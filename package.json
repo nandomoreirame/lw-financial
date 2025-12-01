@@ -1,0 +1,27 @@
+{
+  "name": "monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter './apps/*' dev",
+    "build": "bun run --filter './apps/*' build",
+    "lint": "bun run --filter './packages/*' lint && bun run --filter './apps/*' lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "type-check": "bun run --filter './packages/*' type-check && bun run --filter './apps/*' type-check",
+    "test": "bun run --filter './packages/*' test && bun run --filter './apps/*' test",
+    "clean": "bun run --filter './packages/*' clean && bun run --filter './apps/*' clean",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "typescript": "^5.3.3"
+  }
+}
