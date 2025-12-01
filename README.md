@@ -87,13 +87,30 @@ bun run clean            # Remove builds e cache
 
 ### Backend - Banco de Dados
 
-1. Configure a variável `DATABASE_URL` no arquivo `apps/backend/.env`:
+1. **Inicie o PostgreSQL com Docker Compose:**
 
-```env
-DATABASE_URL="postgresql://user:password@localhost:5432/mydb?schema=public"
+```bash
+# Na raiz do projeto
+docker-compose up -d
 ```
 
-2. Execute as migrações do Prisma:
+Isso irá iniciar um container PostgreSQL na porta 5432 (padrão).
+
+2. **Configure as variáveis de ambiente:**
+
+Copie o arquivo de exemplo e ajuste se necessário:
+
+```bash
+cp .env.example .env
+```
+
+Ou configure diretamente em `apps/backend/.env`:
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/monorepo_dev?schema=public"
+```
+
+3. **Execute as migrações do Prisma:**
 
 ```bash
 cd apps/backend
@@ -101,10 +118,22 @@ bun run prisma:migrate
 bun run prisma:generate
 ```
 
-3. (Opcional) Abra o Prisma Studio:
+4. **(Opcional) Abra o Prisma Studio:**
 
 ```bash
 bun run prisma:studio
+```
+
+5. **Parar o banco de dados:**
+
+```bash
+docker-compose down
+```
+
+Para remover também os volumes (dados):
+
+```bash
+docker-compose down -v
 ```
 
 ### Frontend - ShadcnUI
