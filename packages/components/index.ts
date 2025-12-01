@@ -2,4 +2,4 @@
 export * from './lib/utils';
 
 // Export components
-export * from './components';
+export * from './ui';

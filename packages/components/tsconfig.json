@@ -8,8 +8,12 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
-  "include": ["src/**/*"],
+  "include": ["**/*", "lib/**/*", "ui/**/*", "styles/**/*"],
   "exclude": ["node_modules", "dist"]
 }
