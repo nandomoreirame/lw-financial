@@ -1,3 +1,8 @@
+import '@monorepo/ui/styles';
+
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import type React from 'react';
 import {
   isRouteErrorResponse,
   Links,
@@ -6,12 +11,9 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { Route } from './+types/root';
 import { queryClient } from './lib/query-client';
-import './app.css';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -28,17 +30,19 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-br" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <QueryClientProvider client={queryClient}>
-          {children}
-          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+          <>{children}</>
+          {typeof window !== 'undefined' && import.meta.env.DEV && (
+            <ReactQueryDevtools initialIsOpen={false} />
+          )}
         </QueryClientProvider>
         <ScrollRestoration />
         <Scripts />
