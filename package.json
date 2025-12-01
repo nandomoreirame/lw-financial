@@ -8,7 +8,11 @@
   ],
   "scripts": {
     "dev": "bun run --filter './apps/*' dev",
+    "dev:frontend": "bun run --filter './apps/frontend' dev",
+    "dev:backend": "bun run --filter './apps/backend' dev",
     "build": "bun run --filter './apps/*' build",
+    "build:frontend": "bun run --filter './apps/frontend' build",
+    "build:backend": "bun run --filter './apps/backend' build",
     "lint": "bun run --filter './packages/*' lint && bun run --filter './apps/*' lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "type-check": "bun run --filter './packages/*' type-check && bun run --filter './apps/*' type-check",
