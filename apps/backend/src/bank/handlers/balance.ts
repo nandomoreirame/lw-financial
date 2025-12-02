@@ -1,6 +1,6 @@
 import { FastifyReply } from 'fastify';
+import { AuthenticatedRequest } from '../../types/auth';
 import { accountService } from '../services/account.service';
-import { AuthenticatedRequest } from '../types/auth';
 
 /**
  * Response structure for balance query
