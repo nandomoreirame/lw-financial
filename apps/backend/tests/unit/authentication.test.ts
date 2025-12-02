@@ -260,21 +260,21 @@ describe('Authentication Middleware - Unit Tests', () => {
       log: fastify.log,
     } as unknown as FastifyRequest;
 
-    let statusCode = 0;
+    let responseSent = false;
     const reply = {
-      status: (code: number) => {
-        statusCode = code;
-        return {
-          header: () => ({
-            send: () => {},
-          }),
-        };
-      },
+      status: () => ({
+        header: () => ({
+          send: () => {
+            responseSent = true;
+          },
+        }),
+      }),
     } as unknown as FastifyReply;
 
     const result = await authenticateRequest(request, reply);
     expect(result).toBe(true);
-    expect(statusCode).toBe(0); // No error response sent
+    expect(responseSent).toBe(false); // No error response should be sent for valid token
+    expect((request as AuthenticatedRequest).user).toBeDefined();
   });
 
   // T046 [US2] Test token payload is attached to request.user

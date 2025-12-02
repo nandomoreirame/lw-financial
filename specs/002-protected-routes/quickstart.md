@@ -287,6 +287,7 @@ Resposta esperada:
 ## Next Steps
 
 - Definir rotas específicas que requerem proteção (features futuras)
+
 - Implementar testes unitários e de integração
 - Adicionar logging de tentativas de autenticação falhadas (se necessário)
 - Considerar rate limiting para tentativas de autenticação (feature futura)

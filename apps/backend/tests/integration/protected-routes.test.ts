@@ -1,4 +1,4 @@
-import { test, expect, beforeEach, afterEach, describe } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import Fastify, { FastifyInstance } from 'fastify';
 import jwt from 'jsonwebtoken';
 import { authenticateRequest } from '../../src/middleware/authentication';

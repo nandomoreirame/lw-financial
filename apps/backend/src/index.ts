@@ -1,12 +1,36 @@
 import cors from '@fastify/cors';
 import Fastify from 'fastify';
 import { loginRoutes } from './auth/routes';
-// T031: authenticateRequest function export is already available
-// T034: Example of using middleware with fastify.addHook (commented for demonstration)
-// T035: Example of using middleware with fastify.register plugin pattern (commented for demonstration)
+// Example imports for protected routes (commented for demonstration)
 // import { authenticateRequest } from './middleware/authentication';
 // import { protectedRoutesPlugin } from './plugins/protected-routes';
 // import { AuthenticatedRequest } from './types/auth';
+
+/**
+ * Validates that BETTER_AUTH_SECRET is configured and meets minimum security requirements.
+ * HS256 algorithm requires a secret with sufficient length for security.
+ *
+ * @throws Error if secret is missing or too short
+ */
+function validateAuthSecret(): void {
+  const secret = process.env.BETTER_AUTH_SECRET;
+  const MIN_SECRET_LENGTH = 32; // Minimum recommended length for HS256
+
+  if (!secret) {
+    throw new Error(
+      'BETTER_AUTH_SECRET environment variable is required but not configured'
+    );
+  }
+
+  if (secret.length < MIN_SECRET_LENGTH) {
+    throw new Error(
+      `BETTER_AUTH_SECRET must be at least ${MIN_SECRET_LENGTH} characters long for HS256 algorithm security. Current length: ${secret.length}`
+    );
+  }
+}
+
+// Validate authentication secret at startup
+validateAuthSecret();
 
 const fastify = Fastify({ logger: true });
 
@@ -32,7 +56,7 @@ fastify.get('/api', async () => {
 });
 
 /**
- * T034: Example of applying middleware via fastify.addHook (preHandler)
+ * Example: Applying middleware via fastify.addHook (preHandler)
  *
  * This approach applies authentication to all routes except public ones.
  * Uncomment to enable global authentication protection.
@@ -58,7 +82,7 @@ fastify.get('/api', async () => {
  */
 
 /**
- * T035: Example of applying middleware via fastify.register plugin pattern
+ * Example: Applying middleware via fastify.register plugin pattern
  *
  * This approach applies authentication to routes registered through the plugin.
  * Uncomment to enable protected routes plugin.
