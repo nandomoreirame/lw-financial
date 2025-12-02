@@ -27,7 +27,7 @@ export async function loginRoutes(fastify: FastifyInstance) {
   // Rota de autenticação Better Auth (para futuras extensões)
   fastify.route({
     method: ['GET', 'POST'],
-    url: '/api/auth/*',
+    url: '/auth/*',
     schema: {
       description:
         'Rota de autenticação Better Auth (proxy para futuras extensões)',

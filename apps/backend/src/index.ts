@@ -54,55 +54,39 @@ async function start() {
     await fastify.register(swagger, swaggerOptions);
     await fastify.register(swaggerUi, swaggerUiOptions);
 
-    // Register auth routes
-    await fastify.register(loginRoutes);
+    // Register API v1 routes with prefix
+    await fastify.register(
+      async function v1Routes(fastify) {
+        // Register auth routes under v1 prefix
+        await fastify.register(loginRoutes);
 
-    // Health check
-    fastify.get(
-      '/health',
-      {
-        schema: {
-          description: 'Endpoint de verificação de saúde do sistema',
-          tags: ['health'],
-          response: {
-            200: {
-              type: 'object',
-              properties: {
-                status: { type: 'string' },
-                timestamp: {
-                  type: 'string',
-                  format: 'date-time',
+        // Health check endpoint
+        fastify.get(
+          '/health',
+          {
+            schema: {
+              description: 'Endpoint de verificação de saúde do sistema',
+              tags: ['health'],
+              response: {
+                200: {
+                  type: 'object',
+                  properties: {
+                    status: { type: 'string' },
+                    timestamp: {
+                      type: 'string',
+                      format: 'date-time',
+                    },
+                  },
                 },
               },
             },
           },
-        },
+          async () => {
+            return { status: 'ok', timestamp: new Date().toISOString() };
+          }
+        );
       },
-      async () => {
-        return { status: 'ok', timestamp: new Date().toISOString() };
-      }
-    );
-
-    // Legacy API endpoint (maintained for compatibility)
-    fastify.get(
-      '/api',
-      {
-        schema: {
-          description: 'Endpoint legado de compatibilidade',
-          tags: ['health'],
-          response: {
-            200: {
-              type: 'object',
-              properties: {
-                message: { type: 'string' },
-              },
-            },
-          },
-        },
-      },
-      async () => {
-        return { message: 'Hello from backend API!' };
-      }
+      { prefix: '/v1' }
     );
 
     /**
@@ -115,7 +99,7 @@ async function start() {
      * ```typescript
      * fastify.addHook('preHandler', async (request, reply) => {
      *   // List of public routes that don't require authentication
-     *   const publicRoutes = ['/login', '/health', '/api/auth'];
+     *   const publicRoutes = ['/v1/login', '/v1/health', '/v1/auth'];
      *
      *   // Skip authentication for public routes
      *   if (publicRoutes.some(route => request.url.startsWith(route))) {
@@ -141,11 +125,11 @@ async function start() {
      * ```typescript
      * // Register protected routes plugin with a prefix
      * await fastify.register(protectedRoutesPlugin, {
-     *   prefix: '/api/protected'
+     *   prefix: '/v1/protected'
      * });
      *
      * // Example protected route (would be registered inside the plugin or separately)
-     * fastify.get('/api/protected/profile', async (request: AuthenticatedRequest, reply) => {
+     * fastify.get('/v1/protected/profile', async (request: AuthenticatedRequest, reply) => {
      *   return {
      *     userId: request.user.userId,
      *     username: request.user.username,

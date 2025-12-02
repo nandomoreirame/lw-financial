@@ -21,8 +21,8 @@ export const swaggerOptions = {
     },
     servers: [
       {
-        url: process.env.API_URL || 'http://localhost:3001',
-        description: 'Servidor de desenvolvimento',
+        url: `${process.env.API_URL || 'http://localhost:3001'}/v1`,
+        description: 'Servidor de desenvolvimento - API v1',
       },
     ],
     tags: [
@@ -45,7 +45,7 @@ export const swaggerOptions = {
           type: 'http' as const,
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Token JWT obtido através do endpoint /login',
+          description: 'Token JWT obtido através do endpoint /v1/login',
         },
       },
     },

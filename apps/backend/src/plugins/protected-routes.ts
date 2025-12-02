@@ -11,7 +11,7 @@ import { authenticateRequest } from '../middleware/authentication';
  * ```typescript
  * // Registrar plugin em apps/backend/src/index.ts
  * await fastify.register(protectedRoutesPlugin, {
- *   prefix: '/api/protected'
+ *   prefix: '/v1/protected'
  * });
  *
  * // Agora todas as rotas registradas no plugin precisam de autenticação
@@ -26,7 +26,7 @@ import { authenticateRequest } from '../middleware/authentication';
  * // Usar como hook global (alternativa)
  * fastify.addHook('preHandler', async (request, reply) => {
  *   // Pular autenticação para rotas públicas
- *   const publicRoutes = ['/login', '/health'];
+ *   const publicRoutes = ['/v1/login', '/v1/health'];
  *   if (publicRoutes.some(route => request.url.startsWith(route))) {
  *     return;
  *   }
