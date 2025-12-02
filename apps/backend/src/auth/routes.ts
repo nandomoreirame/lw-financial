@@ -1,6 +1,6 @@
+import bcrypt from 'bcrypt';
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
 import { prisma } from '../db/prisma';
 import { validateLogin } from '../middleware/validation';
 import { ErrorResponse, LoginRequest, LoginResponse } from '../types/auth';
@@ -11,6 +11,11 @@ export async function loginRoutes(fastify: FastifyInstance) {
   fastify.route({
     method: ['GET', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
     url: '/login',
+    schema: {
+      description: 'Métodos HTTP não suportados para /login',
+      tags: ['auth'],
+      hide: true, // Ocultar da documentação Swagger
+    },
     async handler(request: FastifyRequest, reply: FastifyReply) {
       reply.header('Allow', 'POST');
       return reply.status(405).send({
@@ -23,6 +28,12 @@ export async function loginRoutes(fastify: FastifyInstance) {
   fastify.route({
     method: ['GET', 'POST'],
     url: '/api/auth/*',
+    schema: {
+      description:
+        'Rota de autenticação Better Auth (proxy para futuras extensões)',
+      tags: ['auth'],
+      hide: true, // Ocultar da documentação Swagger por enquanto
+    },
     async handler(request: FastifyRequest, reply: FastifyReply) {
       try {
         const url = new URL(request.url, `http://${request.headers.host}`);
@@ -58,6 +69,81 @@ export async function loginRoutes(fastify: FastifyInstance) {
     '/login',
     {
       preHandler: validateLogin,
+      schema: {
+        description: 'Autenticação de usuário e obtenção de token JWT',
+        tags: ['auth'],
+        summary: 'Login de usuário',
+        body: {
+          type: 'object',
+          required: ['username', 'pass'],
+          properties: {
+            username: {
+              type: 'string',
+              minLength: 3,
+              maxLength: 20,
+              pattern: '^[a-zA-Z0-9]+$',
+              description: 'Nome de usuário (3-20 caracteres alfanuméricos)',
+            },
+            pass: {
+              type: 'string',
+              minLength: 6,
+              description: 'Senha do usuário (mínimo 6 caracteres)',
+            },
+          },
+        },
+        response: {
+          200: {
+            description: 'Login bem-sucedido',
+            type: 'object',
+            properties: {
+              token: {
+                type: 'string',
+                description:
+                  'Token JWT para autenticação em requisições subsequentes',
+              },
+            },
+          },
+          400: {
+            description: 'Erro de validação de entrada',
+            type: 'object',
+            properties: {
+              error: {
+                type: 'string',
+              },
+            },
+          },
+          403: {
+            description: 'Credenciais inválidas',
+            type: 'object',
+            properties: {
+              error: {
+                type: 'string',
+              },
+            },
+          },
+          405: {
+            description: 'Método HTTP não permitido',
+            type: 'object',
+            properties: {
+              error: {
+                type: 'string',
+              },
+            },
+          },
+          500: {
+            description: 'Erro interno do servidor',
+            type: 'object',
+            properties: {
+              error: {
+                type: 'string',
+              },
+              code: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const { username, pass } = request.body as LoginRequest;

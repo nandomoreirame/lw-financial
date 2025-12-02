@@ -1,6 +1,9 @@
 import cors from '@fastify/cors';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import Fastify from 'fastify';
 import { loginRoutes } from './auth/routes';
+import { swaggerOptions, swaggerUiOptions } from './config/swagger';
 // Example imports for protected routes (commented for demonstration)
 // import { authenticateRequest } from './middleware/authentication';
 // import { protectedRoutesPlugin } from './plugins/protected-routes';
@@ -34,83 +37,136 @@ validateAuthSecret();
 
 const fastify = Fastify({ logger: true });
 
-// Configure CORS
-fastify.register(cors, {
-  origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: true,
-});
-
-// Register auth routes
-fastify.register(loginRoutes);
-
-// Health check
-fastify.get('/health', async () => {
-  return { status: 'ok', timestamp: new Date().toISOString() };
-});
-
-// Legacy API endpoint (maintained for compatibility)
-fastify.get('/api', async () => {
-  return { message: 'Hello from backend API!' };
-});
-
 /**
- * Example: Applying middleware via fastify.addHook (preHandler)
- *
- * This approach applies authentication to all routes except public ones.
- * Uncomment to enable global authentication protection.
- *
- * @example
- * ```typescript
- * fastify.addHook('preHandler', async (request, reply) => {
- *   // List of public routes that don't require authentication
- *   const publicRoutes = ['/login', '/health', '/api/auth'];
- *
- *   // Skip authentication for public routes
- *   if (publicRoutes.some(route => request.url.startsWith(route))) {
- *     return;
- *   }
- *
- *   // Apply authentication middleware
- *   const authenticated = await authenticateRequest(request, reply);
- *   if (!authenticated) {
- *     return; // Response already sent by middleware
- *   }
- * });
- * ```
+ * Initialize and start the Fastify server
  */
+async function start() {
+  try {
+    // Configure CORS
+    await fastify.register(cors, {
+      origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      credentials: true,
+    });
 
-/**
- * Example: Applying middleware via fastify.register plugin pattern
- *
- * This approach applies authentication to routes registered through the plugin.
- * Uncomment to enable protected routes plugin.
- *
- * @example
- * ```typescript
- * // Register protected routes plugin with a prefix
- * await fastify.register(protectedRoutesPlugin, {
- *   prefix: '/api/protected'
- * });
- *
- * // Example protected route (would be registered inside the plugin or separately)
- * fastify.get('/api/protected/profile', async (request: AuthenticatedRequest, reply) => {
- *   return {
- *     userId: request.user.userId,
- *     username: request.user.username,
- *     email: request.user.email
- *   };
- * });
- * ```
- */
+    // Register Swagger for API documentation
+    await fastify.register(swagger, swaggerOptions);
+    await fastify.register(swaggerUi, swaggerUiOptions);
 
-const PORT = process.env.PORT || 3001;
+    // Register auth routes
+    await fastify.register(loginRoutes);
 
-fastify.listen({ port: Number(PORT), host: '0.0.0.0' }, (err) => {
-  if (err) {
+    // Health check
+    fastify.get(
+      '/health',
+      {
+        schema: {
+          description: 'Endpoint de verificação de saúde do sistema',
+          tags: ['health'],
+          response: {
+            200: {
+              type: 'object',
+              properties: {
+                status: { type: 'string' },
+                timestamp: {
+                  type: 'string',
+                  format: 'date-time',
+                },
+              },
+            },
+          },
+        },
+      },
+      async () => {
+        return { status: 'ok', timestamp: new Date().toISOString() };
+      }
+    );
+
+    // Legacy API endpoint (maintained for compatibility)
+    fastify.get(
+      '/api',
+      {
+        schema: {
+          description: 'Endpoint legado de compatibilidade',
+          tags: ['health'],
+          response: {
+            200: {
+              type: 'object',
+              properties: {
+                message: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+      async () => {
+        return { message: 'Hello from backend API!' };
+      }
+    );
+
+    /**
+     * Example: Applying middleware via fastify.addHook (preHandler)
+     *
+     * This approach applies authentication to all routes except public ones.
+     * Uncomment to enable global authentication protection.
+     *
+     * @example
+     * ```typescript
+     * fastify.addHook('preHandler', async (request, reply) => {
+     *   // List of public routes that don't require authentication
+     *   const publicRoutes = ['/login', '/health', '/api/auth'];
+     *
+     *   // Skip authentication for public routes
+     *   if (publicRoutes.some(route => request.url.startsWith(route))) {
+     *     return;
+     *   }
+     *
+     *   // Apply authentication middleware
+     *   const authenticated = await authenticateRequest(request, reply);
+     *   if (!authenticated) {
+     *     return; // Response already sent by middleware
+     *   }
+     * });
+     * ```
+     */
+
+    /**
+     * Example: Applying middleware via fastify.register plugin pattern
+     *
+     * This approach applies authentication to routes registered through the plugin.
+     * Uncomment to enable protected routes plugin.
+     *
+     * @example
+     * ```typescript
+     * // Register protected routes plugin with a prefix
+     * await fastify.register(protectedRoutesPlugin, {
+     *   prefix: '/api/protected'
+     * });
+     *
+     * // Example protected route (would be registered inside the plugin or separately)
+     * fastify.get('/api/protected/profile', async (request: AuthenticatedRequest, reply) => {
+     *   return {
+     *     userId: request.user.userId,
+     *     username: request.user.username,
+     *     email: request.user.email
+     *   };
+     * });
+     * ```
+     */
+
+    const PORT = process.env.PORT || 3001;
+
+    await fastify.listen({ port: Number(PORT), host: '0.0.0.0' });
+    console.log(`Backend server running on http://localhost:${PORT}`);
+    console.log(
+      `Swagger documentation available at http://localhost:${PORT}/docs`
+    );
+  } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
-  console.log(`Backend server running on http://localhost:${PORT}`);
-});
+}
+
+// Start the server
+start();
