@@ -1,8 +1,8 @@
-# Monorepo
+# LW Financial
 
-Monorepo criado com Bun Workspaces contendo frontend e backend.
+LW Financial criado com Bun Workspaces contendo frontend e backend.
 
-## 📁 Estrutura
+## Estrutura
 
 ```
 .
@@ -12,10 +12,10 @@ Monorepo criado com Bun Workspaces contendo frontend e backend.
 ├── packages/
 │   ├── shared/       # Código compartilhado (Zod)
 │   └── ui/           # Componentes UI compartilhados
-└── package.json      # Configuração do monorepo
+└── package.json      # Configuração do lw-financial
 ```
 
-## 🚀 Início Rápido
+## Início Rápido
 
 ### Instalar dependências
 
@@ -36,7 +36,7 @@ cd apps/frontend && bun run dev
 cd apps/backend && bun run dev
 ```
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 ### Frontend
 
@@ -62,7 +62,7 @@ cd apps/backend && bun run dev
 - **ESLint + Prettier**
 - **Husky + lint-staged**
 
-## 📦 Scripts Disponíveis
+## Scripts Disponíveis
 
 ```bash
 # Desenvolvimento
@@ -83,7 +83,7 @@ bun run test             # Executa testes
 bun run clean            # Remove builds e cache
 ```
 
-## 🔧 Configuração
+## Configuração
 
 ### Backend - Banco de Dados
 
@@ -101,13 +101,13 @@ Isso irá iniciar um container PostgreSQL na porta 5432 (padrão).
 Copie o arquivo de exemplo e ajuste se necessário:
 
 ```bash
-cp .env.example .env
+cp apps/backend/.env.example apps/backend/.env
 ```
 
 Ou configure diretamente em `apps/backend/.env`:
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/monorepo_dev?schema=public"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/lw-financial_dev?schema=public"
 ```
 
 3. **Execute as migrações do Prisma:**
@@ -152,7 +152,20 @@ bunx shadcn@latest add button
 bunx shadcn@latest add card
 ```
 
-## 📚 Documentação
+## Documentação
+
+Toda a documentação do projeto está organizada no diretório [`./docs/`](./docs/README.md).
+
+### Documentação do Projeto
+
+- [Estrutura de Documentação](./docs/README.md) - Organização e guia de uso
+- [Arquitetura](./docs/architecture/) - Decisões arquiteturais e estrutura do projeto
+- [Backend](./docs/backend/) - Documentação específica do backend
+- [Frontend](./docs/frontend/) - Documentação específica do frontend
+- [Especificações](./specs/) - Especificações técnicas de features
+- [Histórias de Usuário](./docs/histories/) - User stories e requisitos
+
+### Documentação Externa
 
 - [React Router Docs](https://reactrouter.com)
 - [Prisma Docs](https://www.prisma.io/docs)
@@ -160,7 +173,7 @@ bunx shadcn@latest add card
 - [React Query Docs](https://tanstack.com/query/latest)
 - [Bun Docs](https://bun.sh/docs)
 
-## 🤝 Contribuindo
+## Contribuindo
 
 1. Faça suas alterações
 2. Execute `bun run lint` e `bun run type-check`

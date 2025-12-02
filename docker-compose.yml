@@ -3,15 +3,15 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: monorepo-postgres
+    container_name: lw-financial-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-monorepo_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-lw-financial_dev}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - '${POSTGRES_PORT:-5432}:5432'
+      - '${POSTGRES_PORT:-5433}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -20,12 +20,22 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - monorepo-network
+      - lw-financial-network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: lw-financial-mailhog
+    restart: unless-stopped
+    ports:
+      - '${MAILHOG_SMTP_PORT:-1025}:1025' # Porta SMTP
+      - '${MAILHOG_WEB_PORT:-8025}:8025' # Interface Web
+    networks:
+      - lw-financial-network
 
 volumes:
   postgres_data:
     driver: local
 
 networks:
-  monorepo-network:
+  lw-financial-network:
     driver: bridge

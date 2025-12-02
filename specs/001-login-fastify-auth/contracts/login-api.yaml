@@ -1,0 +1,159 @@
+openapi: 3.0.3
+info:
+  title: Login API
+  description: API de autenticação para login no sistema bancário
+  version: 1.0.0
+  contact:
+    name: Backend Team
+
+servers:
+  - url: http://localhost:3001
+    description: Servidor de desenvolvimento
+  - url: https://api.lwfinancial.com
+    description: Servidor de produção
+
+paths:
+  /login:
+    post:
+      summary: Autenticar usuário
+      description: |
+        Endpoint para autenticação de usuário com username e senha.
+        Retorna um token JWT válido em caso de sucesso.
+
+        Validações aplicadas:
+        1. Método HTTP deve ser POST
+        2. Formato de username: 3-20 caracteres alfanuméricos
+        3. Formato de password: mínimo 6 caracteres
+        4. Credenciais devem corresponder aos valores hardcoded (admin/admin123)
+      operationId: login
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              valid:
+                summary: Credenciais válidas
+                value:
+                  username: admin
+                  pass: admin123
+              invalidFormat:
+                summary: Formato inválido (username muito curto)
+                value:
+                  username: ab
+                  pass: admin123
+              missingField:
+                summary: Campo ausente
+                value:
+                  username: admin
+      responses:
+        '200':
+          description: Autenticação bem-sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginSuccessResponse'
+              examples:
+                success:
+                  summary: Token JWT gerado
+                  value:
+                    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzA2MzQ1Njc4fQ.example
+        '400':
+          description: Requisição inválida (validação de formato falhou, campos ausentes, corpo vazio)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingUsername:
+                  summary: Username ausente
+                  value:
+                    error: 'Username is required'
+                invalidFormat:
+                  summary: Formato inválido
+                  value:
+                    error: 'Username must be 3-20 alphanumeric characters'
+                emptyBody:
+                  summary: Corpo vazio
+                  value:
+                    error: 'Request body is required'
+        '403':
+          description: Credenciais inválidas (será implementado em US-003)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  summary: Credenciais incorretas
+                  value:
+                    error: 'Invalid credentials'
+        '405':
+          description: Método HTTP não permitido
+          headers:
+            Allow:
+              schema:
+                type: string
+                example: POST
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                methodNotAllowed:
+                  summary: Método não permitido
+                  value:
+                    error: 'Method not allowed. Use POST'
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - pass
+      properties:
+        username:
+          type: string
+          description: Nome de usuário (3-20 caracteres alfanuméricos)
+          minLength: 3
+          maxLength: 20
+          pattern: '^[a-zA-Z0-9]+$'
+          example: admin
+        pass:
+          type: string
+          description: Senha (mínimo 6 caracteres)
+          minLength: 6
+          example: admin123
+      additionalProperties: false
+
+    LoginSuccessResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Token JWT para autenticação em requisições subsequentes
+          format: jwt
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzA2MzQ1Njc4fQ.example
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Mensagem de erro descritiva
+          example: 'Username must be 3-20 alphanumeric characters'
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT retornado pelo endpoint /login

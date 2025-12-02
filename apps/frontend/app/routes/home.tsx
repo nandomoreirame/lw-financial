@@ -1,6 +1,6 @@
-import type { Route } from './+types/home';
+import { Button } from '@lw-financial/ui';
 import { Welcome } from '../welcome/welcome';
-import { Button } from '@monorepo/ui';
+import type { Route } from './+types/home';
 
 export function meta(_args: Route.MetaArgs) {
   return [
