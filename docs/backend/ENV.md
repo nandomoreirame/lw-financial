@@ -9,12 +9,12 @@
 ### Better Auth Configuration
 
 - `BETTER_AUTH_SECRET`: Secret key for Better Auth (minimum 32 characters, change in production)
-- `BETTER_AUTH_URL`: Base URL for Better Auth (default: http://localhost:3001)
-- `BETTER_AUTH_BASE_URL`: Base URL for Better Auth (default: http://localhost:3001)
+- `BETTER_AUTH_URL`: Base URL for Better Auth (default: http://localhost:3333)
+- `BETTER_AUTH_BASE_URL`: Base URL for Better Auth (default: http://localhost:3333)
 
 ### CORS Configuration
 
-- `CLIENT_ORIGIN`: Origin URL for CORS (default: http://localhost:3000)
+- `CLIENT_ORIGIN`: Origin URL for CORS (default: http://localhost:5173)
 
 ### Database (Optional - not required for login feature)
 
@@ -42,7 +42,7 @@ PORT=3001
 BETTER_AUTH_SECRET=your-secret-key-here-min-32-chars-change-in-production
 BETTER_AUTH_URL=http://localhost:3333
 BETTER_AUTH_BASE_URL=http://localhost:3333
-CLIENT_ORIGIN=http://localhost:3000
+CLIENT_ORIGIN=http://localhost:5173
 DATABASE_URL=postgresql://postgres:postgres@localhost:5433/lw-financial_dev
 
 # Email/SMTP Configuration (MailHog for development)
