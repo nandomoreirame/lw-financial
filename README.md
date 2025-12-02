@@ -1,6 +1,6 @@
-# Monorepo
+# LW Financial
 
-Monorepo criado com Bun Workspaces contendo frontend e backend.
+LW Financial criado com Bun Workspaces contendo frontend e backend.
 
 ## 📁 Estrutura
 
@@ -12,7 +12,7 @@ Monorepo criado com Bun Workspaces contendo frontend e backend.
 ├── packages/
 │   ├── shared/       # Código compartilhado (Zod)
 │   └── ui/           # Componentes UI compartilhados
-└── package.json      # Configuração do monorepo
+└── package.json      # Configuração do lw-financial
 ```
 
 ## 🚀 Início Rápido
@@ -107,7 +107,7 @@ cp apps/backend/.env.example apps/backend/.env
 Ou configure diretamente em `apps/backend/.env`:
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/monorepo_dev?schema=public"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/lw-financial_dev?schema=public"
 ```
 
 3. **Execute as migrações do Prisma:**

@@ -1,5 +1,5 @@
 {
-  "name": "monorepo",
+  "name": "@lw-financial/monorepo",
   "version": "0.1.0",
   "private": true,
   "workspaces": [

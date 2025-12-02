@@ -8,3 +8,6 @@ export const userSchema = z.object({
 });
 
 export type User = z.infer<typeof userSchema>;
+
+// Auth schemas
+export { loginSchema, type LoginRequest } from './auth';

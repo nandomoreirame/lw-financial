@@ -1,7 +1,7 @@
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from '@monorepo/shared';
+import { z } from '@lw-financial/shared';
 import { useQuery } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
 
 // Example schema using shared Zod
 const exampleSchema = z.object({

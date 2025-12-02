@@ -1,4 +1,4 @@
-import '@monorepo/ui/styles';
+import '@lw-financial/ui/styles';
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';

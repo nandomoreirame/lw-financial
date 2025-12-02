@@ -40,10 +40,12 @@ next-env.d.ts
 
 # IDE
 .vscode
+.cursor
 .idea
 *.swp
 *.swo
 .claude
+.specify
 CLAUDE.md
 
 # OS

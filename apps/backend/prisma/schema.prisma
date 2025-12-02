@@ -10,11 +10,78 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Example model - customize as needed
+// ============================================================================
+// ID Generation Policy
+// ============================================================================
+// All database IDs MUST use cuid() instead of uuid().
+//
+// Rationale:
+// - cuid() generates collision-resistant, URL-safe, sequential IDs
+// - Better for database indexing and performance
+// - More readable and shorter than UUIDs
+// - Sortable by creation time (useful for pagination)
+//
+// Rule: ALL @id fields MUST use @default(cuid())
+// ============================================================================
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  emailVerified Boolean   @default(false)
+  image         String?
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }
