@@ -86,6 +86,7 @@ export function useAuth(): UseAuthReturn {
       !!token && isValidTokenFormat(token) && !isTokenExpired(token),
     token,
     login,
+
     logout,
     isLoading,
     error,

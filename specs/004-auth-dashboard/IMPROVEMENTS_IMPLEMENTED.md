@@ -238,6 +238,7 @@ function parseCookies(cookieHeader: string): Record<string, string> {
 - [x] Documentação arquitetural criada
 - [x] Código revisado e validado
 - [x] Sem erros de linter
+
 - [x] Sem erros de tipo (frontend)
 
 ---
