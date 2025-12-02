@@ -101,7 +101,7 @@ Isso irá iniciar um container PostgreSQL na porta 5432 (padrão).
 Copie o arquivo de exemplo e ajuste se necessário:
 
 ```bash
-cp .env.example .env
+cp apps/backend/.env.example apps/backend/.env
 ```
 
 Ou configure diretamente em `apps/backend/.env`:
