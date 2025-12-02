@@ -32,5 +32,5 @@ fastify.listen({ port: Number(PORT), host: '0.0.0.0' }, (err) => {
     fastify.log.error(err);
     process.exit(1);
   }
-  console.log(`🚀 Backend server running on http://localhost:${PORT}`);
+  console.log(`Backend server running on http://localhost:${PORT}`);
 });

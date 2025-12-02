@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seed...');
+  console.log('Starting database seed...');
 
   // Hash das senhas
   const saltRounds = 10;
@@ -32,7 +32,7 @@ async function main() {
     },
   });
 
-  console.log('✅ Admin user created:', {
+  console.log('Admin user created:', {
     id: adminUser.id,
     email: adminUser.email,
     name: adminUser.name,
@@ -59,20 +59,20 @@ async function main() {
     },
   });
 
-  console.log('✅ Regular user created:', {
+  console.log('Regular user created:', {
     id: regularUser.id,
     email: regularUser.email,
     name: regularUser.name,
   });
 
-  console.log('\n📋 Credentials for testing:');
+  console.log('\nCredentials for testing:');
   console.log('Admin:');
   console.log('  Username: admin');
   console.log('  Password: admin123');
   console.log('\nUser:');
   console.log('  Username: user');
   console.log('  Password: user123');
-  console.log('\n✨ Seed completed successfully!');
+  console.log('\nSeed completed successfully!');
 }
 
 main()
@@ -80,7 +80,7 @@ main()
     await prisma.$disconnect();
   })
   .catch(async (e) => {
-    console.error('❌ Error seeding database:', e);
+    console.error('Error seeding database:', e);
     await prisma.$disconnect();
     process.exit(1);
   });
