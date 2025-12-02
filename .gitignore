@@ -35,6 +35,31 @@ docker-compose.override.yml
 *.tsbuildinfo
 next-env.d.ts
 
+# Compiled JavaScript (projeto é 100% TypeScript)
+# Backend
+apps/backend/src/**/*.js
+apps/backend/src/**/*.js.map
+apps/backend/dist/**/*.js
+apps/backend/dist/**/*.js.map
+apps/backend/tests/**/*.test.js
+apps/backend/tests/**/*.test.js.map
+apps/backend/prisma/**/*.js
+apps/backend/prisma/**/*.js.map
+
+# Frontend
+apps/frontend/app/**/*.js
+apps/frontend/app/**/*.js.map
+apps/frontend/build/**/*.js
+apps/frontend/build/**/*.js.map
+
+# Packages
+packages/**/src/**/*.js
+packages/**/src/**/*.js.map
+packages/**/dist/**/*.js
+packages/**/dist/**/*.js.map
+packages/**/ui/**/*.js
+packages/**/ui/**/*.js.map
+
 # React Router
 .react-router
 

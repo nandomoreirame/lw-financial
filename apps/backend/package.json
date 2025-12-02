@@ -14,7 +14,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed.ts",
-    "email": "email dev --dir src/email/templates --port 3003"
+    "email": "email dev --dir src/email/templates --port 3003",
+    "test": "NODE_ENV=test bun test"
   },
   "prisma": {
     "seed": "bun run prisma:seed"
