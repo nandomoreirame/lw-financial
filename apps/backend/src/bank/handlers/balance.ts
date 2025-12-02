@@ -1,15 +1,6 @@
-import { FastifyReply, FastifyRequest } from 'fastify';
-import {
-  accountService,
-  AccountNotFoundError,
-} from '../services/account.service';
-
-/**
- * Query parameters for balance endpoint
- */
-interface BalanceQuerystring {
-  account_id: string;
-}
+import { FastifyReply } from 'fastify';
+import { accountService } from '../services/account.service';
+import { AuthenticatedRequest } from '../types/auth';
 
 /**
  * Response structure for balance query
@@ -20,31 +11,27 @@ interface BalanceResponse {
 
 /**
  * Handler for GET /balance endpoint
- * Returns the balance of a bank account
+ * Returns the balance of the authenticated user's bank account
+ * The account ID is extracted from the JWT token, not from the URL
  */
 export async function balanceHandler(
-  request: FastifyRequest<{ Querystring: BalanceQuerystring }>,
+  request: AuthenticatedRequest,
   reply: FastifyReply
 ): Promise<BalanceResponse | number | void> {
-  const { account_id } = request.query;
-
-  // Validate account_id parameter
-  if (
-    !account_id ||
-    typeof account_id !== 'string' ||
-    account_id.trim() === ''
-  ) {
-    return reply.status(400).send({ error: 'account_id is required' });
-  }
-
   try {
-    const balance = await accountService.getBalance(account_id);
-    return reply.status(200).send(balance);
-  } catch (error) {
-    if (error instanceof AccountNotFoundError) {
-      return reply.status(404).send(0);
+    // Get userId from authenticated request (from JWT token)
+    const userId = request.user.userId;
+
+    if (!userId) {
+      return reply
+        .status(401)
+        .send({ error: 'User information not found in token' });
     }
 
+    // Get balance using userId (supports multiple accounts per user)
+    const balance = await accountService.getBalanceByUserId(userId);
+    return reply.status(200).send(balance);
+  } catch (error) {
     // Log unexpected errors
     request.log.error({ err: error }, 'Unexpected error in balance handler');
     return reply.status(500).send({ error: 'Internal server error' });
@@ -55,33 +42,28 @@ export async function balanceHandler(
  * Swagger schema for balance endpoint
  */
 export const balanceSchema = {
-  description: 'Consulta o saldo de uma conta bancaria',
+  description:
+    'Consulta o saldo da conta bancária padrão do usuário autenticado. O userId é extraído do token JWT. Se o usuário não tiver conta, uma conta padrão é criada automaticamente com saldo 0.',
   tags: ['bank'],
-  querystring: {
-    type: 'object',
-    required: ['account_id'],
-    properties: {
-      account_id: {
-        type: 'string',
-        description: 'ID da conta bancaria',
-      },
-    },
-  },
+  security: [{ bearerAuth: [] }],
   response: {
     200: {
       description: 'Saldo da conta',
       type: 'number',
     },
-    400: {
-      description: 'Requisicao invalida',
+    401: {
+      description: 'Não autenticado',
       type: 'object',
       properties: {
         error: { type: 'string' },
       },
     },
-    404: {
-      description: 'Conta nao encontrada',
-      type: 'number',
+    500: {
+      description: 'Erro interno do servidor',
+      type: 'object',
+      properties: {
+        error: { type: 'string' },
+      },
     },
   },
 };

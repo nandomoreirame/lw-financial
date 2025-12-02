@@ -1,0 +1,102 @@
+openapi: 3.0.3
+info:
+  title: Login API
+  description: API de autenticação para interface de login
+  version: 1.0.0
+servers:
+  - url: http://localhost:5173
+    description: Backend local
+  - url: https://api.example.com
+    description: Backend produção
+
+paths:
+  /login:
+    post:
+      summary: Autenticação de usuário
+      description: |
+        Autentica usuário com username e password, retornando token JWT.
+        O token deve ser armazenado em sessionStorage (client-side) e
+        httpOnly cookie (server-side via React Router 7).
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - pass
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 20
+                  pattern: '^[a-zA-Z0-9]+$'
+                  description: Nome de usuário (3-20 caracteres alfanuméricos)
+                  example: 'admin'
+                pass:
+                  type: string
+                  minLength: 6
+                  description: Senha do usuário (mínimo 6 caracteres)
+                  example: 'admin123'
+      responses:
+        '200':
+          description: Login bem-sucedido
+          headers:
+            Set-Cookie:
+              description: httpOnly cookie com token JWT (gerenciado server-side)
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - token
+                properties:
+                  token:
+                    type: string
+                    description: Token JWT para autenticação em requisições subsequentes
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+        '400':
+          description: Erro de validação de entrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '405':
+          description: Método HTTP não permitido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Mensagem de erro
+          example: 'Invalid credentials'
+        code:
+          type: string
+          description: Código de erro (opcional)
+          example: 'AUTH_FAILURE'

@@ -21,7 +21,7 @@ export const swaggerOptions = {
     },
     servers: [
       {
-        url: `${process.env.API_URL || 'http://localhost:3001'}/v1`,
+        url: `${process.env.API_URL || 'http://localhost:3333'}/v1`,
         description: 'Servidor de desenvolvimento - API v1',
       },
     ],

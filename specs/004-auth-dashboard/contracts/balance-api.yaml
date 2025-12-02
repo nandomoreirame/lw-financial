@@ -1,0 +1,89 @@
+openapi: 3.0.3
+info:
+  title: Balance API
+  description: API para consulta de saldo de conta bancária
+  version: 1.0.0
+servers:
+  - url: http://localhost:5173
+    description: Backend local
+  - url: https://api.example.com
+    description: Backend produção
+
+paths:
+  /balance:
+    get:
+      summary: Consulta saldo de conta bancária
+      description: |
+        Retorna o saldo da conta bancária do usuário autenticado.
+        Requer autenticação via JWT token (Authorization header ou cookie).
+        O saldo deve ser formatado como Real brasileiro (R$ X.XXX,XX) no frontend.
+      tags:
+        - bank
+      security:
+        - BearerAuth: []
+        - CookieAuth: []
+      parameters:
+        - name: account_id
+          in: query
+          required: true
+          description: ID da conta bancária
+          schema:
+            type: string
+          example: 'admin'
+      responses:
+        '200':
+          description: Saldo da conta
+          content:
+            application/json:
+              schema:
+                type: number
+                description: Saldo em formato numérico (será formatado no frontend)
+                example: 1234.56
+        '400':
+          description: Requisição inválida (account_id ausente ou inválido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado (token ausente ou inválido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Conta não encontrada
+          content:
+            application/json:
+              schema:
+                type: number
+                example: 0
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Mensagem de erro
+          example: 'account_id is required'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT no header Authorization
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: auth_token
+      description: Token JWT em httpOnly cookie (gerenciado server-side)

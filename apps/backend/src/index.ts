@@ -3,6 +3,7 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import Fastify from 'fastify';
 import { loginRoutes } from './auth/routes';
+import { bankRoutes } from './bank/routes';
 import { swaggerOptions, swaggerUiOptions } from './config/swagger';
 // Example imports for protected routes (commented for demonstration)
 // import { authenticateRequest } from './middleware/authentication';
@@ -44,7 +45,7 @@ async function start() {
   try {
     // Configure CORS
     await fastify.register(cors, {
-      origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+      origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
       credentials: true,
@@ -59,6 +60,9 @@ async function start() {
       async function v1Routes(fastify) {
         // Register auth routes under v1 prefix
         await fastify.register(loginRoutes);
+
+        // Register bank routes under v1 prefix
+        await fastify.register(bankRoutes);
 
         // Health check endpoint
         fastify.get(

@@ -34,19 +34,93 @@ export class InsufficientFundsError extends Error {
 /**
  * Bank Account Service
  * Handles all business logic for bank account operations
+ * Supports multiple accounts per user
  */
 export class AccountService {
   /**
-   * Gets the balance of a bank account
-   * @throws AccountNotFoundError if account doesn't exist
+   * Gets all bank accounts for a user
+   * @param userId - The user ID from the authenticated token
+   * @returns Array of all bank accounts for the user
+   */
+  async getUserAccounts(userId: string): Promise<AccountBalance[]> {
+    const accounts = await prisma.bankAccount.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return accounts.map((account) => ({
+      id: account.id,
+      balance: Number(account.balance),
+    }));
+  }
+
+  /**
+   * Gets or creates the default bank account for a user
+   * Returns the first account if multiple exist, or creates one if none exist
+   * @param userId - The user ID from the authenticated token
+   * @returns The default bank account for the user
+   */
+  async getOrCreateDefaultAccount(userId: string): Promise<{
+    id: string;
+    balance: number;
+  }> {
+    // Find existing accounts for this user
+    const accounts = await prisma.bankAccount.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'asc' }, // Get the first/oldest account as default
+    });
+
+    if (accounts.length > 0) {
+      // Return the first account (default account)
+      return {
+        id: accounts[0].id,
+        balance: Number(accounts[0].balance),
+      };
+    }
+
+    // Create default account if none exists
+    const newAccount = await prisma.bankAccount.create({
+      data: {
+        balance: new Prisma.Decimal(0),
+        userId: userId,
+      },
+    });
+
+    return {
+      id: newAccount.id,
+      balance: Number(newAccount.balance),
+    };
+  }
+
+  /**
+   * Gets the balance of the default bank account for a user
+   * Creates a default account with balance 0 if it doesn't exist
+   * @param userId - The user ID from the authenticated token
+   * @returns The balance of the user's default account
+   */
+  async getBalanceByUserId(userId: string): Promise<number> {
+    const account = await this.getOrCreateDefaultAccount(userId);
+    return account.balance;
+  }
+
+  /**
+   * Gets the balance of a bank account by account ID
+   * @deprecated Use getBalanceByUserId instead for better security
+   * Creates the account with balance 0 if it doesn't exist
    */
   async getBalance(accountId: string): Promise<number> {
-    const account = await prisma.bankAccount.findUnique({
+    let account = await prisma.bankAccount.findUnique({
       where: { id: accountId },
     });
 
+    // Create account with balance 0 if it doesn't exist
     if (!account) {
-      throw new AccountNotFoundError(accountId);
+      account = await prisma.bankAccount.create({
+        data: {
+          id: accountId,
+          balance: new Prisma.Decimal(0),
+        },
+      });
     }
 
     return Number(account.balance);

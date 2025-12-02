@@ -31,7 +31,7 @@ Criar/atualizar `apps/backend/.env`:
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/lw-financial"
 BETTER_AUTH_SECRET="your-secret-key-here-min-32-chars"
-BETTER_AUTH_URL="http://localhost:3001"
+BETTER_AUTH_URL="http://localhost:3333"
 PORT=3001
 ```
 
@@ -80,8 +80,8 @@ export const auth = betterAuth({
     enabled: true,
   },
   secret: process.env.BETTER_AUTH_SECRET!,
-  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3001',
-  trustedOrigins: ['http://localhost:3000', 'http://localhost:3001'],
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3333',
+  trustedOrigins: ['http://localhost:5173', 'http://localhost:3333'],
 });
 ```
 
@@ -205,7 +205,7 @@ const fastify = Fastify({ logger: true });
 
 // Configurar CORS
 fastify.register(cors, {
-  origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+  origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
@@ -236,7 +236,7 @@ fastify.listen({ port: Number(PORT) }, (err) => {
 
 ```bash
 # Login bem-sucedido
-curl -X POST http://localhost:3001/login \
+curl -X POST http://localhost:3333/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","pass":"admin123"}'
 
@@ -244,7 +244,7 @@ curl -X POST http://localhost:3001/login \
 # {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
 
 # Erro: formato inválido
-curl -X POST http://localhost:3001/login \
+curl -X POST http://localhost:3333/login \
   -H "Content-Type: application/json" \
   -d '{"username":"ab","pass":"admin123"}'
 
@@ -252,7 +252,7 @@ curl -X POST http://localhost:3001/login \
 # {"error":"Username must be at least 3 characters"}
 
 # Erro: campo ausente
-curl -X POST http://localhost:3001/login \
+curl -X POST http://localhost:3333/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin"}'
 
@@ -264,7 +264,7 @@ curl -X POST http://localhost:3001/login \
 
 ```bash
 # Deve retornar 405 Method Not Allowed
-curl -X GET http://localhost:3001/login
+curl -X GET http://localhost:3333/login
 
 # Resposta esperada:
 # {"error":"Method not allowed. Use POST"}

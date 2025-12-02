@@ -3,6 +3,7 @@ import '@lw-financial/ui/styles';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type React from 'react';
+import { useEffect, useState } from 'react';
 import {
   isRouteErrorResponse,
   Links,
@@ -29,6 +30,15 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const [showDevtools, setShowDevtools] = useState(false);
+
+  // Only show devtools after hydration to avoid hydration mismatch
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      setShowDevtools(true);
+    }
+  }, []);
+
   return (
     <html lang="pt-br" suppressHydrationWarning>
       <head>
@@ -40,9 +50,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body suppressHydrationWarning>
         <QueryClientProvider client={queryClient}>
           <>{children}</>
-          {typeof window !== 'undefined' && import.meta.env.DEV && (
-            <ReactQueryDevtools initialIsOpen={false} />
-          )}
+          {showDevtools && <ReactQueryDevtools initialIsOpen={false} />}
         </QueryClientProvider>
         <ScrollRestoration />
         <Scripts />
