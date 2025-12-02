@@ -24,16 +24,24 @@ datasource db {
 // Rule: ALL @id fields MUST use @default(cuid())
 // ============================================================================
 
+enum TransactionType {
+  DEPOSIT
+  WITHDRAW
+  TRANSFER
+}
+
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String        @id @default(cuid())
+  email         String        @unique
   name          String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  emailVerified Boolean   @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  emailVerified Boolean       @default(false)
   image         String?
   sessions      Session[]
   accounts      Account[]
+  bankAccounts  BankAccount[] @relation("BankAccounts")
+  transactions  Transaction[] @relation("Transactions")
 
   @@map("user")
 }
@@ -84,4 +92,38 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model BankAccount {
+  id        String   @id @default(cuid())
+  balance   Decimal  @db.Decimal(10, 2)
+  userId    String?
+  user      User?    @relation("BankAccounts", fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  originTransactions      Transaction[] @relation("OriginAccount")
+  destinationTransactions Transaction[] @relation("DestinationAccount")
+
+  @@index([userId])
+  @@map("bank_account")
+}
+
+model Transaction {
+  id                   String          @id @default(cuid())
+  type                 TransactionType
+  amount               Decimal         @db.Decimal(10, 2)
+  originAccountId      String?
+  originAccount        BankAccount?    @relation("OriginAccount", fields: [originAccountId], references: [id], onDelete: SetNull)
+  destinationAccountId String?
+  destinationAccount   BankAccount?    @relation("DestinationAccount", fields: [destinationAccountId], references: [id], onDelete: SetNull)
+  userId               String?
+  user                 User?           @relation("Transactions", fields: [userId], references: [id], onDelete: SetNull)
+  createdAt            DateTime        @default(now())
+
+  @@index([originAccountId])
+  @@index([destinationAccountId])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("transaction")
 }
