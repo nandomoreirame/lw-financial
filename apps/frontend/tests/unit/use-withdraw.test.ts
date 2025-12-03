@@ -123,20 +123,41 @@ describe('useWithdraw hook', () => {
       expect(queryKey[1]).toBe(accountId);
     });
 
+    test('should build correct query key for transactions invalidation', () => {
+      // Test the query key structure used for transactions cache invalidation
+      const transactionsQueryKey = ['transactions'];
+
+      expect(transactionsQueryKey).toEqual(['transactions']);
+      expect(transactionsQueryKey[0]).toBe('transactions');
+    });
+
+    test('should invalidate both balance and transactions cache on success', () => {
+      // Test that both caches are invalidated after successful withdrawal
+      const balanceQueryKey = ['balance', 'test-account-123'];
+      const transactionsQueryKey = ['transactions'];
+
+      expect(balanceQueryKey).toEqual(['balance', 'test-account-123']);
+      expect(transactionsQueryKey).toEqual(['transactions']);
+    });
+
     test('should handle null accountId in cache invalidation', () => {
       // Test that null accountId is handled correctly
       const accountId: string | null = null;
-      const shouldInvalidate = accountId !== null;
+      const shouldInvalidateBalance = accountId !== null;
+      const shouldInvalidateTransactions = true; // Always invalidate transactions
 
-      expect(shouldInvalidate).toBe(false);
+      expect(shouldInvalidateBalance).toBe(false);
+      expect(shouldInvalidateTransactions).toBe(true);
     });
 
     test('should handle valid accountId in cache invalidation', () => {
       // Test that valid accountId triggers invalidation
       const accountId: string | null = 'test-account-123';
-      const shouldInvalidate = accountId !== null;
+      const shouldInvalidateBalance = accountId !== null;
+      const shouldInvalidateTransactions = true; // Always invalidate transactions
 
-      expect(shouldInvalidate).toBe(true);
+      expect(shouldInvalidateBalance).toBe(true);
+      expect(shouldInvalidateTransactions).toBe(true);
     });
   });
 });

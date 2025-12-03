@@ -6,6 +6,8 @@ import * as React from 'react';
 import { BalanceCard } from '../components/dashboard/balance-card';
 import { DepositForm } from '../components/dashboard/deposit-form';
 import { WithdrawForm } from '../components/dashboard/withdraw-form';
+import { Header } from '../components/dashboard/header';
+import { TransactionHistory } from '../components/dashboard/transaction-history';
 import { useBalance } from '../hooks/use-balance';
 import {
   checkAuthentication,
@@ -114,8 +116,9 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="container mx-auto max-w-4xl space-y-6">
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="container mx-auto max-w-4xl p-4 space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground mt-2">
@@ -136,6 +139,8 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
           <DepositForm accountId={accountId} />
           <WithdrawForm accountId={accountId} currentBalance={balance} />
         </div>
+
+        <TransactionHistory />
       </div>
     </div>
   );
