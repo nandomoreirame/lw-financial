@@ -44,6 +44,30 @@ describe('transactionAmountSchema', () => {
       }
     });
 
+    test('should accept deposit amount with cents (2.50)', () => {
+      const result = transactionAmountSchema.safeParse(2.5);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toBe(2.5);
+      }
+    });
+
+    test('should accept withdraw amount with cents (1.99)', () => {
+      const result = transactionAmountSchema.safeParse(1.99);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toBe(1.99);
+      }
+    });
+
+    test('should accept small amounts with cents (0.50)', () => {
+      const result = transactionAmountSchema.safeParse(0.5);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toBe(0.5);
+      }
+    });
+
     test('should accept integer amount', () => {
       const result = transactionAmountSchema.safeParse(100);
       expect(result.success).toBe(true);

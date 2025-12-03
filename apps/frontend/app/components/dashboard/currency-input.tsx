@@ -1,9 +1,12 @@
 /**
  * Currency input component with Brazilian Real formatting
- * Formats input as user types (R$ 1.234,56)
- * Handles keyboard navigation and accessibility
+ * Uses InputGroup from Shadcn UI with R$ prefix
+ * Treats last 2 digits as cents (centavos)
+ * - User types "199" → displays "R$ 1,99"
+ * - User types "199998" → displays "R$ 1.999,98"
  */
 
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@lw-financial/ui';
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 
@@ -18,140 +21,107 @@ export interface CurrencyInputProps extends Omit<
 
 /**
  * Currency input component that formats Brazilian Real currency
- * Formats as user types: R$ 1.234,56
- * Supports keyboard navigation (Enter to submit, Tab to navigate)
+ * Uses InputGroup with R$ prefix
+ * Treats all numeric input as cents (last 2 digits are always cents)
  */
-export function CurrencyInput({
-  value,
-  onChange,
-  error,
-  className,
-  disabled,
-  ...props
-}: CurrencyInputProps) {
-  const [displayValue, setDisplayValue] = React.useState<string>('');
-  const [isUserTyping, setIsUserTyping] = React.useState(false);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+export const CurrencyInput = React.forwardRef<
+  HTMLInputElement,
+  CurrencyInputProps
+>(function CurrencyInput(
+  { value, onChange, error, className, disabled, ...props },
+  ref
+) {
+  // Track the raw input value (in cents) to maintain state during editing
+  const [internalCentsValue, setInternalCentsValue] = React.useState<
+    number | undefined
+  >();
 
-  // Initialize display value from numeric value
-  // Only format when value comes from props (not from user typing)
+  // Initialize internal value from prop value when it changes externally
   React.useEffect(() => {
-    if (!isUserTyping && value !== undefined && value !== null) {
-      // Format as Brazilian Real: R$ 1.234,56
-      const formatted = new Intl.NumberFormat('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(value);
-      setDisplayValue(formatted);
-    } else if (!isUserTyping && (value === undefined || value === null)) {
-      setDisplayValue('');
-    }
-  }, [value, isUserTyping]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsUserTyping(true);
-    const inputValue = e.target.value;
-
-    // Allow empty input
-    if (inputValue === '') {
-      setDisplayValue('');
-      onChange(undefined);
-      setIsUserTyping(false);
-      return;
-    }
-
-    // Remove all non-digit characters except comma and dot
-    const cleaned = inputValue.replace(/[^\d,.-]/g, '');
-
-    // Validate format: reject multiple dots or commas
-    const hasMultipleDots = (cleaned.match(/\./g) || []).length > 1;
-    const hasMultipleCommas = (cleaned.match(/,/g) || []).length > 1;
-
-    if (hasMultipleDots || hasMultipleCommas) {
-      // Invalid format, keep previous display value
-      setIsUserTyping(false);
-      return;
-    }
-
-    // Update display value to allow free typing
-    setDisplayValue(cleaned);
-
-    // Replace comma with dot for parsing
-    const normalized = cleaned.replace(',', '.');
-
-    // Parse as number
-    const numValue = parseFloat(normalized);
-
-    // If valid number, update value
-    if (!isNaN(numValue) && isFinite(numValue) && numValue >= 0) {
-      onChange(numValue);
-    } else {
-      // Invalid input, set to undefined but keep display
-      onChange(undefined);
-    }
-
-    setIsUserTyping(false);
-  };
-
-  const handleBlur = () => {
-    // Format on blur if value exists
-    if (value !== undefined && value !== null) {
-      const formatted = new Intl.NumberFormat('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(value);
-      setDisplayValue(formatted);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Allow Enter to submit form (default behavior)
-    // Allow Tab for navigation (default behavior)
-    // Allow arrow keys, backspace, delete, etc.
     if (
-      e.key === 'Enter' ||
-      e.key === 'Tab' ||
-      e.key === 'ArrowLeft' ||
-      e.key === 'ArrowRight' ||
-      e.key === 'Backspace' ||
-      e.key === 'Delete' ||
-      e.key === 'Home' ||
-      e.key === 'End'
+      value !== undefined &&
+      value !== null &&
+      !isNaN(value) &&
+      isFinite(value)
     ) {
-      return;
+      const cents = Math.round(value * 100);
+      if (internalCentsValue !== cents) {
+        setInternalCentsValue(cents);
+      }
+    } else if (internalCentsValue !== undefined) {
+      setInternalCentsValue(undefined);
     }
+  }, [value, internalCentsValue]);
 
-    // Allow numbers, comma, dot, minus
-    if (/^[0-9,.-]$/.test(e.key) || e.ctrlKey || e.metaKey || e.altKey) {
-      return;
+  const handleChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const inputValue = e.target.value;
+
+      if (inputValue === '' || inputValue === undefined) {
+        setInternalCentsValue(undefined);
+        onChange(undefined);
+        return;
+      }
+
+      // Extract only digits from the input (this is the raw cents value)
+      const digitsOnly = inputValue.replace(/\D/g, '');
+
+      if (digitsOnly === '') {
+        setInternalCentsValue(undefined);
+        onChange(undefined);
+        return;
+      }
+
+      // Parse as integer (this represents cents)
+      const centsValue = parseInt(digitsOnly, 10);
+
+      if (isNaN(centsValue) || !isFinite(centsValue) || centsValue < 0) {
+        setInternalCentsValue(undefined);
+        onChange(undefined);
+        return;
+      }
+
+      // Store the cents value internally
+      setInternalCentsValue(centsValue);
+
+      // Convert cents to reais (divide by 100) for the parent component
+      // This means "199" cents becomes 1.99 reais, "199998" becomes 1999.98 reais
+      const realValue = centsValue / 100;
+      onChange(realValue);
+    },
+    [onChange]
+  );
+
+  // Format display value from internal cents
+  const displayValue = React.useMemo(() => {
+    if (internalCentsValue === undefined || internalCentsValue === null) {
+      return '';
     }
-
-    // Prevent other keys
-    e.preventDefault();
-  };
+    // Convert cents to reais and format with 2 decimal places
+    const realValue = internalCentsValue / 100;
+    return new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(realValue);
+  }, [internalCentsValue]);
 
   return (
-    <input
-      {...props}
-      ref={inputRef}
-      type="text"
-      inputMode="decimal"
-      value={displayValue}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      onKeyDown={handleKeyDown}
-      placeholder="0,00"
-      disabled={disabled}
-      className={cn(
-        'flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors',
-        'file:border-0 file:bg-transparent file:text-sm file:font-medium',
-        'placeholder:text-muted-foreground',
-        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        error && 'border-destructive focus-visible:ring-destructive',
-        className
-      )}
-      aria-label={props['aria-label'] || 'Valor em reais'}
-    />
+    <InputGroup>
+      <InputGroupAddon align="inline-start">R$</InputGroupAddon>
+      <InputGroupInput
+        {...props}
+        ref={ref}
+        type="text"
+        value={displayValue}
+        onChange={handleChange}
+        disabled={disabled}
+        placeholder="0,00"
+        className={cn(
+          error && 'border-destructive focus-visible:ring-destructive',
+          className
+        )}
+        aria-label={props['aria-label'] || 'Valor em reais'}
+      />
+    </InputGroup>
   );
-}
+});
