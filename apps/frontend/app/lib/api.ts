@@ -304,7 +304,7 @@ export async function withdraw(amount: number): Promise<WithdrawResponse> {
           lowerMessage === 'saldo insuficiente' ||
           lowerMessage.includes('saldo insuficiente')
         ) {
-          throw new Error('Saldo insuficiente');
+          throw new Error('Saldo insuficiente para saque');
         }
 
         // For other 400 errors (validation, etc.), throw generic error

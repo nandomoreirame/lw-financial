@@ -181,7 +181,9 @@ describe('withdraw API function', () => {
         });
       };
 
-      await expect(withdraw(100)).rejects.toThrow('Saldo insuficiente');
+      await expect(withdraw(100)).rejects.toThrow(
+        'Saldo insuficiente para saque'
+      );
     });
 
     test('should throw error on 400 Bad Request with saldo insuficiente message', async () => {
@@ -195,7 +197,9 @@ describe('withdraw API function', () => {
         });
       };
 
-      await expect(withdraw(100)).rejects.toThrow('Saldo insuficiente');
+      await expect(withdraw(100)).rejects.toThrow(
+        'Saldo insuficiente para saque'
+      );
     });
 
     test('should throw generic error on 400 Bad Request with other error message', async () => {
