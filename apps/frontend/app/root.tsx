@@ -2,6 +2,7 @@ import '@lw-financial/ui/styles';
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Toaster } from '@lw-financial/ui';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import {
@@ -52,6 +53,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <>{children}</>
           {showDevtools && <ReactQueryDevtools initialIsOpen={false} />}
         </QueryClientProvider>
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
       </body>

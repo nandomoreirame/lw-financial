@@ -1,0 +1,209 @@
+openapi: 3.0.3
+info:
+  title: Bank Event API
+  description: API para processar eventos bancários (depósito, saque, transferência)
+  version: 1.0.0
+  contact:
+    name: LW Financial API Support
+
+servers:
+  - url: http://localhost:3333/v1
+    description: Servidor de desenvolvimento local
+
+paths:
+  /event:
+    post:
+      summary: Processa evento bancário (depósito, saque ou transferência)
+      description: |
+        Processa operações bancárias. Para depósitos e saques de usuários autenticados,
+        o backend identifica automaticamente a conta padrão do usuário a partir do token JWT.
+        Não é necessário enviar `destination` (depósito) ou `origin` (saque) quando autenticado.
+      tags:
+        - bank
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+            examples:
+              deposit:
+                summary: Depósito autenticado
+                description: Depósito na conta padrão do usuário autenticado
+                value:
+                  type: deposit
+                  amount: 100.50
+              withdraw:
+                summary: Saque autenticado
+                description: Saque da conta padrão do usuário autenticado
+                value:
+                  type: withdraw
+                  amount: 50.00
+              transfer:
+                summary: Transferência (requer origin e destination)
+                description: Transferência entre contas (não é parte desta feature)
+                value:
+                  type: transfer
+                  origin: account-123
+                  destination: account-456
+                  amount: 25.00
+      responses:
+        '201':
+          description: Operação realizada com sucesso
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/DepositResponse'
+                  - $ref: '#/components/schemas/WithdrawResponse'
+                  - $ref: '#/components/schemas/TransferResponse'
+              examples:
+                deposit:
+                  summary: Resposta de depósito
+                  value:
+                    destination:
+                      id: clx123abc456
+                      balance: 100.50
+                withdraw:
+                  summary: Resposta de saque
+                  value:
+                    origin:
+                      id: clx123abc456
+                      balance: 50.00
+        '400':
+          description: Requisição inválida ou saldo insuficiente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidAmount:
+                  summary: Valor inválido
+                  value:
+                    error: Invalid amount
+                insufficientFunds:
+                  summary: Saldo insuficiente
+                  value:
+                    error: Insufficient funds
+        '401':
+          description: Não autenticado ou token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Authentication required
+        '404':
+          description: Conta não encontrada (não deve acontecer com identificação automática)
+          content:
+            application/json:
+              schema:
+                type: number
+                example: 0
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Internal server error
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtido via endpoint /login
+
+  schemas:
+    EventRequest:
+      type: object
+      required:
+        - type
+        - amount
+      properties:
+        type:
+          type: string
+          enum: [deposit, withdraw, transfer]
+          description: Tipo de operação bancária
+        origin:
+          type: string
+          description: |
+            ID da conta de origem. Obrigatório para saque e transferência.
+            Para saques autenticados, pode ser omitido (backend identifica automaticamente).
+        destination:
+          type: string
+          description: |
+            ID da conta de destino. Obrigatório para depósito e transferência.
+            Para depósitos autenticados, pode ser omitido (backend identifica automaticamente).
+        amount:
+          type: number
+          format: decimal
+          minimum: 0.01
+          maximum: 999999.99
+          multipleOf: 0.01
+          description: |
+            Valor da operação em reais (R$).
+            Mínimo: R$ 0,01
+            Máximo: R$ 999.999,99
+            Precisão: 2 casas decimais
+      example:
+        type: deposit
+        amount: 100.50
+
+    DepositResponse:
+      type: object
+      properties:
+        destination:
+          $ref: '#/components/schemas/AccountBalance'
+      required:
+        - destination
+
+    WithdrawResponse:
+      type: object
+      properties:
+        origin:
+          $ref: '#/components/schemas/AccountBalance'
+      required:
+        - origin
+
+    TransferResponse:
+      type: object
+      properties:
+        origin:
+          $ref: '#/components/schemas/AccountBalance'
+        destination:
+          $ref: '#/components/schemas/AccountBalance'
+      required:
+        - origin
+        - destination
+
+    AccountBalance:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID da conta bancária
+          example: clx123abc456
+        balance:
+          type: number
+          format: decimal
+          description: Saldo atual da conta em reais (R$)
+          example: 150.75
+      required:
+        - id
+        - balance
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Mensagem de erro descritiva
+          example: Invalid amount
+      required:
+        - error
