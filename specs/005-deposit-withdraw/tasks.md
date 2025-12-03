@@ -79,19 +79,19 @@
 
 ### Implementation for User Story 2
 
-- [ ] T023 [P] [US2] Add withdraw() function to apps/frontend/app/lib/api.ts
-- [ ] T024 [P] [US2] Create use-withdraw hook in apps/frontend/app/hooks/use-withdraw.ts
-- [ ] T025 [US2] Create withdraw-form component in apps/frontend/app/components/dashboard/withdraw-form.tsx
-- [ ] T026 [US2] Implement currency input field with validation in apps/frontend/app/components/dashboard/withdraw-form.tsx
-- [ ] T027 [US2] Implement submit button with loading state (spinner + "Processando...") in apps/frontend/app/components/dashboard/withdraw-form.tsx
-- [ ] T028 [US2] Add form validation with react-hook-form in apps/frontend/app/components/dashboard/withdraw-form.tsx
-- [ ] T029 [US2] Add client-side balance check before submit in apps/frontend/app/components/dashboard/withdraw-form.tsx
-- [ ] T030 [US2] Implement insufficient funds error message in apps/frontend/app/components/dashboard/withdraw-form.tsx
-- [ ] T031 [US2] Implement success message display after withdrawal in apps/frontend/app/components/dashboard/withdraw-form.tsx
-- [ ] T032 [US2] Implement error message display for withdrawal failures in apps/frontend/app/components/dashboard/withdraw-form.tsx
-- [ ] T033 [US2] Add balance cache invalidation after successful withdrawal in apps/frontend/app/hooks/use-withdraw.ts
-- [ ] T034 [US2] Integrate withdraw-form into dashboard route in apps/frontend/app/routes/dashboard.tsx
-- [ ] T035 [US2] Clear input field after successful withdrawal in apps/frontend/app/components/dashboard/withdraw-form.tsx
+- [x] T023 [P] [US2] Add withdraw() function to apps/frontend/app/lib/api.ts
+- [x] T024 [P] [US2] Create use-withdraw hook in apps/frontend/app/hooks/use-withdraw.ts
+- [x] T025 [US2] Create withdraw-form component in apps/frontend/app/components/dashboard/withdraw-form.tsx
+- [x] T026 [US2] Implement currency input field with validation in apps/frontend/app/components/dashboard/withdraw-form.tsx
+- [x] T027 [US2] Implement submit button with loading state (spinner + "Processando...") in apps/frontend/app/components/dashboard/withdraw-form.tsx
+- [x] T028 [US2] Add form validation with react-hook-form in apps/frontend/app/components/dashboard/withdraw-form.tsx
+- [x] T029 [US2] Add client-side balance check before submit in apps/frontend/app/components/dashboard/withdraw-form.tsx
+- [x] T030 [US2] Implement insufficient funds error message in apps/frontend/app/components/dashboard/withdraw-form.tsx
+- [x] T031 [US2] Implement success message display after withdrawal in apps/frontend/app/components/dashboard/withdraw-form.tsx
+- [x] T032 [US2] Implement error message display for withdrawal failures in apps/frontend/app/components/dashboard/withdraw-form.tsx
+- [x] T033 [US2] Add balance cache invalidation after successful withdrawal in apps/frontend/app/hooks/use-withdraw.ts
+- [x] T034 [US2] Integrate withdraw-form into dashboard route in apps/frontend/app/routes/dashboard.tsx
+- [x] T035 [US2] Clear input field after successful withdrawal in apps/frontend/app/components/dashboard/withdraw-form.tsx
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Users can deposit and withdraw money.
 
