@@ -10,29 +10,6 @@ export const INVALID_FORMAT = 'Invalid authorization format';
 export const INVALID_TOKEN = 'Invalid or expired token';
 
 /**
- * Helper function to send standardized error responses.
- *
- * Ensures all authentication errors follow a consistent format:
- * - JSON response with { "error": "..." } structure
- * - Content-Type: application/json header
- * - Generic error messages that don't leak sensitive information
- * - No differentiation between expired vs invalid tokens for security
- *
- * @param reply - Fastify reply object
- * @param statusCode - HTTP status code (typically 401)
- * @param errorMessage - Generic error message (from constants)
- */
-function sendErrorResponse(
-  reply: FastifyReply,
-  statusCode: number,
-  errorMessage: string
-): void {
-  reply.status(statusCode).header('Content-Type', 'application/json').send({
-    error: errorMessage,
-  });
-}
-
-/**
  * Authenticates a request by validating the JWT token from the Authorization header.
  *
  * This middleware validates:
@@ -41,19 +18,19 @@ function sendErrorResponse(
  * - JWT token structure, signature, and expiration
  *
  * If authentication succeeds, the decoded token payload is attached to request.user.
- * If authentication fails, returns 401 Unauthorized with appropriate error message.
+ * If authentication fails, throws an error with statusCode 401 and appropriate error message.
+ * The error is handled by Fastify's error handler which sends the response.
  *
  * @param request - Fastify request object
- * @param reply - Fastify reply object
- * @returns true if authentication succeeds, false otherwise (and sends error response)
+ * @param _reply - Fastify reply object (unused, kept for Fastify preHandler compatibility)
+ * @returns true if authentication succeeds
+ * @throws Error with statusCode 401 if authentication fails
  *
  * @example
  * ```typescript
  * // Apply to a route
  * fastify.get('/protected', {
- *   preHandler: async (request, reply) => {
- *     await authenticateRequest(request, reply);
- *   }
+ *   preHandler: authenticateRequest
  * }, async (request: AuthenticatedRequest, reply) => {
  *   // request.user is available here
  *   return { message: 'Protected resource', userId: request.user.userId };
@@ -62,7 +39,7 @@ function sendErrorResponse(
  */
 export async function authenticateRequest(
   request: FastifyRequest,
-  reply: FastifyReply
+  _reply: FastifyReply
 ): Promise<boolean> {
   // Performance logging to verify <50ms target
   // Use performance.now() for higher precision if available, fallback to Date.now()
@@ -78,8 +55,9 @@ export async function authenticateRequest(
 
     // Check if Authorization header is present
     if (!authHeader) {
-      sendErrorResponse(reply, 401, AUTH_REQUIRED);
-      return false;
+      const error = new Error(AUTH_REQUIRED);
+      (error as { statusCode?: number }).statusCode = 401;
+      throw error;
     }
 
     // Handle multiple Authorization headers: use first one
@@ -91,15 +69,17 @@ export async function authenticateRequest(
 
     // Validate empty Authorization header
     if (!authHeaderValue || authHeaderValue.trim().length === 0) {
-      sendErrorResponse(reply, 401, AUTH_REQUIRED);
-      return false;
+      const error = new Error(AUTH_REQUIRED);
+      (error as { statusCode?: number }).statusCode = 401;
+      throw error;
     }
 
     // Validate Bearer format (must start with "Bearer ")
     const BEARER_PREFIX = 'Bearer ';
     if (!authHeaderValue.startsWith(BEARER_PREFIX)) {
-      sendErrorResponse(reply, 401, INVALID_FORMAT);
-      return false;
+      const error = new Error(INVALID_FORMAT);
+      (error as { statusCode?: number }).statusCode = 401;
+      throw error;
     }
 
     // Extract JWT token from Authorization header (remove "Bearer " prefix)
@@ -107,15 +87,17 @@ export async function authenticateRequest(
     const token = authHeaderValue.substring(BEARER_PREFIX.length).trim();
 
     if (!token || token.length === 0) {
-      sendErrorResponse(reply, 401, INVALID_FORMAT);
-      return false;
+      const error = new Error(INVALID_FORMAT);
+      (error as { statusCode?: number }).statusCode = 401;
+      throw error;
     }
 
     // Validate JWT token structure (must have 3 parts separated by '.')
     const tokenParts = token.split('.');
     if (tokenParts.length !== 3) {
-      sendErrorResponse(reply, 401, INVALID_TOKEN);
-      return false;
+      const error = new Error(INVALID_TOKEN);
+      (error as { statusCode?: number }).statusCode = 401;
+      throw error;
     }
 
     // Get secret from environment
@@ -124,8 +106,9 @@ export async function authenticateRequest(
 
     if (!secret) {
       request.log.error('BETTER_AUTH_SECRET is not configured');
-      sendErrorResponse(reply, 500, 'Server configuration error');
-      return false;
+      const error = new Error('Server configuration error');
+      (error as { statusCode?: number }).statusCode = 500;
+      throw error;
     }
 
     try {
@@ -173,20 +156,27 @@ export async function authenticateRequest(
         error instanceof jwt.JsonWebTokenError ||
         error instanceof jwt.TokenExpiredError
       ) {
-        sendErrorResponse(reply, 401, INVALID_TOKEN);
-        return false;
+        const authError = new Error(INVALID_TOKEN);
+        (authError as { statusCode?: number }).statusCode = 401;
+        throw authError;
       }
 
       // Unexpected error - log for debugging but return generic message
       // Never leak sensitive information in error responses
       request.log.error({ err: error }, 'Unexpected JWT validation error');
-      sendErrorResponse(reply, 401, INVALID_TOKEN);
-      return false;
+      const authError = new Error(INVALID_TOKEN);
+      (authError as { statusCode?: number }).statusCode = 401;
+      throw authError;
     }
   } catch (error) {
+    // Re-throw if already has statusCode (from our validation)
+    if ((error as { statusCode?: number }).statusCode) {
+      throw error;
+    }
     // Don't leak sensitive information in error response
     request.log.error({ err: error }, 'Authentication error');
-    sendErrorResponse(reply, 401, AUTH_REQUIRED);
-    return false;
+    const authError = new Error(AUTH_REQUIRED);
+    (authError as { statusCode?: number }).statusCode = 401;
+    throw authError;
   }
 }

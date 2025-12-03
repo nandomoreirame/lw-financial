@@ -1,4 +1,4 @@
-import { FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthenticatedRequest } from '../../types/auth';
 import { accountService } from '../services/account.service';
 
@@ -15,12 +15,14 @@ interface BalanceResponse {
  * The account ID is extracted from the JWT token, not from the URL
  */
 export async function balanceHandler(
-  request: AuthenticatedRequest,
+  request: FastifyRequest,
   reply: FastifyReply
 ): Promise<BalanceResponse | number | void> {
+  // Type assertion: authenticateRequest middleware ensures request.user exists
+  const authRequest = request as AuthenticatedRequest;
   try {
     // Get userId from authenticated request (from JWT token)
-    const userId = request.user.userId;
+    const userId = authRequest.user.userId;
 
     if (!userId) {
       return reply
@@ -33,7 +35,10 @@ export async function balanceHandler(
     return reply.status(200).send(balance);
   } catch (error) {
     // Log unexpected errors
-    request.log.error({ err: error }, 'Unexpected error in balance handler');
+    authRequest.log.error(
+      { err: error },
+      'Unexpected error in balance handler'
+    );
     return reply.status(500).send({ error: 'Internal server error' });
   }
 }

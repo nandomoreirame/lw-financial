@@ -17,39 +17,29 @@ describe('Protected Routes - Integration Tests', () => {
     fastify.get(
       '/api/protected',
       {
-        preHandler: async (request, reply) => {
-          const authenticated = await authenticateRequest(request, reply);
-          if (!authenticated) {
-            // Response already sent by middleware - prevent handler execution
-            // Throw a special error that Fastify recognizes as "already handled"
-            // This prevents the route handler from executing
-            return reply; // Return reply object to stop further processing
-          }
-        },
+        preHandler: authenticateRequest,
       },
-      async (request: AuthenticatedRequest, reply) => {
-        // Verify reply wasn't sent (safety check)
-        if (reply.sent || !request.user) {
-          return;
-        }
+      async (request: AuthenticatedRequest, _reply) => {
+        // Type assertion: authenticateRequest middleware ensures request.user exists
+        const authRequest = request as AuthenticatedRequest;
         return {
           message: 'Protected resource accessed',
-          userId: request.user.userId,
-          username: request.user.username,
+          userId: authRequest.user.userId,
+          username: authRequest.user.username,
         };
       }
     );
 
-    // Add error handler that respects already-sent replies
+    // Add error handler for authentication errors
     fastify.setErrorHandler((error, request, reply) => {
-      // Only send error if reply hasn't been sent yet
-      if (!reply.sent) {
-        // Check if it's an authentication error that was already handled
-        if (reply.statusCode === 401) {
-          return; // Already handled by middleware
-        }
-        reply.status(500).send({ error: 'Internal server error' });
+      // Handle authentication errors
+      if (error.statusCode === 401 || error.statusCode === 403) {
+        return reply.status(error.statusCode).send({
+          error: error.message,
+        });
       }
+      // Let Fastify handle other errors
+      reply.status(500).send({ error: 'Internal server error' });
     });
   });
 

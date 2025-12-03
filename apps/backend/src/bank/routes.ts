@@ -9,6 +9,19 @@ import { resetHandler, resetSchema } from './handlers/reset';
  * Registers all banking-related endpoints
  */
 export async function bankRoutes(fastify: FastifyInstance) {
+  // Error handler for authentication errors
+  fastify.setErrorHandler((error: unknown, request, reply) => {
+    // Handle authentication errors
+    const err = error as { statusCode?: number; message?: string };
+    if (err.statusCode === 401 || err.statusCode === 403) {
+      return reply.status(err.statusCode).send({
+        error: err.message || 'Authentication error',
+      });
+    }
+    // Let Fastify handle other errors
+    throw error;
+  });
+
   // GET /balance - Query account balance (requires authentication)
   fastify.get(
     '/balance',

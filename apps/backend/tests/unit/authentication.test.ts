@@ -8,6 +8,13 @@ import jwt from 'jsonwebtoken';
 import { authenticateRequest } from '../../src/middleware/authentication';
 import { AuthenticatedRequest } from '../../src/types/auth';
 
+/**
+ * Type for authentication errors thrown by authenticateRequest
+ */
+interface AuthenticationError extends Error {
+  statusCode?: number;
+}
+
 describe('Authentication Middleware - Unit Tests', () => {
   let fastify: FastifyInstance;
   const TEST_SECRET = 'test-secret-key-min-32-characters-long-for-hs256';
@@ -47,8 +54,14 @@ describe('Authentication Middleware - Unit Tests', () => {
       }),
     } as unknown as FastifyReply;
 
-    const result = await authenticateRequest(request, reply);
-    expect(result).toBe(false);
+    try {
+      await authenticateRequest(request, reply);
+      expect(true).toBe(false); // Should not reach here
+    } catch (error) {
+      const authError = error as AuthenticationError;
+      expect(authError.statusCode).toBe(401);
+      expect(authError.message).toBe('Authentication required');
+    }
   });
 
   // T038 [US1] Test empty Authorization header returns 401
@@ -69,8 +82,14 @@ describe('Authentication Middleware - Unit Tests', () => {
       }),
     } as unknown as FastifyReply;
 
-    const result = await authenticateRequest(request, reply);
-    expect(result).toBe(false);
+    try {
+      await authenticateRequest(request, reply);
+      expect(true).toBe(false); // Should not reach here
+    } catch (error) {
+      const authError = error as AuthenticationError;
+      expect(authError.statusCode).toBe(401);
+      expect(authError.message).toBe('Authentication required');
+    }
   });
 
   // T039 [US1] Test invalid Bearer format returns 401
@@ -91,8 +110,14 @@ describe('Authentication Middleware - Unit Tests', () => {
       }),
     } as unknown as FastifyReply;
 
-    const result = await authenticateRequest(request, reply);
-    expect(result).toBe(false);
+    try {
+      await authenticateRequest(request, reply);
+      expect(true).toBe(false); // Should not reach here
+    } catch (error) {
+      const authError = error as AuthenticationError;
+      expect(authError.statusCode).toBe(401);
+      expect(authError.message).toBe('Invalid authorization format');
+    }
   });
 
   // T040 [US1] Test missing token value returns 401
@@ -113,8 +138,14 @@ describe('Authentication Middleware - Unit Tests', () => {
       }),
     } as unknown as FastifyReply;
 
-    const result = await authenticateRequest(request, reply);
-    expect(result).toBe(false);
+    try {
+      await authenticateRequest(request, reply);
+      expect(true).toBe(false); // Should not reach here
+    } catch (error) {
+      const authError = error as AuthenticationError;
+      expect(authError.statusCode).toBe(401);
+      expect(authError.message).toBe('Invalid authorization format');
+    }
   });
 
   // T041 [US1] Test multiple Authorization headers (uses first)
@@ -170,8 +201,14 @@ describe('Authentication Middleware - Unit Tests', () => {
       }),
     } as unknown as FastifyReply;
 
-    const result = await authenticateRequest(request, reply);
-    expect(result).toBe(false);
+    try {
+      await authenticateRequest(request, reply);
+      expect(true).toBe(false); // Should not reach here
+    } catch (error) {
+      const authError = error as AuthenticationError;
+      expect(authError.statusCode).toBe(401);
+      expect(authError.message).toBe('Invalid or expired token');
+    }
   });
 
   // T043 [US2] Test expired JWT token returns 401
@@ -204,8 +241,14 @@ describe('Authentication Middleware - Unit Tests', () => {
       }),
     } as unknown as FastifyReply;
 
-    const result = await authenticateRequest(request, reply);
-    expect(result).toBe(false);
+    try {
+      await authenticateRequest(request, reply);
+      expect(true).toBe(false); // Should not reach here
+    } catch (error) {
+      const authError = error as AuthenticationError;
+      expect(authError.statusCode).toBe(401);
+      expect(authError.message).toBe('Invalid or expired token');
+    }
   });
 
   // T044 [US2] Test invalid signature returns 401
@@ -238,8 +281,14 @@ describe('Authentication Middleware - Unit Tests', () => {
       }),
     } as unknown as FastifyReply;
 
-    const result = await authenticateRequest(request, reply);
-    expect(result).toBe(false);
+    try {
+      await authenticateRequest(request, reply);
+      expect(true).toBe(false); // Should not reach here
+    } catch (error) {
+      const authError = error as AuthenticationError;
+      expect(authError.statusCode).toBe(401);
+      expect(authError.message).toBe('Invalid or expired token');
+    }
   });
 
   // T045 [US2] Test valid JWT token allows request to proceed
@@ -319,18 +368,13 @@ describe('Authentication Middleware - Unit Tests', () => {
       log: fastify.log,
     } as unknown as FastifyRequest;
 
-    const responseHeaders: Record<string, string> = {};
-    let responseData: unknown;
-
     const reply = {
       status: (code: number) => ({
         header: (name: string, value: string) => {
-          responseHeaders[name] = value;
           return {
             send: (data: unknown) => {
-              responseData = data;
               expect(code).toBe(401);
-              expect(responseHeaders['Content-Type']).toBe('application/json');
+              expect(value).toBe('application/json');
               expect(typeof data).toBe('object');
               expect(data).toHaveProperty('error');
             },
@@ -339,8 +383,14 @@ describe('Authentication Middleware - Unit Tests', () => {
       }),
     } as unknown as FastifyReply;
 
-    await authenticateRequest(request, reply);
-    expect(responseData).toEqual({ error: 'Authentication required' });
+    try {
+      await authenticateRequest(request, reply);
+      expect(true).toBe(false); // Should not reach here
+    } catch (error) {
+      const authError = error as AuthenticationError;
+      expect(authError.statusCode).toBe(401);
+      expect(authError.message).toBe('Authentication required');
+    }
   });
 
   // T048 [US3] Test error messages are generic (no sensitive info)
@@ -363,37 +413,32 @@ describe('Authentication Middleware - Unit Tests', () => {
       log: fastify.log,
     } as unknown as FastifyRequest;
 
-    let responseStatusCode = 0;
-    let responseData: unknown;
-
     const reply = {
-      status: function (code: number) {
-        responseStatusCode = code;
-        return {
-          header: () => ({
-            send: (data: unknown) => {
-              responseData = data;
-            },
-          }),
-        };
-      },
+      status: () => ({
+        header: () => ({
+          send: () => {},
+        }),
+      }),
     } as unknown as FastifyReply;
 
-    const result = await authenticateRequest(request, reply);
+    try {
+      await authenticateRequest(request, reply);
+      expect(true).toBe(false); // Should not reach here
+    } catch (error) {
+      const authError = error as AuthenticationError;
+      expect(authError.statusCode).toBe(401);
+      expect(authError.message).toBe('Invalid or expired token');
 
-    expect(result).toBe(false);
-    expect(responseStatusCode).toBe(401);
-    expect(responseData).toEqual({ error: 'Invalid or expired token' });
-
-    // Should be generic message - verify it doesn't leak specific error details
-    // The message "Invalid or expired token" is generic (doesn't specify which one)
-    const dataStr = JSON.stringify(responseData);
-    // Should not contain specific technical error types
-    expect(dataStr).not.toContain('JsonWebTokenError');
-    expect(dataStr).not.toContain('TokenExpiredError');
-    expect(dataStr).not.toContain('signature');
-    expect(dataStr).not.toContain('malformed');
-    // Message is generic - covers multiple error types without specifying which one
-    expect(dataStr).toContain('Invalid or expired token');
+      // Should be generic message - verify it doesn't leak specific error details
+      // The message "Invalid or expired token" is generic (doesn't specify which one)
+      const errorStr = authError.message || JSON.stringify(authError);
+      // Should not contain specific technical error types
+      expect(errorStr).not.toContain('JsonWebTokenError');
+      expect(errorStr).not.toContain('TokenExpiredError');
+      expect(errorStr).not.toContain('signature');
+      expect(errorStr).not.toContain('malformed');
+      // Message is generic - covers multiple error types without specifying which one
+      expect(errorStr).toContain('Invalid or expired token');
+    }
   });
 });

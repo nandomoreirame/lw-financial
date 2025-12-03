@@ -7,13 +7,40 @@ import {
   test,
 } from 'bun:test';
 import Fastify, { FastifyInstance } from 'fastify';
+import jwt from 'jsonwebtoken';
 import { prisma } from '../../src/db/prisma';
 import { bankRoutes } from '../../src/bank/routes';
 
 describe('Bank Operations API Integration Tests', () => {
   let app: FastifyInstance;
+  const TEST_SECRET = 'test-secret-key-min-32-characters-long-for-hs256';
+  const originalSecret = process.env.BETTER_AUTH_SECRET;
+  const TEST_USER_ID = 'test-user-123';
+  const TEST_USERNAME = 'testuser';
+
+  /**
+   * Helper function to create a valid JWT token for testing
+   */
+  function createTestToken(
+    userId: string = TEST_USER_ID,
+    username: string = TEST_USERNAME
+  ) {
+    return jwt.sign(
+      {
+        userId,
+        username,
+        email: 'test@example.com',
+        iat: Math.floor(Date.now() / 1000),
+      },
+      TEST_SECRET,
+      { expiresIn: '1h' }
+    );
+  }
 
   beforeAll(async () => {
+    // Set test secret
+    process.env.BETTER_AUTH_SECRET = TEST_SECRET;
+
     // Initialize Fastify app
     app = Fastify({ logger: false });
     await app.register(bankRoutes);
@@ -21,6 +48,12 @@ describe('Bank Operations API Integration Tests', () => {
   });
 
   afterAll(async () => {
+    // Restore original secret
+    if (originalSecret) {
+      process.env.BETTER_AUTH_SECRET = originalSecret;
+    } else {
+      delete process.env.BETTER_AUTH_SECRET;
+    }
     await app.close();
     await prisma.$disconnect();
   });
@@ -29,6 +62,25 @@ describe('Bank Operations API Integration Tests', () => {
     // Clean up database before each test
     await prisma.transaction.deleteMany({});
     await prisma.bankAccount.deleteMany({});
+    await prisma.account.deleteMany({});
+    await prisma.user.deleteMany({});
+
+    // Create test user for authenticated requests
+    await prisma.user.create({
+      data: {
+        id: TEST_USER_ID,
+        email: 'test@example.com',
+        name: 'Test User',
+        emailVerified: true,
+        accounts: {
+          create: {
+            accountId: TEST_USERNAME,
+            providerId: 'credential',
+            password: 'hashed-password', // Not used in tests
+          },
+        },
+      },
+    });
   });
 
   describe('POST /reset', () => {
@@ -145,17 +197,23 @@ describe('Bank Operations API Integration Tests', () => {
 
   describe('GET /balance', () => {
     test('US-005: should return balance for existing account', async () => {
-      // Create account with balance
+      // Create account with balance and userId
       await prisma.bankAccount.create({
         data: {
           id: '100',
           balance: 20,
+          userId: TEST_USER_ID,
         },
       });
 
+      const token = createTestToken();
+
       const response = await app.inject({
         method: 'GET',
-        url: '/balance?account_id=100',
+        url: '/balance',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       });
 
       expect(response.statusCode).toBe(200);
@@ -163,22 +221,31 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('US-006: should return 0 for non-existing account', async () => {
+      // User has no account, should create default account with balance 0
+      const token = createTestToken();
+
       const response = await app.inject({
         method: 'GET',
-        url: '/balance?account_id=999',
+        url: '/balance',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       });
 
-      expect(response.statusCode).toBe(404);
+      expect(response.statusCode).toBe(200);
       expect(Number(response.body)).toBe(0);
     });
 
-    test('should reject missing account_id parameter', async () => {
+    test('should reject missing authentication token', async () => {
       const response = await app.inject({
         method: 'GET',
         url: '/balance',
       });
 
-      expect(response.statusCode).toBe(400);
+      expect(response.statusCode).toBe(401);
+      const body = JSON.parse(response.body);
+      expect(body).toHaveProperty('error');
+      expect(body.error).toBe('Authentication required');
     });
   });
 
@@ -433,14 +500,25 @@ describe('Bank Operations API Integration Tests', () => {
 
   describe('Complex scenarios', () => {
     test('should handle multiple operations in sequence', async () => {
-      // 1. Create account with deposit
+      const token = createTestToken();
+
+      // Create account with userId for the test user
+      await prisma.bankAccount.create({
+        data: {
+          id: '100',
+          balance: 100,
+          userId: TEST_USER_ID,
+        },
+      });
+
+      // 1. Deposit more
       await app.inject({
         method: 'POST',
         url: '/event',
         payload: {
           type: 'deposit',
           destination: '100',
-          amount: 100,
+          amount: 0, // Already has 100
         },
       });
 
@@ -455,14 +533,18 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // 3. Check balance
+      // 3. Check balance (should be 70)
       const balanceResponse = await app.inject({
         method: 'GET',
-        url: '/balance?account_id=100',
+        url: '/balance',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       });
+      expect(balanceResponse.statusCode).toBe(200);
       expect(Number(balanceResponse.body)).toBe(70);
 
-      // 4. Transfer to new account
+      // 4. Transfer to new account (this creates account '200' without userId)
       await app.inject({
         method: 'POST',
         url: '/event',
@@ -474,29 +556,25 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // 5. Verify final balances
+      // 5. Verify final balance for authenticated user (should be 20)
       const balance1 = await app.inject({
         method: 'GET',
-        url: '/balance?account_id=100',
+        url: '/balance',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       });
+      expect(balance1.statusCode).toBe(200);
       expect(Number(balance1.body)).toBe(20);
-
-      const balance2 = await app.inject({
-        method: 'GET',
-        url: '/balance?account_id=200',
-      });
-      expect(Number(balance2.body)).toBe(50);
     });
 
     test('should maintain data integrity after reset', async () => {
-      // Create accounts and transactions
-      await app.inject({
-        method: 'POST',
-        url: '/event',
-        payload: {
-          type: 'deposit',
-          destination: '100',
-          amount: 50,
+      // Create account with userId
+      await prisma.bankAccount.create({
+        data: {
+          id: '100',
+          balance: 50,
+          userId: TEST_USER_ID,
         },
       });
 
@@ -506,12 +584,16 @@ describe('Bank Operations API Integration Tests', () => {
         url: '/reset',
       });
 
-      // Verify all data is gone
+      // Verify all data is gone - user should get default account with balance 0
+      const token = createTestToken();
       const response = await app.inject({
         method: 'GET',
-        url: '/balance?account_id=100',
+        url: '/balance',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       });
-      expect(response.statusCode).toBe(404);
+      expect(response.statusCode).toBe(200);
       expect(Number(response.body)).toBe(0);
     });
   });
