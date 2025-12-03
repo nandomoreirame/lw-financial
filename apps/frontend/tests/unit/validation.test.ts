@@ -7,6 +7,7 @@ import { describe, expect, test } from 'bun:test';
 import {
   depositFormSchema,
   transactionAmountSchema,
+  withdrawFormSchema,
 } from '../../app/lib/validation';
 
 describe('transactionAmountSchema', () => {
@@ -245,6 +246,68 @@ describe('depositFormSchema', () => {
 
     test('should reject amount above maximum', () => {
       const result = depositFormSchema.safeParse({ amount: 1000000 });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toContain('máximo');
+      }
+    });
+  });
+});
+
+describe('withdrawFormSchema', () => {
+  describe('Happy path - valid form data', () => {
+    test('should accept valid withdraw form data', () => {
+      const result = withdrawFormSchema.safeParse({ amount: 100.5 });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.amount).toBe(100.5);
+      }
+    });
+
+    test('should accept minimum amount', () => {
+      const result = withdrawFormSchema.safeParse({ amount: 0.01 });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.amount).toBe(0.01);
+      }
+    });
+
+    test('should accept maximum amount', () => {
+      const result = withdrawFormSchema.safeParse({ amount: 999999.99 });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.amount).toBe(999999.99);
+      }
+    });
+  });
+
+  describe('Error cases - invalid form data', () => {
+    test('should reject missing amount field', () => {
+      const result = withdrawFormSchema.safeParse({} as any);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toContain('obrigatório');
+      }
+    });
+
+    test('should reject invalid amount value', () => {
+      const result = withdrawFormSchema.safeParse({ amount: -10 });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toContain('maior que zero');
+      }
+    });
+
+    test('should reject amount with too many decimals', () => {
+      const result = withdrawFormSchema.safeParse({ amount: 100.123 });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toContain('2 casas decimais');
+      }
+    });
+
+    test('should reject amount above maximum', () => {
+      const result = withdrawFormSchema.safeParse({ amount: 1000000 });
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toContain('máximo');
