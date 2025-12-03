@@ -33,6 +33,8 @@ export async function bankRoutes(fastify: FastifyInstance) {
   );
 
   // POST /event - Process banking events (deposit, withdraw, transfer)
+  // Authentication is optional but required when origin/destination are not provided
+  // The handler will check authentication when needed
   fastify.post('/event', { schema: eventSchema }, eventHandler);
 
   // POST /reset - Reset system state

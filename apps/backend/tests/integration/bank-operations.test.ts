@@ -8,8 +8,8 @@ import {
 } from 'bun:test';
 import Fastify, { FastifyInstance } from 'fastify';
 import jwt from 'jsonwebtoken';
-import { prisma } from '../../src/db/prisma';
 import { bankRoutes } from '../../src/bank/routes';
+import { prisma } from '../../src/db/prisma';
 
 describe('Bank Operations API Integration Tests', () => {
   let app: FastifyInstance;
@@ -181,7 +181,7 @@ describe('Bank Operations API Integration Tests', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    test('should reject missing destination', async () => {
+    test('should reject missing destination when not authenticated', async () => {
       const response = await app.inject({
         method: 'POST',
         url: '/event',
@@ -191,7 +191,114 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      expect(response.statusCode).toBe(400);
+      expect(response.statusCode).toBe(401);
+      const body = JSON.parse(response.body);
+      expect(body.error).toContain('Authentication required');
+    });
+
+    test('should deposit to user default account when authenticated (no destination)', async () => {
+      const token = createTestToken();
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/event',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        payload: {
+          type: 'deposit',
+          amount: 50.75,
+        },
+      });
+
+      expect(response.statusCode).toBe(201);
+      const body = JSON.parse(response.body);
+      expect(body).toHaveProperty('destination');
+      expect(body.destination).toHaveProperty('id');
+      expect(body.destination).toHaveProperty('balance');
+      expect(body.destination.balance).toBe(50.75);
+
+      // Verify account was created with userId
+      const account = await prisma.bankAccount.findFirst({
+        where: { userId: TEST_USER_ID },
+      });
+      expect(account).toBeTruthy();
+      expect(Number(account?.balance)).toBe(50.75);
+    });
+
+    test('should deposit to existing user default account when authenticated', async () => {
+      // Create account for user
+      await prisma.bankAccount.create({
+        data: {
+          id: 'user-default-account',
+          balance: 100,
+          userId: TEST_USER_ID,
+        },
+      });
+
+      const token = createTestToken();
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/event',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        payload: {
+          type: 'deposit',
+          amount: 25.5,
+        },
+      });
+
+      expect(response.statusCode).toBe(201);
+      const body = JSON.parse(response.body);
+      expect(body.destination.balance).toBe(125.5);
+    });
+
+    test('should validate amount range and precision for authenticated deposit', async () => {
+      const token = createTestToken();
+
+      // Test amount too small
+      const response1 = await app.inject({
+        method: 'POST',
+        url: '/event',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        payload: {
+          type: 'deposit',
+          amount: 0.001,
+        },
+      });
+      expect(response1.statusCode).toBe(400);
+
+      // Test amount too large
+      const response2 = await app.inject({
+        method: 'POST',
+        url: '/event',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        payload: {
+          type: 'deposit',
+          amount: 1000000,
+        },
+      });
+      expect(response2.statusCode).toBe(400);
+
+      // Test too many decimal places
+      const response3 = await app.inject({
+        method: 'POST',
+        url: '/event',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        payload: {
+          type: 'deposit',
+          amount: 10.123,
+        },
+      });
+      expect(response3.statusCode).toBe(400);
     });
   });
 
@@ -318,7 +425,7 @@ describe('Bank Operations API Integration Tests', () => {
       expect(body).toHaveProperty('error');
     });
 
-    test('should reject missing origin', async () => {
+    test('should reject missing origin when not authenticated', async () => {
       const response = await app.inject({
         method: 'POST',
         url: '/event',
@@ -328,7 +435,123 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
+      expect(response.statusCode).toBe(401);
+      const body = JSON.parse(response.body);
+      expect(body.error).toContain('Authentication required');
+    });
+
+    test('should withdraw from user default account when authenticated (no origin)', async () => {
+      // Create account for user with balance
+      await prisma.bankAccount.create({
+        data: {
+          id: 'user-default-account',
+          balance: 100,
+          userId: TEST_USER_ID,
+        },
+      });
+
+      const token = createTestToken();
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/event',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        payload: {
+          type: 'withdraw',
+          amount: 30.25,
+        },
+      });
+
+      expect(response.statusCode).toBe(201);
+      const body = JSON.parse(response.body);
+      expect(body).toHaveProperty('origin');
+      expect(body.origin).toHaveProperty('id');
+      expect(body.origin).toHaveProperty('balance');
+      expect(body.origin.balance).toBe(69.75);
+    });
+
+    test('should reject insufficient funds for authenticated withdraw', async () => {
+      // Create account for user with insufficient balance
+      await prisma.bankAccount.create({
+        data: {
+          id: 'user-default-account',
+          balance: 10,
+          userId: TEST_USER_ID,
+        },
+      });
+
+      const token = createTestToken();
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/event',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        payload: {
+          type: 'withdraw',
+          amount: 50,
+        },
+      });
+
       expect(response.statusCode).toBe(400);
+      const body = JSON.parse(response.body);
+      expect(body.error).toBe('Insufficient funds');
+    });
+
+    test('should create default account and allow withdraw when authenticated', async () => {
+      // User has no account yet
+      const token = createTestToken();
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/event',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+        payload: {
+          type: 'withdraw',
+          amount: 10,
+        },
+      });
+
+      // Should fail because account has 0 balance
+      expect(response.statusCode).toBe(400);
+      const body = JSON.parse(response.body);
+      expect(body.error).toBe('Insufficient funds');
+
+      // But account should have been created
+      const account = await prisma.bankAccount.findFirst({
+        where: { userId: TEST_USER_ID },
+      });
+      expect(account).toBeTruthy();
+      expect(Number(account?.balance)).toBe(0);
+    });
+
+    test('should require authentication for deposit/withdraw without origin/destination', async () => {
+      // Deposit without auth
+      const depositResponse = await app.inject({
+        method: 'POST',
+        url: '/event',
+        payload: {
+          type: 'deposit',
+          amount: 10,
+        },
+      });
+      expect(depositResponse.statusCode).toBe(401);
+
+      // Withdraw without auth
+      const withdrawResponse = await app.inject({
+        method: 'POST',
+        url: '/event',
+        payload: {
+          type: 'withdraw',
+          amount: 10,
+        },
+      });
+      expect(withdrawResponse.statusCode).toBe(401);
     });
   });
 

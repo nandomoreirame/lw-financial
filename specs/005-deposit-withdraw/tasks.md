@@ -22,10 +22,10 @@
 
 **Purpose**: Project initialization and verification of existing infrastructure
 
-- [ ] T001 Verify backend endpoint `/v1/event` is functional in apps/backend/src/bank/handlers/event.ts
-- [ ] T002 Verify frontend dashboard route exists in apps/frontend/app/routes/dashboard.tsx
-- [ ] T003 [P] Verify React Query is configured in apps/frontend/app/lib/query-client.ts
-- [ ] T004 [P] Verify react-hook-form and zod are installed in apps/frontend/package.json
+- [x] T001 Verify backend endpoint `/v1/event` is functional in apps/backend/src/bank/handlers/event.ts
+- [x] T002 Verify frontend dashboard route exists in apps/frontend/app/routes/dashboard.tsx
+- [x] T003 [P] Verify React Query is configured in apps/frontend/app/lib/query-client.ts
+- [x] T004 [P] Verify react-hook-form and zod are installed in apps/frontend/package.json
 
 ---
 
@@ -35,12 +35,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Modify event handler to identify account automatically via JWT in apps/backend/src/bank/handlers/event.ts
-- [ ] T006 Update deposit case to use getOrCreateDefaultAccount(userId) in apps/backend/src/bank/handlers/event.ts
-- [ ] T007 Update withdraw case to use getOrCreateDefaultAccount(userId) in apps/backend/src/bank/handlers/event.ts
-- [ ] T008 Add authentication middleware to event route if not already present in apps/backend/src/bank/routes.ts
-- [ ] T009 Update event handler to accept requests without destination/origin when authenticated in apps/backend/src/bank/handlers/event.ts
-- [ ] T010 Test backend modifications with authenticated requests in apps/backend/tests/integration/
+- [x] T005 Modify event handler to identify account automatically via JWT in apps/backend/src/bank/handlers/event.ts
+- [x] T006 Update deposit case to use getOrCreateDefaultAccount(userId) in apps/backend/src/bank/handlers/event.ts
+- [x] T007 Update withdraw case to use getOrCreateDefaultAccount(userId) in apps/backend/src/bank/handlers/event.ts
+- [x] T008 Add authentication middleware to event route if not already present in apps/backend/src/bank/routes.ts
+- [x] T009 Update event handler to accept requests without destination/origin when authenticated in apps/backend/src/bank/handlers/event.ts
+- [x] T010 Test backend modifications with authenticated requests in apps/backend/tests/integration/
 
 **Checkpoint**: Foundation ready - backend now identifies account automatically. User story implementation can now begin.
 
