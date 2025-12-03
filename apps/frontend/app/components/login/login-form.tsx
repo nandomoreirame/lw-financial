@@ -81,6 +81,9 @@ export function LoginForm({ className }: LoginFormProps) {
       noValidate
     >
       <div className="space-y-2 text-center">
+        <div className="flex justify-center mb-2">
+          <img src="/bank.svg" alt="Bank icon" className="h-12 w-12" />
+        </div>
         <h1 className="text-3xl font-bold">LW Financial</h1>
         <p className="text-balance text-muted-foreground">
           Faça login para acessar sua conta

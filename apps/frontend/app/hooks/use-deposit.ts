@@ -30,6 +30,8 @@ export function useDeposit(accountId: string | null): UseDepositReturn {
       if (accountId) {
         queryClient.invalidateQueries({ queryKey: ['balance', accountId] });
       }
+      // Invalidate transactions cache to refresh transaction history
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
     },
     onError: (error: Error) => {
       // Handle 401 Unauthorized - token expired or invalid

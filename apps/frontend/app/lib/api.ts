@@ -192,6 +192,24 @@ export interface WithdrawResponse {
   };
 }
 
+export type TransactionType =
+  | 'DEPOSIT'
+  | 'WITHDRAW'
+  | 'TRANSFER'
+  | 'INITIAL_BALANCE';
+
+export interface Transaction {
+  id: string;
+  type: TransactionType;
+  amount: string;
+  originAccountId: string | null;
+  destinationAccountId: string | null;
+  userId: string | null;
+  createdAt: string;
+}
+
+export type TransactionsResponse = Transaction[];
+
 /**
  * Performs deposit request to backend
  * The account is automatically identified from the JWT token
@@ -336,5 +354,66 @@ export async function withdraw(amount: number): Promise<WithdrawResponse> {
     }
     // Fallback for unexpected errors
     throw new Error('Erro ao realizar saque. Tente novamente.');
+  }
+}
+
+/**
+ * Fetches transaction history from backend
+ * Returns the 20 most recent transactions for the authenticated user
+ * Transactions are automatically ordered by creation date (most recent first)
+ *
+ * @returns Array of transactions
+ */
+export async function getTransactions(): Promise<TransactionsResponse> {
+  const token = sessionStorage.getItem('auth_token');
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado');
+  }
+
+  try {
+    const response = await fetchWithTimeout(
+      `${API_BASE_URL}/v1/transactions`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      },
+      DEFAULT_TIMEOUT_MS
+    );
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Não autenticado');
+      }
+
+      if (response.status === 404) {
+        // No transactions found returns empty array
+        return [];
+      }
+
+      const error: ErrorResponse = await response.json().catch(() => ({
+        error: 'Erro ao buscar histórico de transações',
+      }));
+      throw new Error(error.error || 'Erro ao buscar histórico de transações');
+    }
+
+    const data = await response.json();
+
+    // Validate response is an array
+    if (!Array.isArray(data)) {
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    return data as TransactionsResponse;
+  } catch (error) {
+    // Re-throw with user-friendly message if it's already an Error
+    if (error instanceof Error) {
+      throw error;
+    }
+    // Fallback for unexpected errors
+    throw new Error('Erro ao buscar histórico de transações. Tente novamente.');
   }
 }
