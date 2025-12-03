@@ -1,20 +1,29 @@
 /**
  * Withdraw form component for withdrawing money from account
- * Handles form validation, submission, loading states, and success/error messages
+ * Uses Shadcn UI Form component with react-hook-form and CurrencyInput for currency input
  * Includes client-side balance check before submission
  */
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@lw-financial/ui';
+import {
+  Button,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@lw-financial/ui';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import { CurrencyInput } from './currency-input';
+import { toast } from 'sonner';
 import { useWithdraw } from '../../hooks/use-withdraw';
+import { cn } from '../../lib/utils';
 import {
   withdrawFormSchema,
   type WithdrawFormData,
 } from '../../lib/validation';
-import { cn } from '../../lib/utils';
+import { CurrencyInput } from './currency-input';
 
 export interface WithdrawFormProps {
   accountId: string | null;
@@ -24,6 +33,7 @@ export interface WithdrawFormProps {
 
 /**
  * Form component for withdrawing money
+ * Uses Shadcn UI Form with CurrencyInput for currency input with R$ prefix
  * Validates amount (R$ 0,01 to R$ 999.999,99), checks balance, handles loading states, and displays feedback
  */
 export function WithdrawForm({
@@ -33,46 +43,37 @@ export function WithdrawForm({
 }: WithdrawFormProps) {
   const { withdraw, isLoading, isSuccess, error, reset } =
     useWithdraw(accountId);
-  const [showSuccess, setShowSuccess] = React.useState(false);
   const [insufficientFundsError, setInsufficientFundsError] = React.useState<
     string | null
   >(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset: resetForm,
-    watch,
-    setValue,
-  } = useForm<WithdrawFormData>({
+  const form = useForm<WithdrawFormData>({
     resolver: zodResolver(withdrawFormSchema),
+    defaultValues: {
+      amount: undefined,
+    },
   });
 
-  const amountValue = watch('amount');
-
-  // Reset success message after 5 seconds
+  // Show success toast and reset form after successful withdrawal
   React.useEffect(() => {
     if (isSuccess) {
-      setShowSuccess(true);
-      const timer = setTimeout(() => {
-        setShowSuccess(false);
-        reset();
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [isSuccess, reset]);
-
-  // Clear form after successful withdrawal
-  React.useEffect(() => {
-    if (isSuccess) {
-      resetForm();
+      toast.success('Saque realizado com sucesso!');
+      form.reset();
       setInsufficientFundsError(null);
+      reset();
     }
-  }, [isSuccess, resetForm]);
+  }, [isSuccess, form, reset]);
+
+  // Show error toast for API errors
+  React.useEffect(() => {
+    if (error && !insufficientFundsError) {
+      toast.error(error.message || 'Erro ao realizar saque. Tente novamente.');
+    }
+  }, [error, insufficientFundsError]);
 
   // Clear insufficient funds error when amount changes or when other errors occur
+  const amountValue = form.watch('amount');
   React.useEffect(() => {
     if (insufficientFundsError && (amountValue !== undefined || error)) {
       setInsufficientFundsError(null);
@@ -91,15 +92,18 @@ export function WithdrawForm({
     // Client-side balance check before submission (UX only - backend always validates)
     // Prevent submission if balance is not yet loaded
     if (currentBalance === undefined) {
-      setInsufficientFundsError(
-        'Aguarde o carregamento do saldo antes de realizar o saque'
-      );
+      const errorMessage =
+        'Aguarde o carregamento do saldo antes de realizar o saque';
+      setInsufficientFundsError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
     // Check if amount exceeds available balance
     if (data.amount > currentBalance) {
-      setInsufficientFundsError('Saldo insuficiente para realizar o saque');
+      const errorMessage = 'Saldo insuficiente para saque';
+      setInsufficientFundsError(errorMessage);
+      toast.error(errorMessage);
       return;
     }
 
@@ -107,11 +111,12 @@ export function WithdrawForm({
     try {
       await withdraw(data.amount);
     } catch (err) {
-      // Error is handled by the hook and displayed below
       // Check if it's an insufficient funds error
       if (err instanceof Error && err.message.includes('insuficiente')) {
         setInsufficientFundsError(err.message);
+        toast.error(err.message);
       }
+      // Other errors are handled by the hook and shown via toast in useEffect
       // Only log in development to avoid exposing sensitive information
       if (import.meta.env.DEV) {
         console.error('Withdraw error:', err);
@@ -130,79 +135,59 @@ export function WithdrawForm({
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <label
-            htmlFor="withdraw-amount"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
-            Valor (R$)
-          </label>
-          <CurrencyInput
-            id="withdraw-amount"
-            value={amountValue}
-            onChange={(value) =>
-              setValue('amount', value || 0, { shouldValidate: true })
-            }
-            error={!!errors.amount || !!insufficientFundsError}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Valor</FormLabel>
+                <FormControl>
+                  <CurrencyInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled={
+                      isLoading || isSubmitting || currentBalance === undefined
+                    }
+                    error={
+                      !!form.formState.errors.amount || !!insufficientFundsError
+                    }
+                    aria-label="Valor do saque em reais"
+                  />
+                </FormControl>
+                {insufficientFundsError && (
+                  <p className="text-sm font-medium text-destructive">
+                    {insufficientFundsError}
+                  </p>
+                )}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button
+            type="submit"
             disabled={isLoading || isSubmitting || currentBalance === undefined}
-            aria-label="Valor do saque em reais"
-          />
-          <input
-            type="hidden"
-            {...register('amount', {
-              valueAsNumber: true,
-            })}
-          />
-          {errors.amount && (
-            <p className="text-sm text-destructive">{errors.amount.message}</p>
-          )}
-          {insufficientFundsError && !errors.amount && (
-            <p className="text-sm text-destructive">{insufficientFundsError}</p>
-          )}
-        </div>
-
-        <Button
-          type="submit"
-          disabled={isLoading || isSubmitting || currentBalance === undefined}
-          className="w-full gap-2"
-          aria-label="Sacar"
-        >
-          {isLoading ? (
-            <>
-              <span
-                className="h-4 w-4 inline-block animate-spin"
-                aria-hidden="true"
-              >
-                ↻
-              </span>
-              Processando...
-            </>
-          ) : (
-            'Sacar'
-          )}
-        </Button>
-      </form>
-
-      {/* Success message */}
-      {showSuccess && (
-        <div
-          className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-200"
-          role="alert"
-        >
-          Saque realizado com sucesso!
-        </div>
-      )}
-
-      {/* Error message */}
-      {error && !showSuccess && !insufficientFundsError && (
-        <div
-          className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive"
-          role="alert"
-        >
-          {error.message || 'Erro ao realizar saque. Tente novamente.'}
-        </div>
-      )}
+            className="w-full gap-2"
+            aria-label="Sacar"
+          >
+            {isLoading ? (
+              <>
+                <span
+                  className="h-4 w-4 inline-block animate-spin"
+                  aria-hidden="true"
+                >
+                  ↻
+                </span>
+                Processando...
+              </>
+            ) : (
+              'Sacar'
+            )}
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 }

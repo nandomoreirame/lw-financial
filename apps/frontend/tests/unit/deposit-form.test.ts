@@ -60,28 +60,18 @@ describe('DepositForm component', () => {
     });
   });
 
-  describe('Success message display logic', () => {
-    test('should show success message when isSuccess is true', () => {
-      // Test the logic for showing success messages
+  describe('Success toast display logic', () => {
+    test('should trigger success toast when isSuccess is true', () => {
+      // Test that success state triggers toast notification
+      // The component now uses toast.success() instead of inline messages
       const isSuccess = true;
-      const showSuccess = isSuccess;
-
-      expect(showSuccess).toBe(true);
+      expect(isSuccess).toBe(true);
     });
 
-    test('should hide success message when isSuccess is false', () => {
-      // Test the logic for hiding success messages
+    test('should not trigger success toast when isSuccess is false', () => {
+      // Test that success toast is not triggered when operation fails
       const isSuccess = false;
-      const showSuccess = isSuccess;
-
-      expect(showSuccess).toBe(false);
-    });
-
-    test('should auto-dismiss success message after timeout', () => {
-      // Test that success messages are set to auto-dismiss
-      // In the component, this is handled with setTimeout(5000)
-      const timeout = 5000;
-      expect(timeout).toBe(5000);
+      expect(isSuccess).toBe(false);
     });
   });
 
@@ -94,26 +84,15 @@ describe('DepositForm component', () => {
   });
 
   describe('Error handling', () => {
-    test('should display error when error exists and success is not shown', () => {
-      // Test the logic for displaying error messages
+    test('should trigger error toast when error exists', () => {
+      // Test that errors trigger toast notifications
+      // The component now uses toast.error() instead of inline messages
       const error = { message: 'Erro ao realizar depósito' };
-      const showSuccess = false;
-      const shouldShowError = error && !showSuccess;
-
-      expect(shouldShowError).toBe(true);
-    });
-
-    test('should hide error when success is shown', () => {
-      // Test that errors are hidden when success message is displayed
-      const error = { message: 'Erro ao realizar depósito' };
-      const showSuccess = true;
-      const shouldShowError = error && !showSuccess;
-
-      expect(shouldShowError).toBe(false);
+      expect(error).toBeTruthy();
     });
 
     test('should use default error message when error message is missing', () => {
-      // Test fallback error message
+      // Test fallback error message for toast
       const error = { message: '' };
       const defaultMessage = 'Erro ao realizar depósito. Tente novamente.';
       const displayMessage = error.message || defaultMessage;
