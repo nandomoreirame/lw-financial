@@ -13,3 +13,11 @@ export {
 export { InputGroup, InputGroupAddon, InputGroupInput } from './input-group';
 export { Label } from './label';
 export { Toaster } from './sonner';
+export {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+  EmptyMedia,
+} from './empty';
