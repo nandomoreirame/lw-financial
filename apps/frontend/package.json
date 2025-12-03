@@ -7,7 +7,8 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "test": "bun run typecheck"
+    "test": "bun test tests/unit/",
+    "test:watch": "bun test --watch tests/unit/"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
