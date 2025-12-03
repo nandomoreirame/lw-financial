@@ -54,18 +54,18 @@
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] Add deposit() function to apps/frontend/app/lib/api.ts
-- [ ] T012 [P] [US1] Create use-deposit hook in apps/frontend/app/hooks/use-deposit.ts
-- [ ] T013 [P] [US1] Create transaction amount validation schema with zod in apps/frontend/app/lib/validation.ts
-- [ ] T014 [US1] Create deposit-form component in apps/frontend/app/components/dashboard/deposit-form.tsx
-- [ ] T015 [US1] Implement currency input field with validation in apps/frontend/app/components/dashboard/deposit-form.tsx
-- [ ] T016 [US1] Implement submit button with loading state (spinner + "Processando...") in apps/frontend/app/components/dashboard/deposit-form.tsx
-- [ ] T017 [US1] Add form validation with react-hook-form in apps/frontend/app/components/dashboard/deposit-form.tsx
-- [ ] T018 [US1] Implement success message display after deposit in apps/frontend/app/components/dashboard/deposit-form.tsx
-- [ ] T019 [US1] Implement error message display for deposit failures in apps/frontend/app/components/dashboard/deposit-form.tsx
-- [ ] T020 [US1] Add balance cache invalidation after successful deposit in apps/frontend/app/hooks/use-deposit.ts
-- [ ] T021 [US1] Integrate deposit-form into dashboard route in apps/frontend/app/routes/dashboard.tsx
-- [ ] T022 [US1] Clear input field after successful deposit in apps/frontend/app/components/dashboard/deposit-form.tsx
+- [x] T011 [P] [US1] Add deposit() function to apps/frontend/app/lib/api.ts
+- [x] T012 [P] [US1] Create use-deposit hook in apps/frontend/app/hooks/use-deposit.ts
+- [x] T013 [P] [US1] Create transaction amount validation schema with zod in apps/frontend/app/lib/validation.ts
+- [x] T014 [US1] Create deposit-form component in apps/frontend/app/components/dashboard/deposit-form.tsx
+- [x] T015 [US1] Implement currency input field with validation in apps/frontend/app/components/dashboard/deposit-form.tsx
+- [x] T016 [US1] Implement submit button with loading state (spinner + "Processando...") in apps/frontend/app/components/dashboard/deposit-form.tsx
+- [x] T017 [US1] Add form validation with react-hook-form in apps/frontend/app/components/dashboard/deposit-form.tsx
+- [x] T018 [US1] Implement success message display after deposit in apps/frontend/app/components/dashboard/deposit-form.tsx
+- [x] T019 [US1] Implement error message display for deposit failures in apps/frontend/app/components/dashboard/deposit-form.tsx
+- [x] T020 [US1] Add balance cache invalidation after successful deposit in apps/frontend/app/hooks/use-deposit.ts
+- [x] T021 [US1] Integrate deposit-form into dashboard route in apps/frontend/app/routes/dashboard.tsx
+- [x] T022 [US1] Clear input field after successful deposit in apps/frontend/app/components/dashboard/deposit-form.tsx
 
 **Checkpoint**: At this point, User Story 1 (Deposit) should be fully functional and testable independently. Users can deposit money and see balance update.
 
