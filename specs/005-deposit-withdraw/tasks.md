@@ -109,7 +109,7 @@
 - [x] T041 [P] Add error handling for token expiration (401) in apps/frontend/app/hooks/use-deposit.ts and apps/frontend/app/hooks/use-withdraw.ts
 - [x] T042 Verify all edge cases from spec are handled in apps/frontend/app/components/dashboard/
 - [x] T043 Run lint and format on all modified files
-- [ ] T044 Test complete user flows (deposit → check balance → withdraw → check balance)
+- [x] T044 Test complete user flows (deposit → check balance → withdraw → check balance)
 - [x] T045 Validate quickstart.md implementation steps
 
 ---
