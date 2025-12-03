@@ -177,3 +177,80 @@ export async function getBalance(_accountId: string): Promise<number> {
     throw new Error('Erro ao buscar saldo. Tente novamente.');
   }
 }
+
+export interface DepositResponse {
+  destination: {
+    id: string;
+    balance: number;
+  };
+}
+
+export interface WithdrawResponse {
+  origin: {
+    id: string;
+    balance: number;
+  };
+}
+
+/**
+ * Performs deposit request to backend
+ * The account is automatically identified from the JWT token
+ * @param amount - Deposit amount (0.01 to 999999.99)
+ * @returns Deposit response with account ID and new balance
+ */
+export async function deposit(amount: number): Promise<DepositResponse> {
+  const token = sessionStorage.getItem('auth_token');
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado');
+  }
+
+  try {
+    const response = await fetchWithTimeout(
+      `${API_BASE_URL}/v1/event`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          type: 'deposit',
+          amount,
+        }),
+      },
+      DEFAULT_TIMEOUT_MS
+    );
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Não autenticado');
+      }
+
+      const error: ErrorResponse = await response.json().catch(() => ({
+        error: 'Erro ao realizar depósito',
+      }));
+      throw new Error(error.error || 'Erro ao realizar depósito');
+    }
+
+    const data = await response.json();
+
+    // Validate response structure
+    if (!data || typeof data !== 'object' || !data.destination) {
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    if (typeof data.destination.balance !== 'number' || !data.destination.id) {
+      throw new Error('Dados de resposta inválidos');
+    }
+
+    return data as DepositResponse;
+  } catch (error) {
+    // Re-throw with user-friendly message if it's already an Error
+    if (error instanceof Error) {
+      throw error;
+    }
+    // Fallback for unexpected errors
+    throw new Error('Erro ao realizar depósito. Tente novamente.');
+  }
+}

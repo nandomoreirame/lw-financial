@@ -4,6 +4,7 @@
 
 import * as React from 'react';
 import { BalanceCard } from '../components/dashboard/balance-card';
+import { DepositForm } from '../components/dashboard/deposit-form';
 import { useBalance } from '../hooks/use-balance';
 import {
   checkAuthentication,
@@ -129,6 +130,8 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
           onRefresh={handleRefresh}
           isRefreshing={isRefreshing}
         />
+
+        <DepositForm accountId={accountId} />
       </div>
     </div>
   );
