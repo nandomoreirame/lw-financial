@@ -5,6 +5,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { withdraw, type WithdrawResponse } from '../lib/api';
+import { isAuthenticationError, redirectToLogin } from '../lib/auth-redirect';
 
 export interface UseWithdrawReturn {
   withdraw: (amount: number) => Promise<WithdrawResponse>;
@@ -17,6 +18,7 @@ export interface UseWithdrawReturn {
 /**
  * Hook to withdraw money from account
  * Automatically invalidates balance cache after successful withdrawal
+ * Handles 401 errors by redirecting to login
  */
 export function useWithdraw(accountId: string | null): UseWithdrawReturn {
   const queryClient = useQueryClient();
@@ -27,6 +29,12 @@ export function useWithdraw(accountId: string | null): UseWithdrawReturn {
       // Invalidate balance cache to refresh balance after withdrawal
       if (accountId) {
         queryClient.invalidateQueries({ queryKey: ['balance', accountId] });
+      }
+    },
+    onError: (error: Error) => {
+      // Handle 401 Unauthorized - token expired or invalid
+      if (isAuthenticationError(error)) {
+        redirectToLogin('Sua sessão expirou. Por favor, faça login novamente');
       }
     },
   });

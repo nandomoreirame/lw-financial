@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@lw-financial/ui';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
+import { CurrencyInput } from './currency-input';
 import { useDeposit } from '../../hooks/use-deposit';
 import { depositFormSchema, type DepositFormData } from '../../lib/validation';
 import { cn } from '../../lib/utils';
@@ -23,15 +24,20 @@ export interface DepositFormProps {
 export function DepositForm({ accountId, className }: DepositFormProps) {
   const { deposit, isLoading, isSuccess, error, reset } = useDeposit(accountId);
   const [showSuccess, setShowSuccess] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset: resetForm,
+    watch,
+    setValue,
   } = useForm<DepositFormData>({
     resolver: zodResolver(depositFormSchema),
   });
+
+  const amountValue = watch('amount');
 
   // Reset success message after 5 seconds
   React.useEffect(() => {
@@ -53,6 +59,12 @@ export function DepositForm({ accountId, className }: DepositFormProps) {
   }, [isSuccess, resetForm]);
 
   const onSubmit = async (data: DepositFormData) => {
+    // Prevent duplicate submissions
+    if (isSubmitting || isLoading) {
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       await deposit(data.amount);
     } catch (err) {
@@ -61,6 +73,8 @@ export function DepositForm({ accountId, className }: DepositFormProps) {
       if (import.meta.env.DEV) {
         console.error('Deposit error:', err);
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -81,26 +95,21 @@ export function DepositForm({ accountId, className }: DepositFormProps) {
           >
             Valor (R$)
           </label>
-          <input
+          <CurrencyInput
             id="deposit-amount"
-            type="number"
-            step="0.01"
-            min="0.01"
-            max="999999.99"
-            placeholder="0,00"
+            value={amountValue}
+            onChange={(value) =>
+              setValue('amount', value || 0, { shouldValidate: true })
+            }
+            error={!!errors.amount}
+            disabled={isLoading || isSubmitting}
+            aria-label="Valor do depósito em reais"
+          />
+          <input
+            type="hidden"
             {...register('amount', {
               valueAsNumber: true,
             })}
-            className={cn(
-              'flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors',
-              'file:border-0 file:bg-transparent file:text-sm file:font-medium',
-              'placeholder:text-muted-foreground',
-              'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-              'disabled:cursor-not-allowed disabled:opacity-50',
-              errors.amount &&
-                'border-destructive focus-visible:ring-destructive'
-            )}
-            disabled={isLoading}
           />
           {errors.amount && (
             <p className="text-sm text-destructive">{errors.amount.message}</p>
@@ -109,7 +118,7 @@ export function DepositForm({ accountId, className }: DepositFormProps) {
 
         <Button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || isSubmitting}
           className="w-full gap-2"
           aria-label="Depositar"
         >

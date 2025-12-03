@@ -5,6 +5,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deposit, type DepositResponse } from '../lib/api';
+import { isAuthenticationError, redirectToLogin } from '../lib/auth-redirect';
 
 export interface UseDepositReturn {
   deposit: (amount: number) => Promise<DepositResponse>;
@@ -17,6 +18,7 @@ export interface UseDepositReturn {
 /**
  * Hook to deposit money into account
  * Automatically invalidates balance cache after successful deposit
+ * Handles 401 errors by redirecting to login
  */
 export function useDeposit(accountId: string | null): UseDepositReturn {
   const queryClient = useQueryClient();
@@ -27,6 +29,12 @@ export function useDeposit(accountId: string | null): UseDepositReturn {
       // Invalidate balance cache to refresh balance after deposit
       if (accountId) {
         queryClient.invalidateQueries({ queryKey: ['balance', accountId] });
+      }
+    },
+    onError: (error: Error) => {
+      // Handle 401 Unauthorized - token expired or invalid
+      if (isAuthenticationError(error)) {
+        redirectToLogin('Sua sessão expirou. Por favor, faça login novamente');
       }
     },
   });

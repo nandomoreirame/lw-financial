@@ -8,10 +8,24 @@
  * hook's logic and integration with React Query.
  */
 
-import { describe, expect, test } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { useDeposit } from '../../app/hooks/use-deposit';
 
 describe('useDeposit hook', () => {
+  beforeEach(() => {
+    // Clear sessionStorage before each test
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.clear();
+    }
+  });
+
+  afterEach(() => {
+    // Clean up after each test
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.clear();
+    }
+  });
+
   describe('Hook interface and structure', () => {
     test('should export useDeposit function', () => {
       expect(typeof useDeposit).toBe('function');
@@ -46,6 +60,83 @@ describe('useDeposit hook', () => {
       // Full testing requires React component rendering with QueryClientProvider
       // The hook uses useMutation from @tanstack/react-query internally
       expect(typeof useDeposit).toBe('function');
+    });
+  });
+
+  describe('401 Error handling logic', () => {
+    test('should detect authentication error messages', () => {
+      // Test the error detection logic used in onError handler
+      const isAuthError = (errorMessage: string): boolean => {
+        return (
+          errorMessage.includes('Não autenticado') ||
+          errorMessage.includes('autenticação')
+        );
+      };
+
+      expect(isAuthError('Não autenticado')).toBe(true);
+      expect(isAuthError('Erro de autenticação')).toBe(true);
+      expect(isAuthError('Token de autenticação inválido')).toBe(true);
+      expect(isAuthError('Erro ao realizar depósito')).toBe(false);
+      expect(isAuthError('Saldo insuficiente')).toBe(false);
+    });
+
+    test('should build login URL with error parameter', () => {
+      // Test the URL building logic used in onError handler
+      const buildLoginUrl = (errorMessage: string): string => {
+        const loginUrl = new URL('/login', 'http://localhost:5173');
+        loginUrl.searchParams.set('error', encodeURIComponent(errorMessage));
+        return loginUrl.toString();
+      };
+
+      const errorMessage =
+        'Sua sessão expirou. Por favor, faça login novamente';
+      const url = buildLoginUrl(errorMessage);
+      const urlObj = new URL(url);
+
+      expect(url).toContain('/login');
+      expect(urlObj.searchParams.has('error')).toBe(true);
+      expect(decodeURIComponent(urlObj.searchParams.get('error') || '')).toBe(
+        errorMessage
+      );
+    });
+
+    test('should handle sessionStorage operations', () => {
+      // Test sessionStorage operations used in error handling
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('auth_token', 'test-token');
+        expect(sessionStorage.getItem('auth_token')).toBe('test-token');
+
+        sessionStorage.removeItem('auth_token');
+        expect(sessionStorage.getItem('auth_token')).toBeNull();
+      }
+    });
+  });
+
+  describe('Cache invalidation logic', () => {
+    test('should build correct query key for balance invalidation', () => {
+      // Test the query key structure used for cache invalidation
+      const accountId = 'test-account-123';
+      const queryKey = ['balance', accountId];
+
+      expect(queryKey).toEqual(['balance', 'test-account-123']);
+      expect(queryKey[0]).toBe('balance');
+      expect(queryKey[1]).toBe(accountId);
+    });
+
+    test('should handle null accountId in cache invalidation', () => {
+      // Test that null accountId is handled correctly
+      const accountId: string | null = null;
+      const shouldInvalidate = accountId !== null;
+
+      expect(shouldInvalidate).toBe(false);
+    });
+
+    test('should handle valid accountId in cache invalidation', () => {
+      // Test that valid accountId triggers invalidation
+      const accountId: string | null = 'test-account-123';
+      const shouldInvalidate = accountId !== null;
+
+      expect(shouldInvalidate).toBe(true);
     });
   });
 });

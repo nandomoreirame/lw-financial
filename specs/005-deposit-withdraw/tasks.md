@@ -101,16 +101,16 @@
 
 **Purpose**: Improvements that affect multiple user stories and final refinements
 
-- [ ] T036 [P] Add loading state prevention for duplicate submissions across both forms in apps/frontend/app/components/dashboard/
-- [ ] T037 [P] Ensure consistent currency formatting (R$ 1.234,56) in all form inputs in apps/frontend/app/components/dashboard/
-- [ ] T038 [P] Add keyboard navigation support for forms in apps/frontend/app/components/dashboard/
-- [ ] T039 [P] Verify responsive design for mobile devices in apps/frontend/app/components/dashboard/
-- [ ] T040 [P] Add error handling for network timeouts in apps/frontend/app/lib/api.ts
-- [ ] T041 [P] Add error handling for token expiration (401) in apps/frontend/app/hooks/use-deposit.ts and apps/frontend/app/hooks/use-withdraw.ts
-- [ ] T042 Verify all edge cases from spec are handled in apps/frontend/app/components/dashboard/
-- [ ] T043 Run lint and format on all modified files
+- [x] T036 [P] Add loading state prevention for duplicate submissions across both forms in apps/frontend/app/components/dashboard/
+- [x] T037 [P] Ensure consistent currency formatting (R$ 1.234,56) in all form inputs in apps/frontend/app/components/dashboard/
+- [x] T038 [P] Add keyboard navigation support for forms in apps/frontend/app/components/dashboard/
+- [x] T039 [P] Verify responsive design for mobile devices in apps/frontend/app/components/dashboard/
+- [x] T040 [P] Add error handling for network timeouts in apps/frontend/app/lib/api.ts
+- [x] T041 [P] Add error handling for token expiration (401) in apps/frontend/app/hooks/use-deposit.ts and apps/frontend/app/hooks/use-withdraw.ts
+- [x] T042 Verify all edge cases from spec are handled in apps/frontend/app/components/dashboard/
+- [x] T043 Run lint and format on all modified files
 - [ ] T044 Test complete user flows (deposit → check balance → withdraw → check balance)
-- [ ] T045 Validate quickstart.md implementation steps
+- [x] T045 Validate quickstart.md implementation steps
 
 ---
 

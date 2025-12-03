@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@lw-financial/ui';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
+import { CurrencyInput } from './currency-input';
 import { useWithdraw } from '../../hooks/use-withdraw';
 import {
   withdrawFormSchema,
@@ -36,6 +37,7 @@ export function WithdrawForm({
   const [insufficientFundsError, setInsufficientFundsError] = React.useState<
     string | null
   >(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const {
     register,
@@ -43,6 +45,7 @@ export function WithdrawForm({
     formState: { errors },
     reset: resetForm,
     watch,
+    setValue,
   } = useForm<WithdrawFormData>({
     resolver: zodResolver(withdrawFormSchema),
   });
@@ -77,6 +80,11 @@ export function WithdrawForm({
   }, [amountValue, error, insufficientFundsError]);
 
   const onSubmit = async (data: WithdrawFormData) => {
+    // Prevent duplicate submissions
+    if (isSubmitting || isLoading) {
+      return;
+    }
+
     // Clear previous errors
     setInsufficientFundsError(null);
 
@@ -95,6 +103,7 @@ export function WithdrawForm({
       return;
     }
 
+    setIsSubmitting(true);
     try {
       await withdraw(data.amount);
     } catch (err) {
@@ -107,6 +116,8 @@ export function WithdrawForm({
       if (import.meta.env.DEV) {
         console.error('Withdraw error:', err);
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -127,26 +138,21 @@ export function WithdrawForm({
           >
             Valor (R$)
           </label>
-          <input
+          <CurrencyInput
             id="withdraw-amount"
-            type="number"
-            step="0.01"
-            min="0.01"
-            max="999999.99"
-            placeholder="0,00"
+            value={amountValue}
+            onChange={(value) =>
+              setValue('amount', value || 0, { shouldValidate: true })
+            }
+            error={!!errors.amount || !!insufficientFundsError}
+            disabled={isLoading || isSubmitting || currentBalance === undefined}
+            aria-label="Valor do saque em reais"
+          />
+          <input
+            type="hidden"
             {...register('amount', {
               valueAsNumber: true,
             })}
-            className={cn(
-              'flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors',
-              'file:border-0 file:bg-transparent file:text-sm file:font-medium',
-              'placeholder:text-muted-foreground',
-              'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-              'disabled:cursor-not-allowed disabled:opacity-50',
-              (errors.amount || insufficientFundsError) &&
-                'border-destructive focus-visible:ring-destructive'
-            )}
-            disabled={isLoading}
           />
           {errors.amount && (
             <p className="text-sm text-destructive">{errors.amount.message}</p>
@@ -158,7 +164,7 @@ export function WithdrawForm({
 
         <Button
           type="submit"
-          disabled={isLoading || currentBalance === undefined}
+          disabled={isLoading || isSubmitting || currentBalance === undefined}
           className="w-full gap-2"
           aria-label="Sacar"
         >
