@@ -254,3 +254,87 @@ export async function deposit(amount: number): Promise<DepositResponse> {
     throw new Error('Erro ao realizar depósito. Tente novamente.');
   }
 }
+
+/**
+ * Performs withdraw request to backend
+ * The account is automatically identified from the JWT token
+ * @param amount - Withdraw amount (0.01 to 999999.99)
+ * @returns Withdraw response with account ID and new balance
+ */
+export async function withdraw(amount: number): Promise<WithdrawResponse> {
+  const token = sessionStorage.getItem('auth_token');
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado');
+  }
+
+  try {
+    const response = await fetchWithTimeout(
+      `${API_BASE_URL}/v1/event`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          type: 'withdraw',
+          amount,
+        }),
+      },
+      DEFAULT_TIMEOUT_MS
+    );
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Não autenticado');
+      }
+
+      if (response.status === 400) {
+        const error: ErrorResponse = await response.json().catch(() => ({
+          error: 'Erro na requisição',
+        }));
+        const errorMessage = error.error || 'Erro na requisição';
+
+        // Check if error message specifically mentions insufficient funds
+        // Backend should return specific error message for insufficient funds
+        const lowerMessage = errorMessage.toLowerCase();
+        if (
+          lowerMessage.includes('insufficient funds') ||
+          lowerMessage === 'saldo insuficiente' ||
+          lowerMessage.includes('saldo insuficiente')
+        ) {
+          throw new Error('Saldo insuficiente');
+        }
+
+        // For other 400 errors (validation, etc.), throw generic error
+        throw new Error(errorMessage);
+      }
+
+      const error: ErrorResponse = await response.json().catch(() => ({
+        error: 'Erro ao realizar saque',
+      }));
+      throw new Error(error.error || 'Erro ao realizar saque');
+    }
+
+    const data = await response.json();
+
+    // Validate response structure
+    if (!data || typeof data !== 'object' || !data.origin) {
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    if (typeof data.origin.balance !== 'number' || !data.origin.id) {
+      throw new Error('Dados de resposta inválidos');
+    }
+
+    return data as WithdrawResponse;
+  } catch (error) {
+    // Re-throw with user-friendly message if it's already an Error
+    if (error instanceof Error) {
+      throw error;
+    }
+    // Fallback for unexpected errors
+    throw new Error('Erro ao realizar saque. Tente novamente.');
+  }
+}

@@ -5,6 +5,7 @@
 import * as React from 'react';
 import { BalanceCard } from '../components/dashboard/balance-card';
 import { DepositForm } from '../components/dashboard/deposit-form';
+import { WithdrawForm } from '../components/dashboard/withdraw-form';
 import { useBalance } from '../hooks/use-balance';
 import {
   checkAuthentication,
@@ -131,7 +132,10 @@ export default function Dashboard({ loaderData }: Route.ComponentProps) {
           isRefreshing={isRefreshing}
         />
 
-        <DepositForm accountId={accountId} />
+        <div className="grid gap-6 md:grid-cols-2">
+          <DepositForm accountId={accountId} />
+          <WithdrawForm accountId={accountId} currentBalance={balance} />
+        </div>
       </div>
     </div>
   );

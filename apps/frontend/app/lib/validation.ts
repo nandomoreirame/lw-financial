@@ -53,3 +53,12 @@ export const depositFormSchema = z.object({
 });
 
 export type DepositFormData = z.infer<typeof depositFormSchema>;
+
+/**
+ * Withdraw form schema
+ */
+export const withdrawFormSchema = z.object({
+  amount: transactionAmountSchema,
+});
+
+export type WithdrawFormData = z.infer<typeof withdrawFormSchema>;
