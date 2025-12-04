@@ -96,6 +96,7 @@ model Verification {
 
 model BankAccount {
   id        String   @id @default(cuid())
+  code      String?  @unique
   balance   Decimal  @db.Decimal(10, 2)
   userId    String?
   user      User?    @relation("BankAccounts", fields: [userId], references: [id], onDelete: SetNull)
@@ -106,6 +107,7 @@ model BankAccount {
   destinationTransactions Transaction[] @relation("DestinationAccount")
 
   @@index([userId])
+  @@index([code])
   @@map("bank_account")
 }
 
