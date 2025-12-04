@@ -12,7 +12,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "types": ["bun-types"]
   },
   "include": ["**/*", "lib/**/*", "ui/**/*", "styles/**/*"],
   "exclude": ["node_modules", "dist"]

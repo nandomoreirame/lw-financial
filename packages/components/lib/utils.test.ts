@@ -182,7 +182,7 @@ describe('cn function', () => {
     });
 
     test('should handle conditional variant classes', () => {
-      const variant = 'primary';
+      const variant: 'primary' | 'secondary' = 'primary';
       const result = cn(
         'base-class',
         variant === 'primary' && 'bg-blue-500',
