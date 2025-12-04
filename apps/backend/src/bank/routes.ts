@@ -40,6 +40,9 @@ export async function bankRoutes(fastify: FastifyInstance) {
       schema: balanceSchema,
       preHandler: authenticateRequest,
     },
+    // Type assertion needed due to incompatibility between explicit handler types
+    // and Fastify's generic route handler types when using schemas
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     balanceHandler as any
   );
 
@@ -58,6 +61,9 @@ export async function bankRoutes(fastify: FastifyInstance) {
       schema: createAccountSchema,
       preHandler: authenticateRequest,
     },
+    // Type assertion needed due to incompatibility between explicit handler types
+    // and Fastify's generic route handler types when using schemas
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createAccountHandler as any
   );
 
@@ -67,6 +73,9 @@ export async function bankRoutes(fastify: FastifyInstance) {
       schema: accountByCodeSchema,
       preHandler: authenticateRequest,
     },
+    // Type assertion needed due to incompatibility between explicit handler types
+    // and Fastify's generic route handler types when using schemas
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     accountByCodeHandler as any
   );
 
@@ -88,6 +97,9 @@ export async function bankRoutes(fastify: FastifyInstance) {
       schema: transactionsSchema,
       preHandler: authenticateRequest,
     },
+    // Type assertion needed due to incompatibility between explicit handler types
+    // and Fastify's generic route handler types when using schemas
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transactionsHandler as any
   );
   fastify.log.info('GET /transactions route registered successfully');
