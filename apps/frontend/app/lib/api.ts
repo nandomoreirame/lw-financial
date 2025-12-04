@@ -71,6 +71,17 @@ export interface LoginResponse {
   token: string;
 }
 
+export interface SignupRequest {
+  username: string;
+  email: string;
+  name: string;
+  pass: string;
+}
+
+export interface SignupResponse {
+  token: string;
+}
+
 export interface ErrorResponse {
   error: string;
   code?: string;
@@ -113,6 +124,63 @@ export async function login(
       throw error;
     }
     throw new Error('Erro ao fazer login. Tente novamente.');
+  }
+}
+
+/**
+ * Performs signup request to backend
+ * Includes timeout and network error handling
+ */
+export async function signup(
+  username: string,
+  email: string,
+  name: string,
+  password: string
+): Promise<SignupResponse> {
+  try {
+    const response = await fetchWithTimeout(
+      `${API_BASE_URL}/v1/signup`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          email,
+          name,
+          pass: password,
+        } as SignupRequest),
+      },
+      DEFAULT_TIMEOUT_MS
+    );
+
+    if (!response.ok) {
+      const error: ErrorResponse = await response.json().catch(() => ({
+        error: 'Erro ao criar conta',
+      }));
+
+      // Tratar erros específicos
+      if (response.status === 409) {
+        const lowerError = error.error.toLowerCase();
+        if (lowerError.includes('username')) {
+          throw new Error('Username já está em uso');
+        }
+        if (lowerError.includes('email')) {
+          throw new Error('Email já está em uso');
+        }
+        throw new Error(error.error || 'Usuário ou email já existe');
+      }
+
+      throw new Error(error.error || 'Erro ao criar conta');
+    }
+
+    return response.json() as Promise<SignupResponse>;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Erro ao criar conta. Tente novamente.');
   }
 }
 

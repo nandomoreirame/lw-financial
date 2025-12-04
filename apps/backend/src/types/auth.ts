@@ -9,6 +9,17 @@ export interface LoginResponse {
   token: string;
 }
 
+export interface SignupRequest {
+  username: string;
+  email: string;
+  name: string;
+  pass: string;
+}
+
+export interface SignupResponse {
+  token: string;
+}
+
 export interface ErrorResponse {
   error: string;
 }

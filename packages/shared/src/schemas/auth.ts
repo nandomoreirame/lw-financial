@@ -13,3 +13,23 @@ export const loginSchema = z.object({
 });
 
 export type LoginRequest = z.infer<typeof loginSchema>;
+
+export const signupSchema = z.object({
+  username: z
+    .string()
+    .min(1, 'Username é obrigatório')
+    .min(3, 'Username deve ter no mínimo 3 caracteres')
+    .max(20, 'Username deve ter no máximo 20 caracteres')
+    .regex(/^[a-zA-Z0-9]+$/, 'Username deve conter apenas letras e números'),
+  email: z
+    .string()
+    .min(1, 'Email é obrigatório')
+    .email('Formato de email inválido'),
+  name: z.string().min(1, 'Nome é obrigatório'),
+  pass: z
+    .string()
+    .min(1, 'Senha é obrigatória')
+    .min(6, 'Senha deve ter no mínimo 6 caracteres'),
+});
+
+export type SignupRequest = z.infer<typeof signupSchema>;
