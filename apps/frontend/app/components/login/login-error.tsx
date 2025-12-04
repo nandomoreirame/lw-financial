@@ -18,7 +18,6 @@ export function LoginError({ error, className }: LoginErrorProps) {
     return null;
   }
 
-  // Map backend errors to user-friendly messages
   const getErrorMessage = (err: string): string => {
     if (err.toLowerCase().includes('invalid credentials')) {
       return 'Credenciais inválidas. Verifique seu username e senha.';
@@ -32,7 +31,6 @@ export function LoginError({ error, className }: LoginErrorProps) {
     if (err.toLowerCase().includes('internal')) {
       return 'Erro interno do servidor. Tente novamente mais tarde.';
     }
-    // Return generic message for unknown errors
     return 'Erro ao fazer login. Tente novamente.';
   };
 

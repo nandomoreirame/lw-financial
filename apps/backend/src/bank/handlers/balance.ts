@@ -18,10 +18,8 @@ export async function balanceHandler(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<BalanceResponse | number | void> {
-  // Type assertion: authenticateRequest middleware ensures request.user exists
   const authRequest = request as AuthenticatedRequest;
   try {
-    // Get userId from authenticated request (from JWT token)
     const userId = authRequest.user.userId;
 
     if (!userId) {
@@ -30,11 +28,9 @@ export async function balanceHandler(
         .send({ error: 'User information not found in token' });
     }
 
-    // Get balance using userId (supports multiple accounts per user)
     const balance = await accountService.getBalanceByUserId(userId);
     return reply.status(200).send(balance);
   } catch (error) {
-    // Log unexpected errors
     authRequest.log.error(
       { err: error },
       'Unexpected error in balance handler'

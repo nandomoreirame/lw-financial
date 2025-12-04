@@ -13,14 +13,12 @@ describe('Protected Routes - Integration Tests', () => {
     process.env.BETTER_AUTH_SECRET = TEST_SECRET;
     fastify = Fastify({ logger: false });
 
-    // Register a protected route for testing
     fastify.get(
       '/api/protected',
       {
         preHandler: authenticateRequest,
       },
       async (request: AuthenticatedRequest, _reply) => {
-        // Type assertion: authenticateRequest middleware ensures request.user exists
         const authRequest = request as AuthenticatedRequest;
         return {
           message: 'Protected resource accessed',
@@ -30,15 +28,12 @@ describe('Protected Routes - Integration Tests', () => {
       }
     );
 
-    // Add error handler for authentication errors
     fastify.setErrorHandler((error, request, reply) => {
-      // Handle authentication errors
       if (error.statusCode === 401 || error.statusCode === 403) {
         return reply.status(error.statusCode).send({
           error: error.message,
         });
       }
-      // Let Fastify handle other errors
       reply.status(500).send({ error: 'Internal server error' });
     });
   });
@@ -52,7 +47,6 @@ describe('Protected Routes - Integration Tests', () => {
     await fastify.close();
   });
 
-  // T050 [US1] Test protected route without token returns 401
   test('T050 [US1] - Protected route without token returns 401', async () => {
     await fastify.ready();
 
@@ -67,7 +61,6 @@ describe('Protected Routes - Integration Tests', () => {
     expect(body).toEqual({ error: 'Authentication required' });
   });
 
-  // T051 [US2] Test protected route with valid token returns route response
   test('T051 [US2] - Protected route with valid token returns route response', async () => {
     await fastify.ready();
 
@@ -97,11 +90,9 @@ describe('Protected Routes - Integration Tests', () => {
     expect(body.username).toBe('testuser');
   });
 
-  // T052 [US2] Test protected route with invalid token returns 401
   test('T052 [US2] - Protected route with invalid token returns 401', async () => {
     await fastify.ready();
 
-    // Test with expired token
     const expiredToken = jwt.sign(
       {
         userId: 'user123',
@@ -111,7 +102,6 @@ describe('Protected Routes - Integration Tests', () => {
         exp: Math.floor(Date.now() / 1000) - 3600,
       },
       TEST_SECRET
-      // Don't use expiresIn when exp is already in payload
     );
 
     const response = await fastify.inject({
@@ -128,7 +118,6 @@ describe('Protected Routes - Integration Tests', () => {
     expect(body).toEqual({ error: 'Invalid or expired token' });
   });
 
-  // T052 [US2] Test with malformed token
   test('T052 [US2] - Protected route with malformed token returns 401', async () => {
     await fastify.ready();
 
@@ -146,7 +135,6 @@ describe('Protected Routes - Integration Tests', () => {
     expect(body).toEqual({ error: 'Invalid or expired token' });
   });
 
-  // T052 [US2] Test with wrong signature
   test('T052 [US2] - Protected route with wrong signature returns 401', async () => {
     await fastify.ready();
 
@@ -175,7 +163,6 @@ describe('Protected Routes - Integration Tests', () => {
     expect(body).toEqual({ error: 'Invalid or expired token' });
   });
 
-  // T053 Test middleware performance is <50ms
   test('T053 - Middleware performance is <50ms', async () => {
     await fastify.ready();
 
@@ -204,10 +191,9 @@ describe('Protected Routes - Integration Tests', () => {
     const duration = endTime - startTime;
 
     expect(response.statusCode).toBe(200);
-    expect(duration).toBeLessThan(50); // Performance target: <50ms
+    expect(duration).toBeLessThan(50);
   });
 
-  // Additional test: Case-insensitive header name
   test('Case-insensitive Authorization header name', async () => {
     await fastify.ready();
 
@@ -222,12 +208,11 @@ describe('Protected Routes - Integration Tests', () => {
       { expiresIn: '1h' }
     );
 
-    // Fastify normalizes headers to lowercase, but test with different case
     const response = await fastify.inject({
       method: 'GET',
       url: '/api/protected',
       headers: {
-        Authorization: `Bearer ${validToken}`, // Capital A
+        Authorization: `Bearer ${validToken}`,
       },
     });
 
@@ -236,7 +221,6 @@ describe('Protected Routes - Integration Tests', () => {
     expect(body.userId).toBe('user123');
   });
 
-  // Additional test: Empty token value
   test('Empty token value after Bearer prefix', async () => {
     await fastify.ready();
 
@@ -253,7 +237,6 @@ describe('Protected Routes - Integration Tests', () => {
     expect(body).toEqual({ error: 'Invalid authorization format' });
   });
 
-  // Additional test: Whitespace handling
   test('Whitespace after Bearer prefix is handled correctly', async () => {
     await fastify.ready();
 
@@ -268,12 +251,11 @@ describe('Protected Routes - Integration Tests', () => {
       { expiresIn: '1h' }
     );
 
-    // Token with extra whitespace should be trimmed and work
     const response = await fastify.inject({
       method: 'GET',
       url: '/api/protected',
       headers: {
-        authorization: `Bearer   ${validToken}   `, // Extra spaces
+        authorization: `Bearer   ${validToken}   `,
       },
     });
 

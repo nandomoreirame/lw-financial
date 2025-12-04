@@ -13,14 +13,12 @@ import { useTransactions } from '../../app/hooks/use-transactions';
 
 describe('useTransactions hook', () => {
   beforeEach(() => {
-    // Clear sessionStorage before each test
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.clear();
     }
   });
 
   afterEach(() => {
-    // Clean up after each test
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.clear();
     }
@@ -32,39 +30,24 @@ describe('useTransactions hook', () => {
     });
 
     test('should accept no parameters', () => {
-      // This test verifies the function signature
-      // Actual hook behavior requires React component testing
       expect(useTransactions.length).toBe(0);
     });
   });
 
   describe('Hook return type', () => {
     test('should return object with expected properties', () => {
-      // Note: This is a type-level test
-      // Actual runtime testing requires React component rendering
-      // The hook should return:
-      // - transactions: Transaction[] | undefined
-      // - isLoading: boolean
-      // - error: Error | null
-      // - refetch: function
-
-      // Verify the function exists and can be called
       expect(typeof useTransactions).toBe('function');
     });
   });
 
   describe('Integration with React Query', () => {
     test('should use React Query query', () => {
-      // This test verifies that the hook is structured correctly
-      // Full testing requires React component rendering with QueryClientProvider
-      // The hook uses useQuery from @tanstack/react-query internally
       expect(typeof useTransactions).toBe('function');
     });
   });
 
   describe('Query key structure', () => {
     test('should use correct query key for transactions', () => {
-      // Test the query key structure used for cache management
       const queryKey = ['transactions'];
 
       expect(queryKey).toEqual(['transactions']);
@@ -73,7 +56,6 @@ describe('useTransactions hook', () => {
     });
 
     test('should build query key correctly for cache invalidation', () => {
-      // Test the query key used in refetch function
       const queryKey = ['transactions'];
 
       expect(queryKey).toEqual(['transactions']);
@@ -82,7 +64,6 @@ describe('useTransactions hook', () => {
 
   describe('Cache invalidation logic', () => {
     test('should build correct query key for transactions cache invalidation', () => {
-      // Test the query key structure used for cache invalidation
       const queryKey = ['transactions'];
 
       expect(queryKey).toEqual(['transactions']);
@@ -90,8 +71,6 @@ describe('useTransactions hook', () => {
     });
 
     test('should handle cache invalidation correctly', () => {
-      // Test that cache invalidation logic is structured correctly
-      // The hook should invalidate queries with key ['transactions']
       const queryKey = ['transactions'];
 
       expect(Array.isArray(queryKey)).toBe(true);
@@ -101,7 +80,6 @@ describe('useTransactions hook', () => {
 
   describe('Transaction data structure', () => {
     test('should handle transaction array structure', () => {
-      // Test the expected transaction data structure
       const mockTransaction = {
         id: 'tx-123',
         type: 'DEPOSIT' as const,
@@ -156,7 +134,6 @@ describe('useTransactions hook', () => {
 
   describe('Loading and error states', () => {
     test('should handle loading state correctly', () => {
-      // Test that loading state is properly typed
       const isLoading: boolean = true;
       const isNotLoading: boolean = false;
 
@@ -167,7 +144,6 @@ describe('useTransactions hook', () => {
     });
 
     test('should handle error state correctly', () => {
-      // Test that error state can be null or Error object
       const errorNull: Error | null = null;
       const errorObject: Error | null = new Error('Test error');
 
@@ -177,7 +153,6 @@ describe('useTransactions hook', () => {
     });
 
     test('should handle undefined transactions state', () => {
-      // Test that transactions can be undefined during initial load
       const transactions: unknown[] | undefined = undefined;
 
       expect(transactions).toBeUndefined();
@@ -186,21 +161,16 @@ describe('useTransactions hook', () => {
 
   describe('Refetch function structure', () => {
     test('should have refetch function with correct signature', () => {
-      // Test that refetch function exists and is callable
-      const refetch = () => {
-        // Mock refetch implementation
-      };
+      const refetch = () => {};
 
       expect(typeof refetch).toBe('function');
-      expect(refetch.length).toBe(0); // No parameters
+      expect(refetch.length).toBe(0);
     });
 
     test('should handle refetch callback dependencies', () => {
-      // Test that refetch uses useCallback with correct dependencies
       const queryClient = { invalidateQueries: () => {} };
       const queryKey = ['transactions'];
 
-      // Verify structure
       expect(Array.isArray(queryKey)).toBe(true);
       expect(typeof queryClient.invalidateQueries).toBe('function');
     });
@@ -208,14 +178,12 @@ describe('useTransactions hook', () => {
 
   describe('Stale time configuration', () => {
     test('should use staleTime of 0 for always refetch', () => {
-      // Test that staleTime is set to 0 for always getting latest transactions
       const staleTime = 0;
 
       expect(staleTime).toBe(0);
     });
 
     test('should configure retry count correctly', () => {
-      // Test that retry is set to 1
       const retry = 1;
 
       expect(retry).toBe(1);

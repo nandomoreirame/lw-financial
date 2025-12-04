@@ -53,7 +53,6 @@ export const PasswordResetEmail = ({
   );
 };
 
-// Export default para React Email CLI
 export default function PasswordResetEmailDefault() {
   return (
     <PasswordResetEmail
@@ -66,7 +65,6 @@ export default function PasswordResetEmailDefault() {
   );
 }
 
-// PreviewProps para React Email CLI
 PasswordResetEmailDefault.PreviewProps = {
   userName: 'Maria Santos',
   userEmail: 'maria.santos@lwfinancial.com',

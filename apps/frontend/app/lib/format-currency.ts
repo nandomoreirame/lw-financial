@@ -10,7 +10,6 @@
  * @returns Formatted currency string (e.g., "R$ 1.234,56")
  */
 export function formatCurrency(value: number): string {
-  // Validate input to handle NaN, Infinity, and invalid numbers
   if (!Number.isFinite(value)) {
     return 'R$ 0,00';
   }

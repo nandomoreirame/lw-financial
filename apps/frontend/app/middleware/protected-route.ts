@@ -20,11 +20,9 @@ function parseCookies(cookieHeader: string): Record<string, string> {
       if (eqIndex === -1) return acc;
       const key = cookie.substring(0, eqIndex).trim();
       const value = cookie.substring(eqIndex + 1).trim();
-      // Handle URL-encoded values and values containing '='
       try {
         acc[key] = decodeURIComponent(value);
       } catch {
-        // If decodeURIComponent fails, use raw value
         acc[key] = value;
       }
       return acc;
@@ -44,21 +42,17 @@ export interface AuthCheckResult {
  * Can be used in route loaders to protect routes
  */
 export function checkAuthentication(request: Request): AuthCheckResult {
-  // Try to get token from sessionStorage (client-side)
-  // In server-side, token should come from httpOnly cookie
   const isServerSide = typeof window === 'undefined';
 
   let token: string | null = null;
 
   if (isServerSide) {
-    // Server-side: get token from cookie
     const cookieHeader = request.headers.get('Cookie');
     if (cookieHeader) {
       const cookies = parseCookies(cookieHeader);
       token = cookies['auth_token'] || null;
     }
   } else {
-    // Client-side: get token from sessionStorage
     token = sessionStorage.getItem('auth_token');
   }
 
@@ -97,7 +91,6 @@ export function requireAuth(request: Request): void {
   if (!authCheck.isAuthenticated) {
     const loginUrl = new URL('/login', request.url);
 
-    // Add error message as query parameter if available
     if (authCheck.error) {
       loginUrl.searchParams.set('error', encodeURIComponent(authCheck.error));
     }

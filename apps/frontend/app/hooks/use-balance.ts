@@ -35,7 +35,7 @@ export function useBalance(accountId: string | null): UseBalanceReturn {
       return getBalance(accountId);
     },
     enabled: !!accountId,
-    staleTime: 0, // Always refetch to get latest balance
+    staleTime: 0,
     retry: 1,
   });
 

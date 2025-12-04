@@ -29,20 +29,18 @@ export function useTransactions(): UseTransactionsReturn {
     queryFn: async () => {
       try {
         const result = await getTransactions();
-        // Log for debugging (only in development)
         if (import.meta.env.DEV) {
           console.log('[useTransactions] Fetched transactions:', result);
         }
         return result;
       } catch (err) {
-        // Log error for debugging (only in development)
         if (import.meta.env.DEV) {
           console.error('[useTransactions] Error fetching transactions:', err);
         }
         throw err;
       }
     },
-    staleTime: 0, // Always refetch to get latest transactions
+    staleTime: 0,
     retry: 1,
   });
 

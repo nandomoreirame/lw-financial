@@ -25,10 +25,8 @@ export async function transactionsHandler(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<TransactionResponse[] | void> {
-  // Type assertion: authenticateRequest middleware ensures request.user exists
   const authRequest = request as AuthenticatedRequest;
   try {
-    // Get userId from authenticated request (from JWT token)
     const userId = authRequest.user.userId;
 
     if (!userId) {
@@ -37,7 +35,6 @@ export async function transactionsHandler(
         .send({ error: 'User information not found in token' });
     }
 
-    // Get user's bank accounts to find all related transactions
     const userAccounts = await prisma.bankAccount.findMany({
       where: {
         userId: userId,
@@ -49,28 +46,19 @@ export async function transactionsHandler(
 
     const accountIds = userAccounts.map((account) => account.id);
 
-    // Build query conditions
-    // Include transactions where:
-    // 1. userId matches (direct user association) - this is the primary way
-    // 2. originAccountId matches user's accounts (withdrawals/transfers from user's accounts)
-    // 3. destinationAccountId matches user's accounts (deposits/transfers to user's accounts)
     const whereConditions: Array<{
       userId?: string;
       originAccountId?: { in: string[] };
       destinationAccountId?: { in: string[] };
     }> = [];
 
-    // Always include userId condition
     whereConditions.push({ userId: userId });
 
-    // Add account-based conditions if user has accounts
     if (accountIds.length > 0) {
       whereConditions.push({ originAccountId: { in: accountIds } });
       whereConditions.push({ destinationAccountId: { in: accountIds } });
     }
 
-    // Fetch transactions for the authenticated user
-    // Limit to 20 most recent, ordered by createdAt DESC
     const transactions = await prisma.transaction.findMany({
       where: {
         OR: whereConditions,
@@ -81,7 +69,6 @@ export async function transactionsHandler(
       take: 20,
     });
 
-    // Log for debugging (only in development)
     if (process.env.NODE_ENV === 'development') {
       authRequest.log.info(
         {
@@ -95,7 +82,6 @@ export async function transactionsHandler(
       );
     }
 
-    // Transform Prisma transactions to API response format
     const response: TransactionResponse[] = transactions.map((tx) => ({
       id: tx.id,
       type: tx.type,
@@ -106,21 +92,13 @@ export async function transactionsHandler(
       createdAt: tx.createdAt.toISOString(),
     }));
 
-    // Get user's current balance
     const currentBalance = await accountService.getBalanceByUserId(userId);
 
-    // Add initial balance transaction if balance is greater than zero
-    // This represents the starting balance before any transactions
     if (currentBalance > 0) {
-      // Calculate initial balance: current balance minus net effect of all transactions
-      // For deposits to user's account: add to balance
-      // For withdrawals from user's account: subtract from balance
-      // For transfers: consider if user's account is origin (subtract) or destination (add)
       let transactionNetEffect = 0;
       transactions.forEach((tx) => {
         const amount = Number(tx.amount);
         if (tx.type === 'DEPOSIT') {
-          // Deposit increases balance
           if (
             accountIds.length > 0 &&
             tx.destinationAccountId &&
@@ -129,7 +107,6 @@ export async function transactionsHandler(
             transactionNetEffect += amount;
           }
         } else if (tx.type === 'WITHDRAW') {
-          // Withdrawal decreases balance
           if (
             accountIds.length > 0 &&
             tx.originAccountId &&
@@ -138,7 +115,6 @@ export async function transactionsHandler(
             transactionNetEffect -= amount;
           }
         } else if (tx.type === 'TRANSFER') {
-          // Transfer: subtract if user's account is origin, add if destination
           if (accountIds.length > 0) {
             if (tx.originAccountId && accountIds.includes(tx.originAccountId)) {
               transactionNetEffect -= amount;
@@ -153,19 +129,14 @@ export async function transactionsHandler(
         }
       });
 
-      // Initial balance = current balance - net effect of all transactions
       const initialBalance = currentBalance - transactionNetEffect;
 
-      // Only add initial balance if it's greater than zero
       if (initialBalance > 0) {
-        // Get the oldest transaction date to set initial balance before it
         const oldestTransactionDate =
           transactions.length > 0
             ? new Date(transactions[transactions.length - 1].createdAt)
             : new Date();
 
-        // Set initial balance date to 1 second before the oldest transaction
-        // or current date if no transactions exist
         const initialBalanceDate = new Date(
           oldestTransactionDate.getTime() - 1000
         );
@@ -180,21 +151,16 @@ export async function transactionsHandler(
           createdAt: initialBalanceDate.toISOString(),
         };
 
-        // Add initial balance at the end (oldest position) since we sort by DESC
-        // When sorted DESC, this will appear after all other transactions
         response.push(initialBalanceTransaction);
       }
     }
 
-    // Sort by createdAt DESC (most recent first)
-    // Initial balance will be at the end (oldest)
     response.sort((a, b) => {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
     return reply.status(200).send(response);
   } catch (error) {
-    // Log unexpected errors
     authRequest.log.error(
       { err: error },
       'Unexpected error in transactions handler'

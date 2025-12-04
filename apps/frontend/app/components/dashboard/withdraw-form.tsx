@@ -55,7 +55,6 @@ export function WithdrawForm({
     },
   });
 
-  // Show success toast and reset form after successful withdrawal
   React.useEffect(() => {
     if (isSuccess) {
       toast.success('Saque realizado com sucesso!');
@@ -65,14 +64,12 @@ export function WithdrawForm({
     }
   }, [isSuccess, form, reset]);
 
-  // Show error toast for API errors
   React.useEffect(() => {
     if (error && !insufficientFundsError) {
       toast.error(error.message || 'Erro ao realizar saque. Tente novamente.');
     }
   }, [error, insufficientFundsError]);
 
-  // Clear insufficient funds error when amount changes or when other errors occur
   const amountValue = form.watch('amount');
   React.useEffect(() => {
     if (insufficientFundsError && (amountValue !== undefined || error)) {
@@ -81,16 +78,12 @@ export function WithdrawForm({
   }, [amountValue, error, insufficientFundsError]);
 
   const onSubmit = async (data: WithdrawFormData) => {
-    // Prevent duplicate submissions
     if (isSubmitting || isLoading) {
       return;
     }
 
-    // Clear previous errors
     setInsufficientFundsError(null);
 
-    // Client-side balance check before submission (UX only - backend always validates)
-    // Prevent submission if balance is not yet loaded
     if (currentBalance === undefined) {
       const errorMessage =
         'Aguarde o carregamento do saldo antes de realizar o saque';
@@ -99,7 +92,6 @@ export function WithdrawForm({
       return;
     }
 
-    // Check if amount exceeds available balance
     if (data.amount > currentBalance) {
       const errorMessage = 'Saldo insuficiente para saque';
       setInsufficientFundsError(errorMessage);
@@ -111,13 +103,10 @@ export function WithdrawForm({
     try {
       await withdraw(data.amount);
     } catch (err) {
-      // Check if it's an insufficient funds error
       if (err instanceof Error && err.message.includes('insuficiente')) {
         setInsufficientFundsError(err.message);
         toast.error(err.message);
       }
-      // Other errors are handled by the hook and shown via toast in useEffect
-      // Only log in development to avoid exposing sensitive information
       if (import.meta.env.DEV) {
         console.error('Withdraw error:', err);
       }

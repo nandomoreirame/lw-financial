@@ -18,28 +18,22 @@ describe('TransactionHistory component', () => {
     });
 
     test('should be a React function component', () => {
-      // Verify it's a function (React function component)
       expect(typeof TransactionHistory).toBe('function');
     });
   });
 
   describe('Component structure', () => {
     test('should accept no props', () => {
-      // Verify function signature accepts no parameters
-      // Actual prop validation requires React component testing
       expect(TransactionHistory.length).toBe(0);
     });
   });
 
   describe('Integration with useTransactions hook', () => {
     test('should use useTransactions hook for data fetching', () => {
-      // Test that component integrates with useTransactions hook
-      // The component imports and uses useTransactions hook
       expect(typeof TransactionHistory).toBe('function');
     });
 
     test('should access transactions data from hook', () => {
-      // Test that transactions data structure is correct
       const mockTransactions = [
         {
           id: 'tx-1',
@@ -60,13 +54,11 @@ describe('TransactionHistory component', () => {
 
   describe('Loading state handling', () => {
     test('should display loading skeleton when isLoading is true', () => {
-      // Test that loading state triggers skeleton display
       const isLoading = true;
       expect(isLoading).toBe(true);
     });
 
     test('should show loading indicators during fetch', () => {
-      // Test that loading indicators are displayed
       const showLoading = true;
       expect(showLoading).toBe(true);
     });
@@ -74,14 +66,12 @@ describe('TransactionHistory component', () => {
 
   describe('Error state handling', () => {
     test('should display error message when error exists', () => {
-      // Test that error state displays error message
       const error = { message: 'Erro ao buscar transações' };
       expect(error).toBeTruthy();
       expect(error.message).toBe('Erro ao buscar transações');
     });
 
     test('should use default error message when error message is missing', () => {
-      // Test fallback error message
       const error = { message: '' };
       const defaultMessage =
         'Erro ao buscar histórico de transações. Tente novamente.';
@@ -93,34 +83,29 @@ describe('TransactionHistory component', () => {
 
   describe('Empty state handling', () => {
     test('should display empty state when no transactions', () => {
-      // Test that empty state is displayed
       const transactions: unknown[] = [];
       const isEmpty = transactions.length === 0;
       expect(isEmpty).toBe(true);
     });
 
     test('should display empty state when transactions is null', () => {
-      // Test that empty state handles null transactions
       const transactions = null;
       const isEmpty = !transactions || transactions.length === 0;
       expect(isEmpty).toBe(true);
     });
 
     test('should display empty state when transactions is undefined', () => {
-      // Test that empty state handles undefined transactions
       const transactions = undefined;
       const isEmpty = !transactions || transactions?.length === 0;
       expect(isEmpty).toBe(true);
     });
 
     test('should show empty message when transactions array is empty', () => {
-      // Test that empty message is displayed
       const emptyMessage = 'Nenhuma transação encontrada';
       expect(emptyMessage).toBe('Nenhuma transação encontrada');
     });
 
     test('should show empty description with helpful message', () => {
-      // Test that empty description provides helpful context
       const emptyDescription =
         'Suas transações aparecerão aqui quando você realizar depósitos, saques ou transferências.';
       expect(emptyDescription).toContain('depósitos');
@@ -129,7 +114,6 @@ describe('TransactionHistory component', () => {
     });
 
     test('should use Empty component from Shadcn UI', () => {
-      // Test that Empty component structure is correct
       const emptyComponentStructure = {
         hasEmpty: true,
         hasEmptyHeader: true,
@@ -145,13 +129,11 @@ describe('TransactionHistory component', () => {
     });
 
     test('should use ReceiptIcon for empty state', () => {
-      // Test that ReceiptIcon is used for transaction context
       const iconName = 'ReceiptIcon';
       expect(iconName).toBe('ReceiptIcon');
     });
 
     test('should apply border-0 class to Empty component', () => {
-      // Test that Empty component has border-0 to avoid duplicate borders
       const emptyClassName = 'border-0';
       expect(emptyClassName).toBe('border-0');
     });
@@ -159,7 +141,6 @@ describe('TransactionHistory component', () => {
 
   describe('Transaction display logic', () => {
     test('should format transaction type in Portuguese', () => {
-      // Test that transaction types are formatted correctly
       const typeLabels = {
         DEPOSIT: 'Depósito',
         WITHDRAW: 'Saque',
@@ -174,7 +155,6 @@ describe('TransactionHistory component', () => {
     });
 
     test('should format transaction amount as currency', () => {
-      // Test that amounts are formatted as currency
       const amount = 1234.56;
       const formattedAmount = `R$ ${amount.toLocaleString('pt-BR', {
         minimumFractionDigits: 2,
@@ -186,7 +166,6 @@ describe('TransactionHistory component', () => {
     });
 
     test('should format transaction date/time correctly', () => {
-      // Test that dates are formatted correctly
       const date = new Date('2025-12-03T14:30:00.000Z');
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -201,7 +180,6 @@ describe('TransactionHistory component', () => {
 
   describe('Transaction item rendering', () => {
     test('should render transaction items with correct structure', () => {
-      // Test that transaction items have correct structure
       const transaction = {
         id: 'tx-1',
         type: 'DEPOSIT' as const,
@@ -216,7 +194,6 @@ describe('TransactionHistory component', () => {
     });
 
     test('should apply correct color based on transaction type', () => {
-      // Test that colors are applied based on type
       const getColor = (type: string) => {
         if (type === 'DEPOSIT' || type === 'INITIAL_BALANCE') return 'green';
         if (type === 'WITHDRAW') return 'red';
@@ -230,7 +207,6 @@ describe('TransactionHistory component', () => {
     });
 
     test('should display sign prefix for deposit, initial balance and withdraw', () => {
-      // Test that signs are displayed correctly
       const formatAmount = (type: string, amount: string) => {
         if (type === 'DEPOSIT' || type === 'INITIAL_BALANCE')
           return `+${amount}`;
@@ -247,7 +223,6 @@ describe('TransactionHistory component', () => {
 
   describe('Transaction list rendering', () => {
     test('should render all transactions in list', () => {
-      // Test that all transactions are rendered
       const transactions = [
         { id: 'tx-1', type: 'DEPOSIT' as const, amount: '100.00' },
         { id: 'tx-2', type: 'WITHDRAW' as const, amount: '50.00' },
@@ -257,7 +232,6 @@ describe('TransactionHistory component', () => {
     });
 
     test('should limit displayed transactions to 20', () => {
-      // Test that only 20 transactions are displayed
       const maxTransactions = 20;
       expect(maxTransactions).toBe(20);
     });
@@ -265,13 +239,11 @@ describe('TransactionHistory component', () => {
 
   describe('Component title and structure', () => {
     test('should display component title', () => {
-      // Test that component has a title
       const title = 'Histórico de Transações';
       expect(title).toBe('Histórico de Transações');
     });
 
     test('should have proper card container structure', () => {
-      // Test that component has card container
       const hasCardContainer = true;
       expect(hasCardContainer).toBe(true);
     });

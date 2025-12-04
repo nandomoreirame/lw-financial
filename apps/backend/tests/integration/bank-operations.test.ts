@@ -38,17 +38,14 @@ describe('Bank Operations API Integration Tests', () => {
   }
 
   beforeAll(async () => {
-    // Set test secret
     process.env.BETTER_AUTH_SECRET = TEST_SECRET;
 
-    // Initialize Fastify app
     app = Fastify({ logger: false });
     await app.register(bankRoutes);
     await app.ready();
   });
 
   afterAll(async () => {
-    // Restore original secret
     if (originalSecret) {
       process.env.BETTER_AUTH_SECRET = originalSecret;
     } else {
@@ -59,13 +56,11 @@ describe('Bank Operations API Integration Tests', () => {
   });
 
   beforeEach(async () => {
-    // Clean up database before each test
     await prisma.transaction.deleteMany({});
     await prisma.bankAccount.deleteMany({});
     await prisma.account.deleteMany({});
     await prisma.user.deleteMany({});
 
-    // Create test user for authenticated requests
     await prisma.user.create({
       data: {
         id: TEST_USER_ID,
@@ -76,7 +71,7 @@ describe('Bank Operations API Integration Tests', () => {
           create: {
             accountId: TEST_USERNAME,
             providerId: 'credential',
-            password: 'hashed-password', // Not used in tests
+            password: 'hashed-password',
           },
         },
       },
@@ -85,7 +80,6 @@ describe('Bank Operations API Integration Tests', () => {
 
   describe('POST /reset', () => {
     test('should reset system state successfully', async () => {
-      // Create some test data
       await prisma.bankAccount.create({
         data: {
           id: 'test-account-1',
@@ -101,7 +95,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(response.statusCode).toBe(200);
       expect(response.body).toBe('OK');
 
-      // Verify all data is deleted
       const accountCount = await prisma.bankAccount.count();
       const transactionCount = await prisma.transaction.count();
       expect(accountCount).toBe(0);
@@ -130,7 +123,6 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // Verify account was created in database
       const account = await prisma.bankAccount.findUnique({
         where: { id: '100' },
       });
@@ -139,7 +131,6 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('US-008: should deposit to existing account', async () => {
-      // Create initial account
       await prisma.bankAccount.create({
         data: {
           id: '100',
@@ -218,7 +209,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(body.destination).toHaveProperty('balance');
       expect(body.destination.balance).toBe(50.75);
 
-      // Verify account was created with userId
       const account = await prisma.bankAccount.findFirst({
         where: { userId: TEST_USER_ID },
       });
@@ -227,7 +217,6 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('should deposit to existing user default account when authenticated', async () => {
-      // Create account for user
       await prisma.bankAccount.create({
         data: {
           id: 'user-default-account',
@@ -258,7 +247,6 @@ describe('Bank Operations API Integration Tests', () => {
     test('should validate amount range and precision for authenticated deposit', async () => {
       const token = createTestToken();
 
-      // Test amount too small
       const response1 = await app.inject({
         method: 'POST',
         url: '/event',
@@ -272,7 +260,6 @@ describe('Bank Operations API Integration Tests', () => {
       });
       expect(response1.statusCode).toBe(400);
 
-      // Test amount too large
       const response2 = await app.inject({
         method: 'POST',
         url: '/event',
@@ -286,7 +273,6 @@ describe('Bank Operations API Integration Tests', () => {
       });
       expect(response2.statusCode).toBe(400);
 
-      // Test too many decimal places
       const response3 = await app.inject({
         method: 'POST',
         url: '/event',
@@ -304,7 +290,6 @@ describe('Bank Operations API Integration Tests', () => {
 
   describe('GET /balance', () => {
     test('US-005: should return balance for existing account', async () => {
-      // Create account with balance and userId
       await prisma.bankAccount.create({
         data: {
           id: '100',
@@ -328,7 +313,6 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('US-006: should return 0 for non-existing account', async () => {
-      // User has no account, should create default account with balance 0
       const token = createTestToken();
 
       const response = await app.inject({
@@ -358,7 +342,6 @@ describe('Bank Operations API Integration Tests', () => {
 
   describe('POST /event - withdraw', () => {
     test('US-009: should withdraw from existing account', async () => {
-      // Create account with balance
       await prisma.bankAccount.create({
         data: {
           id: '100',
@@ -402,7 +385,6 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('US-011: should reject withdraw with insufficient funds', async () => {
-      // Create account with insufficient balance
       await prisma.bankAccount.create({
         data: {
           id: '100',
@@ -441,7 +423,6 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('should withdraw from user default account when authenticated (no origin)', async () => {
-      // Create account for user with balance
       await prisma.bankAccount.create({
         data: {
           id: 'user-default-account',
@@ -473,7 +454,6 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('should reject insufficient funds for authenticated withdraw', async () => {
-      // Create account for user with insufficient balance
       await prisma.bankAccount.create({
         data: {
           id: 'user-default-account',
@@ -502,7 +482,6 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('should create default account and allow withdraw when authenticated', async () => {
-      // User has no account yet
       const token = createTestToken();
 
       const response = await app.inject({
@@ -517,12 +496,10 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // Should fail because account has 0 balance
       expect(response.statusCode).toBe(400);
       const body = JSON.parse(response.body);
       expect(body.error).toBe('Insufficient funds');
 
-      // But account should have been created
       const account = await prisma.bankAccount.findFirst({
         where: { userId: TEST_USER_ID },
       });
@@ -531,7 +508,6 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('should require authentication for deposit/withdraw without origin/destination', async () => {
-      // Deposit without auth
       const depositResponse = await app.inject({
         method: 'POST',
         url: '/event',
@@ -542,7 +518,6 @@ describe('Bank Operations API Integration Tests', () => {
       });
       expect(depositResponse.statusCode).toBe(401);
 
-      // Withdraw without auth
       const withdrawResponse = await app.inject({
         method: 'POST',
         url: '/event',
@@ -557,7 +532,6 @@ describe('Bank Operations API Integration Tests', () => {
 
   describe('POST /event - transfer', () => {
     test('US-012: should transfer between existing accounts', async () => {
-      // Create two accounts
       await prisma.bankAccount.createMany({
         data: [
           { id: '100', balance: 15 },
@@ -591,7 +565,6 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('should create destination account if it does not exist', async () => {
-      // Create only origin account
       await prisma.bankAccount.create({
         data: {
           id: '100',
@@ -623,7 +596,6 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // Verify destination account was created
       const destAccount = await prisma.bankAccount.findUnique({
         where: { id: '300' },
       });
@@ -648,7 +620,6 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('US-014: should reject transfer with insufficient funds', async () => {
-      // Create origin account with insufficient balance
       await prisma.bankAccount.create({
         data: {
           id: '100',
@@ -725,7 +696,6 @@ describe('Bank Operations API Integration Tests', () => {
     test('should handle multiple operations in sequence', async () => {
       const token = createTestToken();
 
-      // Create account with userId for the test user
       await prisma.bankAccount.create({
         data: {
           id: '100',
@@ -734,18 +704,16 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // 1. Deposit more
       await app.inject({
         method: 'POST',
         url: '/event',
         payload: {
           type: 'deposit',
           destination: '100',
-          amount: 0, // Already has 100
+          amount: 0,
         },
       });
 
-      // 2. Withdraw some amount
       await app.inject({
         method: 'POST',
         url: '/event',
@@ -756,7 +724,6 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // 3. Check balance (should be 70)
       const balanceResponse = await app.inject({
         method: 'GET',
         url: '/balance',
@@ -767,7 +734,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(balanceResponse.statusCode).toBe(200);
       expect(Number(balanceResponse.body)).toBe(70);
 
-      // 4. Transfer to new account (this creates account '200' without userId)
       await app.inject({
         method: 'POST',
         url: '/event',
@@ -779,7 +745,6 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // 5. Verify final balance for authenticated user (should be 20)
       const balance1 = await app.inject({
         method: 'GET',
         url: '/balance',
@@ -792,7 +757,6 @@ describe('Bank Operations API Integration Tests', () => {
     });
 
     test('should maintain data integrity after reset', async () => {
-      // Create account with userId
       await prisma.bankAccount.create({
         data: {
           id: '100',
@@ -801,13 +765,11 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // Reset
       await app.inject({
         method: 'POST',
         url: '/reset',
       });
 
-      // Verify all data is gone - user should get default account with balance 0
       const token = createTestToken();
       const response = await app.inject({
         method: 'GET',

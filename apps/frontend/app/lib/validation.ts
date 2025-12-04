@@ -19,13 +19,8 @@ export const transactionAmountSchema = z
   .max(999999.99, 'Valor máximo é R$ 999.999,99')
   .refine(
     (value) => {
-      // Check if value has at most 2 decimal places
-      // Use a more robust method that handles scientific notation and large numbers
       const valueStr = value.toString();
-      // Handle scientific notation (e.g., 1e-2)
       if (valueStr.includes('e') || valueStr.includes('E')) {
-        // For scientific notation, check if the value is within valid range
-        // and has reasonable precision
         return value >= 0.01 && value <= 999999.99;
       }
       const decimalPlaces = (valueStr.split('.')[1] || '').length;
@@ -37,7 +32,6 @@ export const transactionAmountSchema = z
   )
   .refine(
     (value) => {
-      // Check if value is a valid finite number
       return Number.isFinite(value) && !Number.isNaN(value);
     },
     {

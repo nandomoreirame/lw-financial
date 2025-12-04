@@ -18,12 +18,10 @@ export function formatDateTime(date: string | Date): string {
     dateObj = date;
   }
 
-  // Validate date
   if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
     return 'Data inválida';
   }
 
-  // Format: DD/MM/YYYY HH:mm
   const day = String(dateObj.getDate()).padStart(2, '0');
   const month = String(dateObj.getMonth() + 1).padStart(2, '0');
   const year = dateObj.getFullYear();

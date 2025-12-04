@@ -80,5 +80,4 @@ const footerText = {
   margin: '0',
 };
 
-// Export named para uso nos outros templates
 export const BaseEmail = BaseEmailComponent;

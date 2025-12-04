@@ -120,13 +120,10 @@ export async function eventHandler(
   const { type, origin, destination, amount } = request.body;
   const user = extractUserFromToken(request);
 
-  // Validate amount
   if (typeof amount !== 'number' || amount <= 0) {
     return reply.status(400).send({ error: 'Invalid amount' });
   }
 
-  // Validate amount precision (2 decimal places)
-  // Convert to string to check decimal places accurately
   const amountStr = amount.toString();
   const decimalPart = amountStr.split('.')[1];
   if (decimalPart && decimalPart.length > 2) {
@@ -135,7 +132,6 @@ export async function eventHandler(
     });
   }
 
-  // Validate amount range (0.01 to 999999.99)
   if (amount < 0.01 || amount > 999999.99) {
     return reply.status(400).send({
       error: 'Amount must be between R$ 0,01 and R$ 999.999,99',
@@ -145,27 +141,22 @@ export async function eventHandler(
   try {
     switch (type) {
       case 'deposit': {
-        // For authenticated users without destination, identify account automatically from JWT
         let accountId: string;
         let userId: string | undefined;
 
         if (!destination) {
-          // No destination provided - require authentication
           if (!user) {
             return reply.status(401).send({
               error: 'Authentication required when destination is not provided',
             });
           }
-          // Authenticated: use user's default account
           userId = user.userId;
           const defaultAccount =
             await accountService.getOrCreateDefaultAccount(userId);
           accountId = defaultAccount.id;
         } else {
-          // Destination provided
           accountId = destination;
           if (user) {
-            // User is authenticated - use userId for transaction logging
             userId = user.userId;
           }
         }
@@ -177,27 +168,22 @@ export async function eventHandler(
       }
 
       case 'withdraw': {
-        // For authenticated users without origin, identify account automatically from JWT
         let accountId: string;
         let userId: string | undefined;
 
         if (!origin) {
-          // No origin provided - require authentication
           if (!user) {
             return reply.status(401).send({
               error: 'Authentication required when origin is not provided',
             });
           }
-          // Authenticated: use user's default account
           userId = user.userId;
           const defaultAccount =
             await accountService.getOrCreateDefaultAccount(userId);
           accountId = defaultAccount.id;
         } else {
-          // Origin provided
           accountId = origin;
           if (user) {
-            // User is authenticated - use userId for transaction logging
             userId = user.userId;
           }
         }
@@ -209,7 +195,6 @@ export async function eventHandler(
       }
 
       case 'transfer': {
-        // Transfer still requires origin and destination
         if (!origin || !destination) {
           return reply.status(400).send({
             error: 'Origin and destination are required for transfer',
@@ -222,7 +207,6 @@ export async function eventHandler(
             .send({ error: 'Origin and destination cannot be the same' });
         }
 
-        // Extract userId if authenticated (for transaction logging)
         const userId = user?.userId;
 
         const result = await accountService.transfer(
@@ -246,7 +230,6 @@ export async function eventHandler(
       return reply.status(400).send({ error: 'Insufficient funds' });
     }
 
-    // Log unexpected errors
     request.log.error({ err: error }, 'Unexpected error in event handler');
     return reply.status(500).send({ error: 'Internal server error' });
   }
@@ -257,7 +240,7 @@ export async function eventHandler(
  */
 export const eventSchema = {
   description:
-    'Processa eventos bancarios (deposito, saque, transferencia). Para usuarios autenticados, identifica automaticamente a conta padrao do usuario a partir do token JWT. Nao e necessario enviar destination (deposito) ou origin (saque) quando autenticado.',
+    'Processa eventos bancários (deposito, saque, transferência). Para usuários autenticados, identifica automaticamente a conta padrão do usuário a partir do token JWT. Nao e necessário enviar destination (deposito) ou origin (saque) quando autenticado.',
   tags: ['bank'],
   body: {
     type: 'object',
@@ -266,30 +249,30 @@ export const eventSchema = {
       type: {
         type: 'string',
         enum: ['deposit', 'withdraw', 'transfer'],
-        description: 'Tipo de operacao',
+        description: 'Tipo de operação',
       },
       origin: {
         type: 'string',
         description:
-          'ID da conta de origem. Obrigatorio para transferencia. Para saques autenticados, pode ser omitido (backend identifica automaticamente).',
+          'ID da conta de origem. Obrigatório para transferência. Para saques autenticados, pode ser omitido (backend identifica automaticamente).',
       },
       destination: {
         type: 'string',
         description:
-          'ID da conta de destino. Obrigatorio para transferencia. Para depositos autenticados, pode ser omitido (backend identifica automaticamente).',
+          'ID da conta de destino. Obrigatório para transferência. Para depósitos autenticados, pode ser omitido (backend identifica automaticamente).',
       },
       amount: {
         type: 'number',
         minimum: 0.01,
         maximum: 999999.99,
         description:
-          'Valor da operacao em reais (R$). Minimo: R$ 0,01. Maximo: R$ 999.999,99. Precisao: 2 casas decimais.',
+          'Valor da operação em reais (R$). Mínimo: R$ 0,01. Máximo: R$ 999.999,99. Precisão: 2 casas decimais.',
       },
     },
   },
   response: {
     201: {
-      description: 'Operacao realizada com sucesso',
+      description: 'Operação realizada com sucesso',
       type: 'object',
       properties: {
         origin: {
@@ -309,21 +292,21 @@ export const eventSchema = {
       },
     },
     400: {
-      description: 'Requisicao invalida ou saldo insuficiente',
+      description: 'Requisição inválida ou saldo insuficiente',
       type: 'object',
       properties: {
         error: { type: 'string' },
       },
     },
     401: {
-      description: 'Nao autenticado ou token invalido',
+      description: 'Não autenticado ou token inválido',
       type: 'object',
       properties: {
         error: { type: 'string' },
       },
     },
     404: {
-      description: 'Conta nao encontrada',
+      description: 'Conta não encontrada',
       type: 'number',
     },
   },

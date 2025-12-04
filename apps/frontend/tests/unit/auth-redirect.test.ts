@@ -8,14 +8,12 @@ import { isAuthenticationError } from '../../app/lib/auth-redirect';
 
 describe('auth-redirect utilities', () => {
   beforeEach(() => {
-    // Clear sessionStorage before each test
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.clear();
     }
   });
 
   afterEach(() => {
-    // Clean up after each test
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.clear();
     }
@@ -80,9 +78,6 @@ describe('auth-redirect utilities', () => {
         sessionStorage.setItem('auth_token', 'test-token');
         expect(sessionStorage.getItem('auth_token')).toBe('test-token');
 
-        // Note: We can't actually test the redirect in unit tests,
-        // but we can verify the token is cleared
-        // In a real scenario, redirectToLogin would be called and clear the token
         sessionStorage.removeItem('auth_token');
         expect(sessionStorage.getItem('auth_token')).toBeNull();
       }

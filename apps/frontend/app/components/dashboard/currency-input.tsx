@@ -31,12 +31,10 @@ export const CurrencyInput = React.forwardRef<
   { value, onChange, error, className, disabled, ...props },
   ref
 ) {
-  // Track the raw input value (in cents) to maintain state during editing
   const [internalCentsValue, setInternalCentsValue] = React.useState<
     number | undefined
   >();
 
-  // Initialize internal value from prop value when it changes externally
   React.useEffect(() => {
     if (
       value !== undefined &&
@@ -63,7 +61,6 @@ export const CurrencyInput = React.forwardRef<
         return;
       }
 
-      // Extract only digits from the input (this is the raw cents value)
       const digitsOnly = inputValue.replace(/\D/g, '');
 
       if (digitsOnly === '') {
@@ -72,7 +69,6 @@ export const CurrencyInput = React.forwardRef<
         return;
       }
 
-      // Parse as integer (this represents cents)
       const centsValue = parseInt(digitsOnly, 10);
 
       if (isNaN(centsValue) || !isFinite(centsValue) || centsValue < 0) {
@@ -81,23 +77,18 @@ export const CurrencyInput = React.forwardRef<
         return;
       }
 
-      // Store the cents value internally
       setInternalCentsValue(centsValue);
 
-      // Convert cents to reais (divide by 100) for the parent component
-      // This means "199" cents becomes 1.99 reais, "199998" becomes 1999.98 reais
       const realValue = centsValue / 100;
       onChange(realValue);
     },
     [onChange]
   );
 
-  // Format display value from internal cents
   const displayValue = React.useMemo(() => {
     if (internalCentsValue === undefined || internalCentsValue === null) {
       return '';
     }
-    // Convert cents to reais and format with 2 decimal places
     const realValue = internalCentsValue / 100;
     return new Intl.NumberFormat('pt-BR', {
       minimumFractionDigits: 2,

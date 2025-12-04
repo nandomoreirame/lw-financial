@@ -94,7 +94,6 @@ describe('transaction-types utility', () => {
       test('should return labels different from input type', () => {
         TRANSACTION_TYPES.forEach((type) => {
           const label = getTransactionTypeLabel(type);
-          // Label should be in Portuguese, not English
           expect(label).not.toBe(type);
         });
       });
@@ -116,12 +115,10 @@ describe('transaction-types utility', () => {
           getTransactionTypeLabel(type)
         );
 
-        // All results should be strings
         results.forEach((result) => {
           expect(typeof result).toBe('string');
         });
 
-        // Results should match expected labels
         expect(results[TRANSACTION_TYPES.indexOf('DEPOSIT')]).toBe('Depósito');
         expect(results[TRANSACTION_TYPES.indexOf('WITHDRAW')]).toBe('Saque');
         expect(results[TRANSACTION_TYPES.indexOf('TRANSFER')]).toBe(
@@ -162,7 +159,6 @@ describe('transaction-types utility', () => {
       );
       const uniqueLabels = new Set(labels);
 
-      // Each type should have a unique label
       expect(uniqueLabels.size).toBe(TRANSACTION_TYPES.length);
     });
   });

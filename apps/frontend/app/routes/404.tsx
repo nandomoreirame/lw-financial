@@ -19,7 +19,6 @@ export function meta(_args: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
 
-  // Ignore browser extension and well-known requests silently
   if (
     url.pathname.startsWith('/.well-known/') ||
     url.pathname.startsWith('/favicon.ico') ||
@@ -28,7 +27,6 @@ export async function loader({ request }: Route.LoaderArgs) {
     return new Response(null, { status: 404 });
   }
 
-  // For actual page requests, return 404
   throw new Response('Página não encontrada', { status: 404 });
 }
 

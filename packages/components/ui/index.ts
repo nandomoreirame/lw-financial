@@ -1,4 +1,3 @@
-// Export all components here
 export { Button, buttonVariants } from './button';
 export {
   Form,

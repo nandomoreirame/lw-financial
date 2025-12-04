@@ -3,13 +3,10 @@
  * Handles authentication and balance requests
  */
 
-// Validate API URL to prevent injection attacks
-// Backend runs on port 3001 by default (see apps/backend/src/index.ts)
 const API_BASE_URL = (() => {
   const url = import.meta.env.VITE_API_URL || 'http://localhost:3333';
   try {
     const urlObj = new URL(url);
-    // Only allow http/https protocols
     if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
       throw new Error('Invalid protocol');
     }
@@ -56,7 +53,6 @@ async function fetchWithTimeout(
         'Requisição expirou. Verifique sua conexão e tente novamente.'
       );
     }
-    // Re-throw network errors with user-friendly message
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error(
         'Erro de conexão. Verifique sua internet e tente novamente.'
@@ -113,11 +109,9 @@ export async function login(
 
     return response.json() as Promise<LoginResponse>;
   } catch (error) {
-    // Re-throw with user-friendly message if it's already an Error
     if (error instanceof Error) {
       throw error;
     }
-    // Fallback for unexpected errors
     throw new Error('Erro ao fazer login. Tente novamente.');
   }
 }
@@ -156,7 +150,6 @@ export async function getBalance(_accountId: string): Promise<number> {
       }
 
       if (response.status === 404) {
-        // Account not found returns 0
         return 0;
       }
 
@@ -169,11 +162,9 @@ export async function getBalance(_accountId: string): Promise<number> {
     const balance = await response.json();
     return typeof balance === 'number' ? balance : 0;
   } catch (error) {
-    // Re-throw with user-friendly message if it's already an Error
     if (error instanceof Error) {
       throw error;
     }
-    // Fallback for unexpected errors
     throw new Error('Erro ao buscar saldo. Tente novamente.');
   }
 }
@@ -253,7 +244,6 @@ export async function deposit(amount: number): Promise<DepositResponse> {
 
     const data = await response.json();
 
-    // Validate response structure
     if (!data || typeof data !== 'object' || !data.destination) {
       throw new Error('Resposta inválida do servidor');
     }
@@ -264,11 +254,9 @@ export async function deposit(amount: number): Promise<DepositResponse> {
 
     return data as DepositResponse;
   } catch (error) {
-    // Re-throw with user-friendly message if it's already an Error
     if (error instanceof Error) {
       throw error;
     }
-    // Fallback for unexpected errors
     throw new Error('Erro ao realizar depósito. Tente novamente.');
   }
 }
@@ -314,8 +302,6 @@ export async function withdraw(amount: number): Promise<WithdrawResponse> {
         }));
         const errorMessage = error.error || 'Erro na requisição';
 
-        // Check if error message specifically mentions insufficient funds
-        // Backend should return specific error message for insufficient funds
         const lowerMessage = errorMessage.toLowerCase();
         if (
           lowerMessage.includes('insufficient funds') ||
@@ -325,7 +311,6 @@ export async function withdraw(amount: number): Promise<WithdrawResponse> {
           throw new Error('Saldo insuficiente para saque');
         }
 
-        // For other 400 errors (validation, etc.), throw generic error
         throw new Error(errorMessage);
       }
 
@@ -337,7 +322,6 @@ export async function withdraw(amount: number): Promise<WithdrawResponse> {
 
     const data = await response.json();
 
-    // Validate response structure
     if (!data || typeof data !== 'object' || !data.origin) {
       throw new Error('Resposta inválida do servidor');
     }
@@ -348,11 +332,9 @@ export async function withdraw(amount: number): Promise<WithdrawResponse> {
 
     return data as WithdrawResponse;
   } catch (error) {
-    // Re-throw with user-friendly message if it's already an Error
     if (error instanceof Error) {
       throw error;
     }
-    // Fallback for unexpected errors
     throw new Error('Erro ao realizar saque. Tente novamente.');
   }
 }
@@ -390,7 +372,6 @@ export async function getTransactions(): Promise<TransactionsResponse> {
       }
 
       if (response.status === 404) {
-        // No transactions found returns empty array
         return [];
       }
 
@@ -402,18 +383,15 @@ export async function getTransactions(): Promise<TransactionsResponse> {
 
     const data = await response.json();
 
-    // Validate response is an array
     if (!Array.isArray(data)) {
       throw new Error('Resposta inválida do servidor');
     }
 
     return data as TransactionsResponse;
   } catch (error) {
-    // Re-throw with user-friendly message if it's already an Error
     if (error instanceof Error) {
       throw error;
     }
-    // Fallback for unexpected errors
     throw new Error('Erro ao buscar histórico de transações. Tente novamente.');
   }
 }

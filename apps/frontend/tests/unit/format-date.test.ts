@@ -39,10 +39,8 @@ describe('formatDateTime function', () => {
     });
 
     test('should format date with timezone offset correctly', () => {
-      // Create date for Brazil timezone (UTC-3)
       const date = new Date('2025-12-03T17:30:00.000Z');
       const result = formatDateTime(date);
-      // Should still format correctly (uses UTC time)
       expect(result).toMatch(/03\/12\/2025 \d{2}:\d{2}/);
     });
   });
@@ -103,7 +101,6 @@ describe('formatDateTime function', () => {
     test('should handle malformed date strings gracefully', () => {
       const malformed = '2025-13-45T99:99:99.000Z';
       const result = formatDateTime(malformed);
-      // Should either format what it can or return error message
       expect(result).toBeDefined();
     });
   });
@@ -113,7 +110,6 @@ describe('formatDateTime function', () => {
       const date = new Date('2025-12-03T14:30:00.000Z');
       const result = formatDateTime(date);
 
-      // Check format: DD/MM/YYYY HH:mm
       const formatRegex = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/;
       expect(result).toMatch(formatRegex);
     });
@@ -122,8 +118,8 @@ describe('formatDateTime function', () => {
       const date = new Date('2025-01-05T09:05:00.000Z');
       const result = formatDateTime(date);
 
-      expect(result.split('/')[0]).toMatch(/^\d{2}$/); // Day
-      expect(result.split('/')[1]).toMatch(/^\d{2}$/); // Month
+      expect(result.split('/')[0]).toMatch(/^\d{2}$/);
+      expect(result.split('/')[1]).toMatch(/^\d{2}$/);
     });
 
     test('should pad hours and minutes with zeros when needed', () => {
@@ -167,7 +163,6 @@ describe('formatDateTime function', () => {
       const resultWithMs = formatDateTime(dateWithMs);
       const resultWithoutMs = formatDateTime(dateWithoutMs);
 
-      // Both should have same formatted result (minutes precision)
       expect(resultWithMs).toBe(resultWithoutMs);
     });
   });

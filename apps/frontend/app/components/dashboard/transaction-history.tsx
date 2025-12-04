@@ -26,7 +26,6 @@ import type { Transaction } from '../../lib/api';
 export function TransactionHistory() {
   const { transactions, isLoading, error } = useTransactions();
 
-  // Debug logging (only in development)
   if (import.meta.env.DEV) {
     React.useEffect(() => {
       console.log('[TransactionHistory] State:', {
@@ -39,7 +38,6 @@ export function TransactionHistory() {
     }, [isLoading, error, transactions]);
   }
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="rounded-lg border bg-card p-6 space-y-4">
@@ -53,7 +51,6 @@ export function TransactionHistory() {
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-6 space-y-4">
@@ -68,7 +65,6 @@ export function TransactionHistory() {
     );
   }
 
-  // Empty state
   if (!transactions || transactions.length === 0) {
     return (
       <div className="rounded-lg border bg-card p-6 space-y-4">
@@ -89,7 +85,6 @@ export function TransactionHistory() {
     );
   }
 
-  // Success state - show transactions
   return (
     <div className="rounded-lg border bg-card p-6 space-y-4">
       <h2 className="text-lg font-semibold">Histórico de Transações</h2>
@@ -115,7 +110,6 @@ function TransactionItem({ transaction, className }: TransactionItemProps) {
   const formattedAmount = formatCurrency(Number(transaction.amount));
   const formattedDateTime = formatDateTime(transaction.createdAt);
 
-  // Determine color based on transaction type
   const amountColor =
     transaction.type === 'DEPOSIT' || transaction.type === 'INITIAL_BALANCE'
       ? 'text-green-600 dark:text-green-400'
@@ -123,13 +117,12 @@ function TransactionItem({ transaction, className }: TransactionItemProps) {
         ? 'text-red-600 dark:text-red-400'
         : 'text-blue-600 dark:text-blue-400';
 
-  // Format amount with sign prefix
   const amountWithSign =
     transaction.type === 'DEPOSIT' || transaction.type === 'INITIAL_BALANCE'
       ? `+${formattedAmount}`
       : transaction.type === 'WITHDRAW'
         ? `-${formattedAmount}`
-        : formattedAmount; // TRANSFER shows without sign
+        : formattedAmount;
 
   return (
     <div

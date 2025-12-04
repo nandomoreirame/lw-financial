@@ -30,12 +30,10 @@ export function BalanceCard({
   isRefreshing = false,
   className,
 }: BalanceCardProps) {
-  // Loading state - show skeleton
   if (isLoading && balance === undefined) {
     return <BalanceSkeleton className={className} />;
   }
 
-  // Error state
   if (error) {
     return (
       <div
@@ -58,7 +56,6 @@ export function BalanceCard({
     );
   }
 
-  // Empty/not available state
   if (balance === undefined || balance === null) {
     return (
       <div className={cn('rounded-lg border bg-card p-6 space-y-4', className)}>
@@ -73,7 +70,6 @@ export function BalanceCard({
     );
   }
 
-  // Success state - show balance
   return (
     <div className={cn('rounded-lg border bg-card p-6 space-y-4', className)}>
       <div className="flex items-center justify-between">

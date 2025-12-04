@@ -35,23 +35,16 @@ export async function loader({ request }: Route.LoaderArgs) {
   const isServerSide = typeof window === 'undefined';
   const authCheck = checkAuthentication(request);
 
-  // On server-side, if no token in cookie, allow client-side check
-  // This happens when user just logged in and token is only in sessionStorage
   if (isServerSide && !authCheck.isAuthenticated) {
-    // Return null accountId to allow client-side check
-    // The component will handle authentication check on the client
     return {
       accountId: null,
       needsClientAuth: true,
     };
   }
 
-  // Require authentication - redirects to login if not authenticated
   requireAuth(request);
 
-  // Get account ID from token
   if (!authCheck.accountId) {
-    // If no account ID, redirect to login with error
     throw new Response('Account ID não encontrado', { status: 401 });
   }
 
@@ -70,15 +63,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     null
   );
 
-  // Check authentication on client if needed (when token is only in sessionStorage)
   React.useEffect(() => {
     if (loaderData?.needsClientAuth) {
-      // Create a mock request object for client-side check
       const mockRequest = new Request(window.location.href);
       const authCheck = checkAuthentication(mockRequest);
 
       if (!authCheck.isAuthenticated || !authCheck.accountId) {
-        // Redirect to login with error
         const loginUrl = new URL('/login', window.location.origin);
         loginUrl.searchParams.set(
           'error',
@@ -92,7 +82,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     }
   }, [loaderData?.needsClientAuth]);
 
-  // Use accountId from loader or client-side check
   const accountId = loaderData?.accountId || clientAccountId;
   const { balance, formattedBalance, isLoading, error, refetch } =
     useBalance(accountId);
@@ -101,11 +90,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     refetch();
   };
 
-  // Use isLoading from React Query to determine refreshing state
-  // Only show refreshing if we already have a balance (not initial load)
   const isRefreshing = isLoading && balance !== undefined;
 
-  // Show loading state while checking client-side authentication
   if (loaderData?.needsClientAuth && !clientAccountId) {
     return (
       <div className="min-h-screen bg-background p-4">

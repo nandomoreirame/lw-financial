@@ -26,15 +26,12 @@ export function useWithdraw(accountId: string | null): UseWithdrawReturn {
   const { mutateAsync, isPending, isSuccess, error, reset } = useMutation({
     mutationFn: withdraw,
     onSuccess: () => {
-      // Invalidate balance cache to refresh balance after withdrawal
       if (accountId) {
         queryClient.invalidateQueries({ queryKey: ['balance', accountId] });
       }
-      // Invalidate transactions cache to refresh transaction history
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
     },
     onError: (error: Error) => {
-      // Handle 401 Unauthorized - token expired or invalid
       if (isAuthenticationError(error)) {
         redirectToLogin('Sua sessão expirou. Por favor, faça login novamente');
       }

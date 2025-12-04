@@ -10,7 +10,6 @@ export const createBankAccountSchema = z.object({
     .nonnegative('Balance must be non-negative')
     .finite('Balance must be a finite number')
     .refine((val) => {
-      // Garantir que o valor não exceda o limite do Decimal(10, 2)
       return val <= 99999999.99;
     }, 'Balance exceeds maximum allowed value (99,999,999.99)'),
   userId: z.string().cuid().optional(),
@@ -60,7 +59,6 @@ export const createTransactionSchema = z
   })
   .refine(
     (data) => {
-      // DEPOSIT deve ter destinationAccountId e não ter originAccountId
       if (data.type === 'DEPOSIT') {
         return (
           data.destinationAccountId !== undefined &&
@@ -77,7 +75,6 @@ export const createTransactionSchema = z
   )
   .refine(
     (data) => {
-      // WITHDRAW deve ter originAccountId e não ter destinationAccountId
       if (data.type === 'WITHDRAW') {
         return (
           data.originAccountId !== undefined &&
@@ -94,7 +91,6 @@ export const createTransactionSchema = z
   )
   .refine(
     (data) => {
-      // TRANSFER deve ter ambos originAccountId e destinationAccountId
       if (data.type === 'TRANSFER') {
         return (
           data.originAccountId !== undefined &&

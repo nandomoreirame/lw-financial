@@ -11,18 +11,13 @@
  * @param errorMessage - Error message to display on login page
  */
 export function redirectToLogin(errorMessage: string): void {
-  // Clear authentication token
   if (typeof sessionStorage !== 'undefined') {
     sessionStorage.removeItem('auth_token');
   }
 
-  // Build login URL with error parameter
   const loginUrl = new URL('/login', window.location.origin);
   loginUrl.searchParams.set('error', encodeURIComponent(errorMessage));
 
-  // Use window.location.href for compatibility with hooks
-  // Note: In a future refactor, this could use React Router's navigate
-  // but hooks cannot use other hooks directly, so we use window.location
   window.location.href = loginUrl.toString();
 }
 

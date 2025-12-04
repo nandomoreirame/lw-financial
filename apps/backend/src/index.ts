@@ -5,10 +5,6 @@ import Fastify from 'fastify';
 import { loginRoutes } from './auth/routes';
 import { bankRoutes } from './bank/routes';
 import { swaggerOptions, swaggerUiOptions } from './config/swagger';
-// Example imports for protected routes (commented for demonstration)
-// import { authenticateRequest } from './middleware/authentication';
-// import { protectedRoutesPlugin } from './plugins/protected-routes';
-// import { AuthenticatedRequest } from './types/auth';
 
 /**
  * Validates that BETTER_AUTH_SECRET is configured and meets minimum security requirements.
@@ -18,7 +14,7 @@ import { swaggerOptions, swaggerUiOptions } from './config/swagger';
  */
 function validateAuthSecret(): void {
   const secret = process.env.BETTER_AUTH_SECRET;
-  const MIN_SECRET_LENGTH = 32; // Minimum recommended length for HS256
+  const MIN_SECRET_LENGTH = 32;
 
   if (!secret) {
     throw new Error(
@@ -33,7 +29,6 @@ function validateAuthSecret(): void {
   }
 }
 
-// Validate authentication secret at startup
 validateAuthSecret();
 
 const fastify = Fastify({ logger: true });
@@ -43,7 +38,6 @@ const fastify = Fastify({ logger: true });
  */
 async function start() {
   try {
-    // Configure CORS
     await fastify.register(cors, {
       origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -51,20 +45,15 @@ async function start() {
       credentials: true,
     });
 
-    // Register Swagger for API documentation
     await fastify.register(swagger, swaggerOptions);
     await fastify.register(swaggerUi, swaggerUiOptions);
 
-    // Register API v1 routes with prefix
     await fastify.register(
       async function v1Routes(fastify) {
-        // Register auth routes under v1 prefix
         await fastify.register(loginRoutes);
 
-        // Register bank routes under v1 prefix
         await fastify.register(bankRoutes);
 
-        // Health check endpoint
         fastify.get(
           '/health',
           {
@@ -102,18 +91,18 @@ async function start() {
      * @example
      * ```typescript
      * fastify.addHook('preHandler', async (request, reply) => {
-     *   // List of public routes that don't require authentication
+     *
      *   const publicRoutes = ['/v1/login', '/v1/health', '/v1/auth'];
      *
-     *   // Skip authentication for public routes
+     *
      *   if (publicRoutes.some(route => request.url.startsWith(route))) {
      *     return;
      *   }
      *
-     *   // Apply authentication middleware
+     *
      *   const authenticated = await authenticateRequest(request, reply);
      *   if (!authenticated) {
-     *     return; // Response already sent by middleware
+     *     return;
      *   }
      * });
      * ```
@@ -127,12 +116,12 @@ async function start() {
      *
      * @example
      * ```typescript
-     * // Register protected routes plugin with a prefix
+     *
      * await fastify.register(protectedRoutesPlugin, {
      *   prefix: '/v1/protected'
      * });
      *
-     * // Example protected route (would be registered inside the plugin or separately)
+     *
      * fastify.get('/v1/protected/profile', async (request: AuthenticatedRequest, reply) => {
      *   return {
      *     userId: request.user.userId,
@@ -156,5 +145,4 @@ async function start() {
   }
 }
 
-// Start the server
 start();

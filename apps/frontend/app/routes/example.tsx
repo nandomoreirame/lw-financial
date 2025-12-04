@@ -3,7 +3,6 @@ import { z } from '@lw-financial/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 
-// Example schema using shared Zod
 const exampleSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email address'),
@@ -11,7 +10,6 @@ const exampleSchema = z.object({
 
 type ExampleFormData = z.infer<typeof exampleSchema>;
 
-// Example API function
 async function fetchExampleData() {
   const response = await fetch('/api/example');
   if (!response.ok) throw new Error('Failed to fetch');
@@ -19,7 +17,6 @@ async function fetchExampleData() {
 }
 
 export default function ExampleRoute() {
-  // React Hook Form example
   const {
     register,
     handleSubmit,
@@ -28,7 +25,6 @@ export default function ExampleRoute() {
     resolver: zodResolver(exampleSchema),
   });
 
-  // React Query example
   const { data, isLoading, error } = useQuery({
     queryKey: ['example'],
     queryFn: fetchExampleData,

@@ -13,7 +13,6 @@ export async function resetHandler(
     await accountService.reset();
     return reply.status(200).send('OK');
   } catch (error) {
-    // Log unexpected errors
     request.log.error({ err: error }, 'Unexpected error in reset handler');
     return reply.status(500).send({ error: 'Internal server error' });
   }

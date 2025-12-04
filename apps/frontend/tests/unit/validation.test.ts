@@ -140,7 +140,6 @@ describe('transactionAmountSchema', () => {
       const result = transactionAmountSchema.safeParse(NaN);
       expect(result.success).toBe(false);
       if (!result.success) {
-        // Should have error about invalid type or invalid value
         const messages = result.error.issues.map((i) => i.message);
         expect(
           messages.some((m) => m.includes('inválido') || m.includes('número'))
@@ -184,7 +183,6 @@ describe('transactionAmountSchema', () => {
       const result = transactionAmountSchema.safeParse(null as any);
       expect(result.success).toBe(false);
       if (!result.success) {
-        // null is treated as invalid type, not missing value
         expect(result.error.issues[0].message).toContain('número');
       }
     });
@@ -200,7 +198,6 @@ describe('transactionAmountSchema', () => {
 
   describe('Scientific notation handling', () => {
     test('should accept valid amount in scientific notation within range', () => {
-      // 1e-2 = 0.01 (minimum)
       const result = transactionAmountSchema.safeParse(1e-2);
       expect(result.success).toBe(true);
       if (result.success) {
@@ -209,7 +206,6 @@ describe('transactionAmountSchema', () => {
     });
 
     test('should reject scientific notation below minimum', () => {
-      // 1e-3 = 0.001 (below minimum)
       const result = transactionAmountSchema.safeParse(1e-3);
       expect(result.success).toBe(false);
     });

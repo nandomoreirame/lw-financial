@@ -58,7 +58,6 @@ export function DepositForm({ accountId, className }: DepositFormProps) {
   }, [error]);
 
   const onSubmit = async (data: DepositFormData) => {
-    // Prevent duplicate submissions
     if (isSubmitting || isLoading) {
       return;
     }
@@ -67,8 +66,6 @@ export function DepositForm({ accountId, className }: DepositFormProps) {
     try {
       await deposit(data.amount);
     } catch (err) {
-      // Error is handled by the hook and displayed below
-      // Only log in development to avoid exposing sensitive information
       if (import.meta.env.DEV) {
         console.error('Deposit error:', err);
       }

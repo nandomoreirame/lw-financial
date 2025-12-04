@@ -2,16 +2,16 @@
  * Hook for managing authentication state
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { login as loginAPI } from '../lib/api';
 import {
   getToken,
-  storeToken,
-  removeToken,
   isTokenExpired,
   isValidTokenFormat,
+  removeToken,
+  storeToken,
 } from '../lib/auth';
-import { login as loginAPI } from '../lib/api';
 
 export interface UseAuthReturn {
   isAuthenticated: boolean;
@@ -31,9 +31,6 @@ export function useAuth(): UseAuthReturn {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Check authentication status on mount
-  // No cleanup needed: this effect only reads from sessionStorage synchronously
-  // and doesn't create any subscriptions or async operations that need cleanup
   useEffect(() => {
     const storedToken = getToken();
     if (
@@ -43,7 +40,6 @@ export function useAuth(): UseAuthReturn {
     ) {
       setToken(storedToken);
     } else if (storedToken) {
-      // Token is invalid or expired, remove it
       removeToken();
     }
   }, []);
@@ -56,11 +52,9 @@ export function useAuth(): UseAuthReturn {
       try {
         const response = await loginAPI(username, password);
 
-        // Store token in sessionStorage
         storeToken(response.token);
         setToken(response.token);
 
-        // Redirect to home (dashboard)
         navigate('/');
       } catch (err) {
         const errorMessage =

@@ -64,21 +64,18 @@ export class AccountService {
     id: string;
     balance: number;
   }> {
-    // Find existing accounts for this user
     const accounts = await prisma.bankAccount.findMany({
       where: { userId },
-      orderBy: { createdAt: 'asc' }, // Get the first/oldest account as default
+      orderBy: { createdAt: 'asc' },
     });
 
     if (accounts.length > 0) {
-      // Return the first account (default account)
       return {
         id: accounts[0].id,
         balance: Number(accounts[0].balance),
       };
     }
 
-    // Create default account if none exists
     const newAccount = await prisma.bankAccount.create({
       data: {
         balance: new Prisma.Decimal(0),
@@ -113,7 +110,6 @@ export class AccountService {
       where: { id: accountId },
     });
 
-    // Create account with balance 0 if it doesn't exist
     if (!account) {
       account = await prisma.bankAccount.create({
         data: {
@@ -136,13 +132,11 @@ export class AccountService {
     userId?: string
   ): Promise<AccountBalance> {
     const result = await prisma.$transaction(async (tx) => {
-      // Try to find existing account
       let account = await tx.bankAccount.findUnique({
         where: { id: destinationId },
       });
 
       if (account) {
-        // Update existing account balance
         account = await tx.bankAccount.update({
           where: { id: destinationId },
           data: {
@@ -150,7 +144,6 @@ export class AccountService {
           },
         });
       } else {
-        // Create new account with initial balance
         account = await tx.bankAccount.create({
           data: {
             id: destinationId,
@@ -160,7 +153,6 @@ export class AccountService {
         });
       }
 
-      // Record the transaction
       await tx.transaction.create({
         data: {
           type: 'DEPOSIT',
@@ -190,7 +182,6 @@ export class AccountService {
     userId?: string
   ): Promise<AccountBalance> {
     const result = await prisma.$transaction(async (tx) => {
-      // Find the account
       const account = await tx.bankAccount.findUnique({
         where: { id: originId },
       });
@@ -204,7 +195,6 @@ export class AccountService {
         throw new InsufficientFundsError(originId, amount, currentBalance);
       }
 
-      // Update balance
       const updatedAccount = await tx.bankAccount.update({
         where: { id: originId },
         data: {
@@ -212,7 +202,6 @@ export class AccountService {
         },
       });
 
-      // Record the transaction
       await tx.transaction.create({
         data: {
           type: 'WITHDRAW',
@@ -243,7 +232,6 @@ export class AccountService {
     userId?: string
   ): Promise<{ origin: AccountBalance; destination: AccountBalance }> {
     const result = await prisma.$transaction(async (tx) => {
-      // Find origin account
       const originAccount = await tx.bankAccount.findUnique({
         where: { id: originId },
       });
@@ -257,13 +245,11 @@ export class AccountService {
         throw new InsufficientFundsError(originId, amount, originBalance);
       }
 
-      // Find or create destination account
       let destAccount = await tx.bankAccount.findUnique({
         where: { id: destinationId },
       });
 
       if (!destAccount) {
-        // Create destination account if it doesn't exist
         destAccount = await tx.bankAccount.create({
           data: {
             id: destinationId,
@@ -272,7 +258,6 @@ export class AccountService {
         });
       }
 
-      // Update origin account (debit)
       const updatedOrigin = await tx.bankAccount.update({
         where: { id: originId },
         data: {
@@ -280,7 +265,6 @@ export class AccountService {
         },
       });
 
-      // Update destination account (credit)
       const updatedDest = await tx.bankAccount.update({
         where: { id: destinationId },
         data: {
@@ -288,7 +272,6 @@ export class AccountService {
         },
       });
 
-      // Record the transaction
       await tx.transaction.create({
         data: {
           type: 'TRANSFER',
@@ -320,13 +303,10 @@ export class AccountService {
    */
   async reset(): Promise<void> {
     await prisma.$transaction(async (tx) => {
-      // Delete all transactions first (due to foreign key constraints)
       await tx.transaction.deleteMany({});
-      // Delete all bank accounts
       await tx.bankAccount.deleteMany({});
     });
   }
 }
 
-// Export singleton instance
 export const accountService = new AccountService();

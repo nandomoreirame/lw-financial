@@ -24,7 +24,7 @@ export interface ErrorResponse {
  * @example
  * ```typescript
  * fastify.get('/api/profile', async (request: AuthenticatedRequest, reply) => {
- *   // request.user is guaranteed to be available here
+ *
  *   return {
  *     userId: request.user.userId,
  *     username: request.user.username,

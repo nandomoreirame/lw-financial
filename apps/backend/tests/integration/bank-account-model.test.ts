@@ -7,7 +7,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 
 const prisma = new PrismaClient();
 
-// Constantes para testes
 const TEST_CONSTANTS = {
   PERFORMANCE_THRESHOLD_BALANCE_MS: 50,
   PERFORMANCE_THRESHOLD_HISTORY_MS: 100,
@@ -18,7 +17,6 @@ const TEST_CONSTANTS = {
   MAX_BALANCE: 99999999.99,
 } as const;
 
-// Helpers para reduzir duplicação
 const testHelpers = {
   /**
    * Cria uma conta bancária de teste
@@ -103,7 +101,6 @@ describe('BankAccount Model - Integration Tests', () => {
   let createdUserId: string | null = null;
 
   beforeAll(async () => {
-    // Criar um usuário de teste se necessário
     const testUser = await prisma.user.create({
       data: {
         email: `test-${Date.now()}@example.com`,
@@ -114,7 +111,6 @@ describe('BankAccount Model - Integration Tests', () => {
   });
 
   afterAll(async () => {
-    // Limpar dados de teste
     if (createdTransactionIds.length > 0) {
       await prisma.transaction.deleteMany({
         where: {
@@ -143,7 +139,6 @@ describe('BankAccount Model - Integration Tests', () => {
     await prisma.$disconnect();
   });
 
-  // T021 [US1] Criar BankAccount sem userId
   it('T021 [US1] - should create a bank account without userId', async () => {
     const account = await prisma.bankAccount.create({
       data: {
@@ -158,7 +153,6 @@ describe('BankAccount Model - Integration Tests', () => {
     expect(account.userId).toBeNull();
   });
 
-  // T022 [P] [US1] Criar BankAccount com userId
   it('T022 [US1] - should create a bank account with userId', async () => {
     if (!createdUserId) {
       throw new Error('Test user not created');
@@ -178,7 +172,6 @@ describe('BankAccount Model - Integration Tests', () => {
     expect(account.userId).toBe(createdUserId);
   });
 
-  // T023 [P] [US1] Consulta de saldo por account_id (validar SC-002: <50ms)
   it('T023 [US1] - should query balance by account_id in <50ms (SC-002)', async () => {
     const account = await testHelpers.createTestAccount(2500.75);
     createdAccountIds.push(account.id);
@@ -193,19 +186,16 @@ describe('BankAccount Model - Integration Tests', () => {
 
     expect(result).not.toBeNull();
     expect(result?.balance.toString()).toBe('2500.75');
-    // Performance check - pode falhar em ambientes lentos, mas é um indicador útil
     if (duration >= TEST_CONSTANTS.PERFORMANCE_THRESHOLD_BALANCE_MS) {
       console.warn(
         `Performance warning: Balance query took ${duration}ms (threshold: ${TEST_CONSTANTS.PERFORMANCE_THRESHOLD_BALANCE_MS}ms)`
       );
     }
-    // Em ambientes de CI, podemos ser mais flexíveis
     expect(duration).toBeLessThan(
       TEST_CONSTANTS.PERFORMANCE_THRESHOLD_BALANCE_MS * 10
     );
   });
 
-  // T024 [P] [US2] Criar Transaction tipo DEPOSIT
   it('T024 [US2] - should create a transaction of type DEPOSIT', async () => {
     const account = await testHelpers.createTestAccount(0);
     createdAccountIds.push(account.id);
@@ -227,7 +217,6 @@ describe('BankAccount Model - Integration Tests', () => {
     expect(transaction.originAccountId).toBeNull();
   });
 
-  // T025 [P] [US2] Criar Transaction tipo WITHDRAW
   it('T025 [US2] - should create a transaction of type WITHDRAW', async () => {
     const account = await testHelpers.createTestAccount(1000.0);
     createdAccountIds.push(account.id);
@@ -249,7 +238,6 @@ describe('BankAccount Model - Integration Tests', () => {
     expect(transaction.destinationAccountId).toBeNull();
   });
 
-  // T026 [P] [US2] Criar Transaction tipo TRANSFER com origem e destino
   it('T026 [US2] - should create a transaction of type TRANSFER with origin and destination', async () => {
     const originAccount = await testHelpers.createTestAccount(1000.0);
     const destinationAccount = await testHelpers.createTestAccount(500.0);
@@ -273,12 +261,10 @@ describe('BankAccount Model - Integration Tests', () => {
     expect(transaction.destinationAccountId).toBe(destinationAccount.id);
   });
 
-  // T027 [P] [US2] Query de histórico de transações por conta (validar SC-004: <100ms para até 1000 transações)
   it('T027 [US2] - should query transaction history by account in <100ms for up to 1000 transactions (SC-004)', async () => {
     const account = await testHelpers.createTestAccount(1000.0);
     createdAccountIds.push(account.id);
 
-    // Criar múltiplas transações para simular histórico
     for (let i = 0; i < TEST_CONSTANTS.TRANSACTION_HISTORY_COUNT; i++) {
       const isDeposit = i % 2 === 0;
       const transaction = await prisma.transaction.create({
@@ -309,7 +295,6 @@ describe('BankAccount Model - Integration Tests', () => {
     const duration = endTime - startTime;
 
     expect(history.length).toBe(TEST_CONSTANTS.TRANSACTION_HISTORY_COUNT);
-    // Performance check com threshold flexível para ambientes lentos
     if (duration >= TEST_CONSTANTS.PERFORMANCE_THRESHOLD_HISTORY_MS) {
       console.warn(
         `Performance warning: History query took ${duration}ms (threshold: ${TEST_CONSTANTS.PERFORMANCE_THRESHOLD_HISTORY_MS}ms)`
@@ -320,13 +305,11 @@ describe('BankAccount Model - Integration Tests', () => {
     );
   });
 
-  // T028 [P] [US2] Query de todas as transações ordenadas por createdAt (validar SC-005: <200ms para até 10k transações)
   it('T028 [US2] - should query all transactions ordered by createdAt in <200ms for up to 10k transactions (SC-005)', async () => {
     const account1 = await testHelpers.createTestAccount(1000.0);
     const account2 = await testHelpers.createTestAccount(500.0);
     createdAccountIds.push(account1.id, account2.id);
 
-    // Criar transações para teste (50 ao invés de 10k para teste rápido)
     for (let i = 0; i < TEST_CONSTANTS.ALL_TRANSACTIONS_COUNT; i++) {
       const transactionType =
         i % 3 === 0 ? 'DEPOSIT' : i % 3 === 1 ? 'WITHDRAW' : 'TRANSFER';
@@ -367,7 +350,6 @@ describe('BankAccount Model - Integration Tests', () => {
     expect(allTransactions.length).toBeGreaterThanOrEqual(
       TEST_CONSTANTS.ALL_TRANSACTIONS_COUNT
     );
-    // Performance check com threshold flexível
     if (duration >= TEST_CONSTANTS.PERFORMANCE_THRESHOLD_ALL_TRANSACTIONS_MS) {
       console.warn(
         `Performance warning: All transactions query took ${duration}ms (threshold: ${TEST_CONSTANTS.PERFORMANCE_THRESHOLD_ALL_TRANSACTIONS_MS}ms)`
@@ -378,9 +360,8 @@ describe('BankAccount Model - Integration Tests', () => {
     );
   });
 
-  // T029 [P] [US2] Integridade referencial (tentar criar Transaction com conta inexistente deve falhar)
   it('T029 [US2] - should fail when creating transaction with non-existent account (referential integrity)', async () => {
-    const nonExistentAccountId = 'clxxxxxxxxxxxxxxxxxxxxx'; // Formato cuid válido mas inexistente
+    const nonExistentAccountId = 'clxxxxxxxxxxxxxxxxxxxxx';
 
     try {
       await prisma.transaction.create({
@@ -390,29 +371,19 @@ describe('BankAccount Model - Integration Tests', () => {
           destinationAccountId: nonExistentAccountId,
         },
       });
-      // Se não lançou exceção, o teste falhou
-      expect(true).toBe(false); // Force failure
+      expect(true).toBe(false);
     } catch (error) {
-      // Esperamos que lance um erro por violação de foreign key constraint
       expect(error).toBeDefined();
 
-      // Validar que é um erro do Prisma conhecido
       if (error instanceof PrismaClientKnownRequestError) {
-        // Código P2003 = Foreign key constraint failed
         expect(error.code).toBe('P2003');
         expect(error.meta).toBeDefined();
       } else {
-        // Se não for PrismaClientKnownRequestError, pelo menos deve ter mensagem
         expect((error as Error).message).toBeDefined();
       }
     }
   });
 
-  // ============================================================================
-  // Testes de Casos Extremos e Validações
-  // ============================================================================
-
-  // T030 - Teste: Tentar criar conta com saldo negativo (deve falhar na validação)
   it('T030 - should reject negative balance when validated with schema', async () => {
     const result = createBankAccountSchema.safeParse({
       balance: -100.0,
@@ -425,7 +396,6 @@ describe('BankAccount Model - Integration Tests', () => {
     }
   });
 
-  // T031 - Teste: Tentar criar conta com saldo zero (deve passar)
   it('T031 - should allow zero balance', async () => {
     const result = createBankAccountSchema.safeParse({
       balance: 0,
@@ -441,7 +411,6 @@ describe('BankAccount Model - Integration Tests', () => {
     }
   });
 
-  // T032 - Teste: Tentar criar transação com amount negativo (deve falhar na validação)
   it('T032 - should reject negative transaction amount when validated with schema', async () => {
     const account = await testHelpers.createTestAccount(1000.0);
     createdAccountIds.push(account.id);
@@ -459,7 +428,6 @@ describe('BankAccount Model - Integration Tests', () => {
     }
   });
 
-  // T033 - Teste: Tentar criar transação com amount zero (deve falhar na validação)
   it('T033 - should reject zero transaction amount when validated with schema', async () => {
     const account = await testHelpers.createTestAccount(1000.0);
     createdAccountIds.push(account.id);
@@ -477,7 +445,6 @@ describe('BankAccount Model - Integration Tests', () => {
     }
   });
 
-  // T034 - Teste: Tentar criar DEPOSIT sem destinationAccountId (deve falhar na validação)
   it('T034 - should reject DEPOSIT without destinationAccountId when validated with schema', async () => {
     const result = createTransactionSchema.safeParse({
       type: 'DEPOSIT',
@@ -493,7 +460,6 @@ describe('BankAccount Model - Integration Tests', () => {
     }
   });
 
-  // T035 - Teste: Tentar criar WITHDRAW sem originAccountId (deve falhar na validação)
   it('T035 - should reject WITHDRAW without originAccountId when validated with schema', async () => {
     const result = createTransactionSchema.safeParse({
       type: 'WITHDRAW',
@@ -509,7 +475,6 @@ describe('BankAccount Model - Integration Tests', () => {
     }
   });
 
-  // T036 - Teste: Tentar criar TRANSFER sem originAccountId (deve falhar na validação)
   it('T036 - should reject TRANSFER without originAccountId when validated with schema', async () => {
     const account = await testHelpers.createTestAccount(1000.0);
     createdAccountIds.push(account.id);
@@ -529,7 +494,6 @@ describe('BankAccount Model - Integration Tests', () => {
     }
   });
 
-  // T037 - Teste: Tentar criar TRANSFER sem destinationAccountId (deve falhar na validação)
   it('T037 - should reject TRANSFER without destinationAccountId when validated with schema', async () => {
     const account = await testHelpers.createTestAccount(1000.0);
     createdAccountIds.push(account.id);
@@ -549,7 +513,6 @@ describe('BankAccount Model - Integration Tests', () => {
     }
   });
 
-  // T038 - Teste: Tentar criar TRANSFER com mesma conta origem e destino (deve falhar na validação)
   it('T038 - should reject TRANSFER with same origin and destination account when validated with schema', async () => {
     const account = await testHelpers.createTestAccount(1000.0);
     createdAccountIds.push(account.id);
@@ -570,7 +533,6 @@ describe('BankAccount Model - Integration Tests', () => {
     }
   });
 
-  // T039 - Teste: Tentar criar conta com saldo muito grande (deve falhar na validação)
   it('T039 - should reject balance exceeding maximum value when validated with schema', async () => {
     const result = createBankAccountSchema.safeParse({
       balance: TEST_CONSTANTS.MAX_BALANCE + 1,
@@ -583,7 +545,6 @@ describe('BankAccount Model - Integration Tests', () => {
     }
   });
 
-  // T040 - Teste: Tentar criar transação com amount muito grande (deve falhar na validação)
   it('T040 - should reject transaction amount exceeding maximum value when validated with schema', async () => {
     const account = await testHelpers.createTestAccount(1000.0);
     createdAccountIds.push(account.id);

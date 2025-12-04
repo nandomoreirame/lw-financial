@@ -106,7 +106,6 @@ export function decodeToken(token: string): JWTPayload | null {
     const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
     return JSON.parse(decoded) as JWTPayload;
   } catch (error) {
-    // Only log in development to avoid exposing errors in production
     if (import.meta.env.DEV) {
       console.error('Error decoding token:', error);
     }
@@ -124,7 +123,6 @@ export function isTokenExpired(token: string): boolean {
     return true;
   }
 
-  // exp is in seconds, Date.now() is in milliseconds
   return Date.now() >= decoded.exp * 1000;
 }
 

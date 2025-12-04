@@ -2,10 +2,10 @@
  * Login route - Public route for user authentication
  */
 
-import type { Route } from './+types/login';
 import { redirect } from 'react-router';
-import { checkAuthentication } from '../middleware/protected-route';
 import { LoginForm } from '../components/login/login-form';
+import { checkAuthentication } from '../middleware/protected-route';
+import type { Route } from './+types/login';
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -19,15 +19,12 @@ export function meta(_args: Route.MetaArgs) {
  * Redirects to dashboard if user is already authenticated
  */
 export async function loader({ request }: Route.LoaderArgs) {
-  // Check if user is already authenticated
   const authCheck = checkAuthentication(request);
 
   if (authCheck.isAuthenticated) {
-    // User is already logged in, redirect to home (dashboard)
     throw redirect('/');
   }
 
-  // Check for error message in query params (from protected route redirect)
   const url = new URL(request.url);
   const error = url.searchParams.get('error');
 
@@ -35,9 +32,6 @@ export async function loader({ request }: Route.LoaderArgs) {
     error: error || null,
   };
 }
-
-// Login is now handled client-side in LoginForm component
-// This allows direct API calls without server-side fetch issues
 
 /**
  * Login page component

@@ -33,7 +33,6 @@ export const links: Route.LinksFunction = () => [
 export function Layout({ children }: { children: React.ReactNode }) {
   const [showDevtools, setShowDevtools] = useState(false);
 
-  // Only show devtools after hydration to avoid hydration mismatch
   useEffect(() => {
     if (import.meta.env.DEV) {
       setShowDevtools(true);

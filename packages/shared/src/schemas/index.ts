@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// Example shared schemas
 export const userSchema = z.object({
   id: z.string(),
   email: z.string().email(),
@@ -9,10 +8,8 @@ export const userSchema = z.object({
 
 export type User = z.infer<typeof userSchema>;
 
-// Auth schemas
 export { loginSchema, type LoginRequest } from './auth';
 
-// Bank account schemas
 export {
   createBankAccountSchema,
   updateBalanceSchema,

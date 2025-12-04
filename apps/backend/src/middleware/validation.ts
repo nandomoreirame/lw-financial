@@ -8,7 +8,6 @@ export async function validateLogin(
   try {
     const body = request.body as unknown;
 
-    // Verificar se o corpo está vazio ou não existe
     if (!body || typeof body !== 'object' || Object.keys(body).length === 0) {
       reply.status(400).send({
         error: 'Request body is required',
@@ -20,7 +19,6 @@ export async function validateLogin(
     return true;
   } catch (error: unknown) {
     if (error instanceof ZodError) {
-      // Filtrar mensagens duplicadas e melhorar formatação
       const errorMessages = error.errors
         .map((err) => {
           const path = err.path.join('.');

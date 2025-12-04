@@ -12,12 +12,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
   const [theme, setTheme] = useState<ToasterProps['theme']>('system');
 
   useEffect(() => {
-    // Detect theme from document element class
     const htmlElement = document.documentElement;
     const isDark = htmlElement.classList.contains('dark');
     setTheme(isDark ? 'dark' : 'light');
 
-    // Watch for theme changes via MutationObserver
     const observer = new MutationObserver(() => {
       const isDarkNow = htmlElement.classList.contains('dark');
       setTheme(isDarkNow ? 'dark' : 'light');

@@ -1,5 +1,3 @@
-// Swagger configuration types are inferred from the object structure
-
 /**
  * Configuração do Swagger para documentação da API
  */

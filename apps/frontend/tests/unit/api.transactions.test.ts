@@ -10,7 +10,6 @@ import {
   type TransactionsResponse,
 } from '../../app/lib/api';
 
-// Mock global fetch
 const originalFetch = global.fetch;
 const originalSessionStorage = global.sessionStorage;
 
@@ -18,7 +17,6 @@ describe('getTransactions API function', () => {
   let mockSessionStorage: Storage;
 
   beforeEach(() => {
-    // Mock sessionStorage
     mockSessionStorage = {
       getItem: () => null,
       setItem: () => {},
@@ -28,20 +26,16 @@ describe('getTransactions API function', () => {
       length: 0,
     } as Storage;
 
-    // Replace global sessionStorage
     Object.defineProperty(global, 'sessionStorage', {
       value: mockSessionStorage,
       writable: true,
     });
 
-    // Mock fetch
     global.fetch = (() => {}) as typeof fetch;
   });
 
   afterEach(() => {
-    // Restore original fetch
     global.fetch = originalFetch;
-    // Restore original sessionStorage
     Object.defineProperty(global, 'sessionStorage', {
       value: originalSessionStorage,
       writable: true,
@@ -72,10 +66,8 @@ describe('getTransactions API function', () => {
         },
       ];
 
-      // Mock sessionStorage.getItem
       mockSessionStorage.getItem = () => mockToken;
 
-      // Mock fetch
       global.fetch = async () => {
         return new Response(JSON.stringify(mockTransactions), {
           status: 200,
@@ -329,7 +321,6 @@ describe('getTransactions API function', () => {
       mockSessionStorage.getItem = () => mockToken;
 
       global.fetch = async () => {
-        // Simulate timeout by throwing AbortError
         const error = new Error('AbortError');
         error.name = 'AbortError';
         throw error;

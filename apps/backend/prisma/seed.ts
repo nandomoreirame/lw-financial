@@ -6,22 +6,17 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Starting database seed...');
 
-  // Limpar banco de dados antes de popular
-  // Ordem de deleção: primeiro as tabelas dependentes, depois as independentes
-  // Session e Account serão deletados automaticamente com User (onDelete: Cascade)
   console.log('Cleaning database...');
   await prisma.transaction.deleteMany();
   await prisma.bankAccount.deleteMany();
   await prisma.verification.deleteMany();
-  await prisma.user.deleteMany(); // Deleta Session e Account automaticamente (onDelete: Cascade)
+  await prisma.user.deleteMany();
   console.log('Database cleaned successfully!');
 
-  // Hash das senhas
   const saltRounds = 10;
   const adminPasswordHash = await bcrypt.hash('admin123', saltRounds);
   const userPasswordHash = await bcrypt.hash('user123', saltRounds);
 
-  // Criar usuário admin
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@lwfinancial.com' },
     update: {},
@@ -48,7 +43,6 @@ async function main() {
     name: adminUser.name,
   });
 
-  // Criar usuário comum
   const regularUser = await prisma.user.upsert({
     where: { email: 'user@lwfinancial.com' },
     update: {},
@@ -75,7 +69,6 @@ async function main() {
     name: regularUser.name,
   });
 
-  // Criar ou atualizar conta bancária para admin com saldo inicial
   const existingAdminAccount = await prisma.bankAccount.findFirst({
     where: { userId: adminUser.id },
   });
@@ -98,7 +91,6 @@ async function main() {
     balance: adminBankAccount.balance.toString(),
   });
 
-  // Criar ou atualizar conta bancária para usuário comum com saldo inicial
   const existingUserAccount = await prisma.bankAccount.findFirst({
     where: { userId: regularUser.id },
   });

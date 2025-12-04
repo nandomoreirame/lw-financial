@@ -9,23 +9,23 @@ import { authenticateRequest } from '../middleware/authentication';
  *
  * @example
  * ```typescript
- * // Registrar plugin em apps/backend/src/index.ts
+ *
  * await fastify.register(protectedRoutesPlugin, {
  *   prefix: '/v1/protected'
  * });
  *
- * // Agora todas as rotas registradas no plugin precisam de autenticação
+ *
  * fastify.get('/users', async (request: AuthenticatedRequest, reply) => {
- *   // request.user está disponível aqui
+ *
  *   return { userId: request.user.userId };
  * });
  * ```
  *
  * @example
  * ```typescript
- * // Usar como hook global (alternativa)
+ *
  * fastify.addHook('preHandler', async (request, reply) => {
- *   // Pular autenticação para rotas públicas
+ *
  *   const publicRoutes = ['/v1/login', '/v1/health'];
  *   if (publicRoutes.some(route => request.url.startsWith(route))) {
  *     return;
@@ -33,7 +33,7 @@ import { authenticateRequest } from '../middleware/authentication';
  *
  *   const authenticated = await authenticateRequest(request, reply);
  *   if (!authenticated) {
- *     return; // Resposta já enviada pelo middleware
+ *     return;
  *   }
  * });
  * ```
@@ -42,15 +42,10 @@ export async function protectedRoutesPlugin(
   fastify: FastifyInstance,
   _options: FastifyPluginOptions
 ) {
-  // Aplicar autenticação a todas as rotas neste plugin
   fastify.addHook('preHandler', async (request, reply) => {
     const authenticated = await authenticateRequest(request, reply);
     if (!authenticated) {
-      return; // Resposta já enviada pelo middleware
+      return;
     }
   });
-
-  // Exemplo de rota protegida (pode ser removido se não necessário)
-  // Rotas específicas devem ser registradas no arquivo principal
-  // ou em outros plugins que registrem este plugin como dependência
 }

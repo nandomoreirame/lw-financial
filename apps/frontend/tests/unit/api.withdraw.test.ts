@@ -6,7 +6,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { withdraw, type WithdrawResponse } from '../../app/lib/api';
 
-// Mock global fetch
 const originalFetch = global.fetch;
 const originalSessionStorage = global.sessionStorage;
 
@@ -14,7 +13,6 @@ describe('withdraw API function', () => {
   let mockSessionStorage: Storage;
 
   beforeEach(() => {
-    // Mock sessionStorage
     mockSessionStorage = {
       getItem: () => null,
       setItem: () => {},
@@ -24,20 +22,16 @@ describe('withdraw API function', () => {
       length: 0,
     } as Storage;
 
-    // Replace global sessionStorage
     Object.defineProperty(global, 'sessionStorage', {
       value: mockSessionStorage,
       writable: true,
     });
 
-    // Mock fetch
     global.fetch = (() => {}) as typeof fetch;
   });
 
   afterEach(() => {
-    // Restore original fetch
     global.fetch = originalFetch;
-    // Restore original sessionStorage
     Object.defineProperty(global, 'sessionStorage', {
       value: originalSessionStorage,
       writable: true,
@@ -54,10 +48,8 @@ describe('withdraw API function', () => {
         },
       };
 
-      // Mock sessionStorage.getItem
       mockSessionStorage.getItem = () => mockToken;
 
-      // Mock fetch
       global.fetch = async () => {
         return new Response(JSON.stringify(mockResponse), {
           status: 201,
@@ -244,7 +236,6 @@ describe('withdraw API function', () => {
         );
       };
 
-      // The function throws the error message from the server response
       await expect(withdraw(100)).rejects.toThrow('Internal Server Error');
     });
 
@@ -282,10 +273,9 @@ describe('withdraw API function', () => {
       mockSessionStorage.getItem = () => mockToken;
 
       global.fetch = async () => {
-        return new Response(
-          JSON.stringify({ origin: { id: '123' } }), // missing balance
-          { status: 201 }
-        );
+        return new Response(JSON.stringify({ origin: { id: '123' } }), {
+          status: 201,
+        });
       };
 
       await expect(withdraw(100)).rejects.toThrow(
@@ -318,10 +308,9 @@ describe('withdraw API function', () => {
       mockSessionStorage.getItem = () => mockToken;
 
       global.fetch = async () => {
-        return new Response(
-          JSON.stringify({ origin: { balance: 100 } }), // missing id
-          { status: 201 }
-        );
+        return new Response(JSON.stringify({ origin: { balance: 100 } }), {
+          status: 201,
+        });
       };
 
       await expect(withdraw(100)).rejects.toThrow(
@@ -337,7 +326,6 @@ describe('withdraw API function', () => {
       mockSessionStorage.getItem = () => mockToken;
 
       global.fetch = async () => {
-        // Simulate timeout by throwing AbortError
         const error = new Error('AbortError');
         error.name = 'AbortError';
         throw error;

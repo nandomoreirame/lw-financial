@@ -13,14 +13,12 @@ import { useDeposit } from '../../app/hooks/use-deposit';
 
 describe('useDeposit hook', () => {
   beforeEach(() => {
-    // Clear sessionStorage before each test
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.clear();
     }
   });
 
   afterEach(() => {
-    // Clean up after each test
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.clear();
     }
@@ -32,40 +30,24 @@ describe('useDeposit hook', () => {
     });
 
     test('should accept accountId parameter', () => {
-      // This test verifies the function signature
-      // Actual hook behavior requires React component testing
       expect(useDeposit.length).toBe(1);
     });
   });
 
   describe('Hook return type', () => {
     test('should return object with expected properties', () => {
-      // Note: This is a type-level test
-      // Actual runtime testing requires React component rendering
-      // The hook should return:
-      // - deposit: function
-      // - isLoading: boolean
-      // - isSuccess: boolean
-      // - error: Error | null
-      // - reset: function
-
-      // Verify the function exists and can be called
       expect(typeof useDeposit).toBe('function');
     });
   });
 
   describe('Integration with React Query', () => {
     test('should use React Query mutation', () => {
-      // This test verifies that the hook is structured correctly
-      // Full testing requires React component rendering with QueryClientProvider
-      // The hook uses useMutation from @tanstack/react-query internally
       expect(typeof useDeposit).toBe('function');
     });
   });
 
   describe('401 Error handling logic', () => {
     test('should detect authentication error messages', () => {
-      // Test the error detection logic used in onError handler
       const isAuthError = (errorMessage: string): boolean => {
         return (
           errorMessage.includes('Não autenticado') ||
@@ -81,7 +63,6 @@ describe('useDeposit hook', () => {
     });
 
     test('should build login URL with error parameter', () => {
-      // Test the URL building logic used in onError handler
       const buildLoginUrl = (errorMessage: string): string => {
         const loginUrl = new URL('/login', 'http://localhost:5173');
         loginUrl.searchParams.set('error', encodeURIComponent(errorMessage));
@@ -101,7 +82,6 @@ describe('useDeposit hook', () => {
     });
 
     test('should handle sessionStorage operations', () => {
-      // Test sessionStorage operations used in error handling
       if (typeof sessionStorage !== 'undefined') {
         sessionStorage.setItem('auth_token', 'test-token');
         expect(sessionStorage.getItem('auth_token')).toBe('test-token');
@@ -114,7 +94,6 @@ describe('useDeposit hook', () => {
 
   describe('Cache invalidation logic', () => {
     test('should build correct query key for balance invalidation', () => {
-      // Test the query key structure used for cache invalidation
       const accountId = 'test-account-123';
       const queryKey = ['balance', accountId];
 
@@ -124,7 +103,6 @@ describe('useDeposit hook', () => {
     });
 
     test('should build correct query key for transactions invalidation', () => {
-      // Test the query key structure used for transactions cache invalidation
       const transactionsQueryKey = ['transactions'];
 
       expect(transactionsQueryKey).toEqual(['transactions']);
@@ -132,7 +110,6 @@ describe('useDeposit hook', () => {
     });
 
     test('should invalidate both balance and transactions cache on success', () => {
-      // Test that both caches are invalidated after successful deposit
       const balanceQueryKey = ['balance', 'test-account-123'];
       const transactionsQueryKey = ['transactions'];
 
@@ -141,20 +118,18 @@ describe('useDeposit hook', () => {
     });
 
     test('should handle null accountId in cache invalidation', () => {
-      // Test that null accountId is handled correctly
       const accountId: string | null = null;
       const shouldInvalidateBalance = accountId !== null;
-      const shouldInvalidateTransactions = true; // Always invalidate transactions
+      const shouldInvalidateTransactions = true;
 
       expect(shouldInvalidateBalance).toBe(false);
       expect(shouldInvalidateTransactions).toBe(true);
     });
 
     test('should handle valid accountId in cache invalidation', () => {
-      // Test that valid accountId triggers invalidation
       const accountId: string | null = 'test-account-123';
       const shouldInvalidateBalance = accountId !== null;
-      const shouldInvalidateTransactions = true; // Always invalidate transactions
+      const shouldInvalidateTransactions = true;
 
       expect(shouldInvalidateBalance).toBe(true);
       expect(shouldInvalidateTransactions).toBe(true);

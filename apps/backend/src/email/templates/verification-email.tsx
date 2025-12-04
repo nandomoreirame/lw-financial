@@ -52,7 +52,6 @@ export const VerificationEmail = ({
   );
 };
 
-// Export default para React Email CLI
 export default function VerificationEmailDefault() {
   return (
     <VerificationEmail
@@ -65,7 +64,6 @@ export default function VerificationEmailDefault() {
   );
 }
 
-// PreviewProps para React Email CLI
 VerificationEmailDefault.PreviewProps = {
   userName: 'João Silva',
   userEmail: 'joao.silva@lwfinancial.com',

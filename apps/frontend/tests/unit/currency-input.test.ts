@@ -9,22 +9,18 @@ import { CurrencyInput } from '../../app/components/dashboard/currency-input';
 describe('CurrencyInput component', () => {
   describe('Component exports', () => {
     test('should export CurrencyInput component', () => {
-      // CurrencyInput is a forwardRef component, which returns an object
       expect(CurrencyInput).toBeDefined();
       expect(typeof CurrencyInput).toBe('object');
-      // forwardRef components have a render property
       expect(typeof CurrencyInput.render || typeof CurrencyInput).toBeTruthy();
     });
 
     test('should accept value, onChange, error, and other input props', () => {
-      // Verify component exists and can be used
       expect(CurrencyInput).toBeDefined();
     });
   });
 
   describe('Component structure', () => {
     test('should be a React forwardRef component', () => {
-      // forwardRef returns an object, not a function
       expect(typeof CurrencyInput).toBe('object');
       expect(CurrencyInput).toBeDefined();
     });

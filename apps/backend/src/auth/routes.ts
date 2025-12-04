@@ -7,14 +7,13 @@ import { ErrorResponse, LoginRequest, LoginResponse } from '../types/auth';
 import { auth } from './better-auth';
 
 export async function loginRoutes(fastify: FastifyInstance) {
-  // Tratamento de métodos HTTP não suportados para /login
   fastify.route({
     method: ['GET', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
     url: '/login',
     schema: {
       description: 'Métodos HTTP não suportados para /login',
       tags: ['auth'],
-      hide: true, // Ocultar da documentação Swagger
+      hide: true,
     },
     async handler(request: FastifyRequest, reply: FastifyReply) {
       reply.header('Allow', 'POST');
@@ -24,7 +23,6 @@ export async function loginRoutes(fastify: FastifyInstance) {
     },
   });
 
-  // Rota de autenticação Better Auth (para futuras extensões)
   fastify.route({
     method: ['GET', 'POST'],
     url: '/auth/*',
@@ -32,11 +30,14 @@ export async function loginRoutes(fastify: FastifyInstance) {
       description:
         'Rota de autenticação Better Auth (proxy para futuras extensões)',
       tags: ['auth'],
-      hide: true, // Ocultar da documentação Swagger por enquanto
+      hide: true,
     },
     async handler(request: FastifyRequest, reply: FastifyReply) {
       try {
-        const url = new URL(request.url, `http://${request.headers.host}`);
+        const url = new URL(
+          request.url,
+          `http://${request.headers.host || 'localhost:3001'}`
+        );
 
         const headers = new Headers();
         Object.entries(request.headers).forEach(([key, value]) => {
@@ -64,7 +65,6 @@ export async function loginRoutes(fastify: FastifyInstance) {
     },
   });
 
-  // Rota de login customizada
   fastify.post(
     '/login',
     {
@@ -149,7 +149,6 @@ export async function loginRoutes(fastify: FastifyInstance) {
       const { username, pass } = request.body as LoginRequest;
 
       try {
-        // Buscar conta pelo accountId (username)
         const account = await prisma.account.findFirst({
           where: {
             accountId: username,
@@ -167,7 +166,6 @@ export async function loginRoutes(fastify: FastifyInstance) {
           } as ErrorResponse);
         }
 
-        // Verificar senha
         const isPasswordValid = await bcrypt.compare(pass, account.password);
 
         if (!isPasswordValid) {
@@ -182,10 +180,8 @@ export async function loginRoutes(fastify: FastifyInstance) {
           'Successful login'
         );
 
-        // Gerar token JWT
         const secret = process.env.BETTER_AUTH_SECRET!;
 
-        // Gerar token JWT com payload básico
         const token = jwt.sign(
           {
             userId: account.userId,
@@ -195,7 +191,7 @@ export async function loginRoutes(fastify: FastifyInstance) {
           },
           secret,
           {
-            expiresIn: '1h', // Token expira em 1 hora (conforme recomendação para sistema bancário)
+            expiresIn: '1h',
           }
         );
 

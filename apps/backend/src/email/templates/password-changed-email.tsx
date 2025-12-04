@@ -43,7 +43,6 @@ export const PasswordChangedEmail = ({
   );
 };
 
-// Export default para React Email CLI
 export default function PasswordChangedEmailDefault() {
   return (
     <PasswordChangedEmail
@@ -54,7 +53,6 @@ export default function PasswordChangedEmailDefault() {
   );
 }
 
-// PreviewProps para React Email CLI
 PasswordChangedEmailDefault.PreviewProps = {
   userName: 'Pedro Oliveira',
   userEmail: 'pedro.oliveira@lwfinancial.com',

@@ -9,13 +9,12 @@ import { z } from '@lw-financial/shared';
 import { Button } from '@lw-financial/ui';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
 import { login as loginAPI } from '../../lib/api';
 import { storeToken } from '../../lib/auth';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 import { LoginError } from './login-error';
 
-// Login form schema matching backend validation
 const loginSchema = z.object({
   username: z
     .string()
@@ -55,15 +54,10 @@ export function LoginForm({ className }: LoginFormProps) {
     setError(null);
 
     try {
-      // Call login API directly from client
       const response = await loginAPI(data.username, data.password);
 
-      // Store token in sessionStorage
       storeToken(response.token);
 
-      // Use window.location.href to force full page reload
-      // This ensures the loader runs on the client where sessionStorage is available
-      // After SSR, the loader will run on the client and can access sessionStorage
       window.location.href = '/';
     } catch (err) {
       const errorMessage =
