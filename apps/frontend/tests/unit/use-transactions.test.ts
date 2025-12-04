@@ -29,8 +29,8 @@ describe('useTransactions hook', () => {
       expect(typeof useTransactions).toBe('function');
     });
 
-    test('should accept no parameters', () => {
-      expect(useTransactions.length).toBe(0);
+    test('should accept optional accountCode parameter', () => {
+      expect(useTransactions.length).toBe(1);
     });
   });
 

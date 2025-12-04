@@ -29,8 +29,8 @@ describe('useWithdraw hook', () => {
       expect(typeof useWithdraw).toBe('function');
     });
 
-    test('should accept accountId parameter', () => {
-      expect(useWithdraw.length).toBe(1);
+    test('should accept accountId and optional accountCode parameters', () => {
+      expect(useWithdraw.length).toBe(2);
     });
   });
 
@@ -93,46 +93,58 @@ describe('useWithdraw hook', () => {
   });
 
   describe('Cache invalidation logic', () => {
-    test('should build correct query key for balance invalidation', () => {
-      const accountId = 'test-account-123';
-      const queryKey = ['balance', accountId];
+    test('should build correct query key for balance invalidation with accountCode', () => {
+      const accountCode = '1234-5';
+      const queryKey = ['balance', accountCode];
 
-      expect(queryKey).toEqual(['balance', 'test-account-123']);
+      expect(queryKey).toEqual(['balance', '1234-5']);
       expect(queryKey[0]).toBe('balance');
-      expect(queryKey[1]).toBe(accountId);
+      expect(queryKey[1]).toBe(accountCode);
+    });
+
+    test('should build correct query key for balance invalidation with default', () => {
+      const accountCode = undefined;
+      const queryKey = ['balance', accountCode || 'default'];
+
+      expect(queryKey).toEqual(['balance', 'default']);
+      expect(queryKey[0]).toBe('balance');
+      expect(queryKey[1]).toBe('default');
     });
 
     test('should build correct query key for transactions invalidation', () => {
-      const transactionsQueryKey = ['transactions'];
+      const accountCode = '1234-5';
+      const transactionsQueryKey = ['transactions', accountCode];
 
-      expect(transactionsQueryKey).toEqual(['transactions']);
+      expect(transactionsQueryKey).toEqual(['transactions', '1234-5']);
       expect(transactionsQueryKey[0]).toBe('transactions');
+      expect(transactionsQueryKey[1]).toBe(accountCode);
     });
 
     test('should invalidate both balance and transactions cache on success', () => {
-      const balanceQueryKey = ['balance', 'test-account-123'];
-      const transactionsQueryKey = ['transactions'];
+      const accountCode = '1234-5';
+      const balanceQueryKey = ['balance', accountCode || 'default'];
+      const transactionsQueryKey = ['transactions', accountCode];
 
-      expect(balanceQueryKey).toEqual(['balance', 'test-account-123']);
-      expect(transactionsQueryKey).toEqual(['transactions']);
+      expect(balanceQueryKey).toEqual(['balance', '1234-5']);
+      expect(transactionsQueryKey).toEqual(['transactions', '1234-5']);
     });
 
-    test('should handle null accountId in cache invalidation', () => {
-      const accountId: string | null = null;
-      const shouldInvalidateBalance = accountId !== null;
-      const shouldInvalidateTransactions = true;
+    test('should handle undefined accountCode in cache invalidation', () => {
+      const accountCode: string | undefined = undefined;
+      const balanceQueryKey = ['balance', accountCode || 'default'];
+      const transactionsQueryKey = ['transactions', accountCode];
 
-      expect(shouldInvalidateBalance).toBe(false);
-      expect(shouldInvalidateTransactions).toBe(true);
+      expect(balanceQueryKey).toEqual(['balance', 'default']);
+      expect(transactionsQueryKey).toEqual(['transactions', undefined]);
     });
 
-    test('should handle valid accountId in cache invalidation', () => {
-      const accountId: string | null = 'test-account-123';
-      const shouldInvalidateBalance = accountId !== null;
-      const shouldInvalidateTransactions = true;
+    test('should handle valid accountCode in cache invalidation', () => {
+      const accountCode: string | undefined = '1234-5';
+      const balanceQueryKey = ['balance', accountCode || 'default'];
+      const transactionsQueryKey = ['transactions', accountCode];
 
-      expect(shouldInvalidateBalance).toBe(true);
-      expect(shouldInvalidateTransactions).toBe(true);
+      expect(balanceQueryKey).toEqual(['balance', '1234-5']);
+      expect(transactionsQueryKey).toEqual(['transactions', '1234-5']);
     });
   });
 });
