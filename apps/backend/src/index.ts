@@ -38,10 +38,21 @@ const fastify = Fastify({ logger: true });
  */
 async function start() {
   try {
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    const clientOrigin = isDevelopment
+      ? 'http://localhost:5173'
+      : (process.env.CLIENT_ORIGIN ?? 'http://localhost:5173');
+
     await fastify.register(cors, {
-      origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      origin: clientOrigin,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+      ],
       credentials: true,
     });
 
@@ -132,7 +143,7 @@ async function start() {
      * ```
      */
 
-    const PORT = process.env.PORT || 3001;
+    const PORT = process.env.PORT || 3333;
 
     await fastify.listen({ port: Number(PORT), host: '0.0.0.0' });
     console.log(`Backend server running on http://localhost:${PORT}`);

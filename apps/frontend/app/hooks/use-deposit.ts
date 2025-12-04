@@ -19,17 +19,24 @@ export interface UseDepositReturn {
  * Hook to deposit money into account
  * Automatically invalidates balance cache after successful deposit
  * Handles 401 errors by redirecting to login
+ * @param accountId - Account ID (optional)
+ * @param accountCode - Account code in format "XXXX-X" (optional, takes precedence over accountId)
  */
-export function useDeposit(accountId: string | null): UseDepositReturn {
+export function useDeposit(
+  accountId: string | null,
+  accountCode?: string
+): UseDepositReturn {
   const queryClient = useQueryClient();
 
   const { mutateAsync, isPending, isSuccess, error, reset } = useMutation({
-    mutationFn: deposit,
+    mutationFn: (amount: number) => deposit(amount, accountCode),
     onSuccess: () => {
-      if (accountId) {
-        queryClient.invalidateQueries({ queryKey: ['balance', accountId] });
-      }
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({
+        queryKey: ['balance', accountCode || 'default'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['transactions', accountCode],
+      });
     },
     onError: (error: Error) => {
       if (isAuthenticationError(error)) {

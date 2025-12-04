@@ -160,7 +160,6 @@ export async function signup(
         error: 'Erro ao criar conta',
       }));
 
-      // Tratar erros específicos
       if (response.status === 409) {
         const lowerError = error.error.toLowerCase();
         if (lowerError.includes('username')) {
@@ -186,22 +185,27 @@ export async function signup(
 
 /**
  * Fetches account balance from backend
- * The account ID is extracted from the JWT token on the backend, not from parameters.
- * The accountId parameter is kept for API compatibility but is not used.
+ * If accountCode is provided, fetches balance for that specific account
+ * Otherwise, fetches balance for the user's default account
  *
- * @param accountId - Unused parameter (kept for API compatibility)
+ * @param accountCode - Account code in format "XXXX-X" (optional). If not provided, returns default account balance
  * @returns Account balance as a number
  */
-export async function getBalance(_accountId: string): Promise<number> {
+export async function getBalance(accountCode?: string): Promise<number> {
   const token = sessionStorage.getItem('auth_token');
 
   if (!token) {
     throw new Error('Token de autenticação não encontrado');
   }
 
+  const url = new URL(`${API_BASE_URL}/v1/balance`);
+  if (accountCode) {
+    url.searchParams.set('account_code', accountCode);
+  }
+
   try {
     const response = await fetchWithTimeout(
-      `${API_BASE_URL}/v1/balance`,
+      url.toString(),
       {
         method: 'GET',
         headers: {
@@ -271,15 +275,32 @@ export type TransactionsResponse = Transaction[];
 
 /**
  * Performs deposit request to backend
- * The account is automatically identified from the JWT token
+ * The account can be identified by accountCode or automatically from the JWT token
  * @param amount - Deposit amount (0.01 to 999999.99)
+ * @param accountCode - Optional account code in format "XXXX-X" to deposit to specific account
  * @returns Deposit response with account ID and new balance
  */
-export async function deposit(amount: number): Promise<DepositResponse> {
+export async function deposit(
+  amount: number,
+  accountCode?: string
+): Promise<DepositResponse> {
   const token = sessionStorage.getItem('auth_token');
 
   if (!token) {
     throw new Error('Token de autenticação não encontrado');
+  }
+
+  const body: {
+    type: string;
+    amount: number;
+    accountCode?: string;
+  } = {
+    type: 'deposit',
+    amount,
+  };
+
+  if (accountCode) {
+    body.accountCode = accountCode;
   }
 
   try {
@@ -291,10 +312,7 @@ export async function deposit(amount: number): Promise<DepositResponse> {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          type: 'deposit',
-          amount,
-        }),
+        body: JSON.stringify(body),
       },
       DEFAULT_TIMEOUT_MS
     );
@@ -331,15 +349,32 @@ export async function deposit(amount: number): Promise<DepositResponse> {
 
 /**
  * Performs withdraw request to backend
- * The account is automatically identified from the JWT token
+ * The account can be identified by accountCode or automatically from the JWT token
  * @param amount - Withdraw amount (0.01 to 999999.99)
+ * @param accountCode - Optional account code in format "XXXX-X" to withdraw from specific account
  * @returns Withdraw response with account ID and new balance
  */
-export async function withdraw(amount: number): Promise<WithdrawResponse> {
+export async function withdraw(
+  amount: number,
+  accountCode?: string
+): Promise<WithdrawResponse> {
   const token = sessionStorage.getItem('auth_token');
 
   if (!token) {
     throw new Error('Token de autenticação não encontrado');
+  }
+
+  const body: {
+    type: string;
+    amount: number;
+    accountCode?: string;
+  } = {
+    type: 'withdraw',
+    amount,
+  };
+
+  if (accountCode) {
+    body.accountCode = accountCode;
   }
 
   try {
@@ -351,10 +386,7 @@ export async function withdraw(amount: number): Promise<WithdrawResponse> {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          type: 'withdraw',
-          amount,
-        }),
+        body: JSON.stringify(body),
       },
       DEFAULT_TIMEOUT_MS
     );
@@ -410,20 +442,29 @@ export async function withdraw(amount: number): Promise<WithdrawResponse> {
 /**
  * Fetches transaction history from backend
  * Returns the 20 most recent transactions for the authenticated user
+ * Optionally filters by accountCode if provided
  * Transactions are automatically ordered by creation date (most recent first)
  *
+ * @param accountCode - Optional account code in format "XXXX-X" to filter transactions
  * @returns Array of transactions
  */
-export async function getTransactions(): Promise<TransactionsResponse> {
+export async function getTransactions(
+  accountCode?: string
+): Promise<TransactionsResponse> {
   const token = sessionStorage.getItem('auth_token');
 
   if (!token) {
     throw new Error('Token de autenticação não encontrado');
   }
 
+  const url = new URL(`${API_BASE_URL}/v1/transactions`);
+  if (accountCode) {
+    url.searchParams.set('accountCode', accountCode);
+  }
+
   try {
     const response = await fetchWithTimeout(
-      `${API_BASE_URL}/v1/transactions`,
+      url.toString(),
       {
         method: 'GET',
         headers: {
@@ -461,5 +502,186 @@ export async function getTransactions(): Promise<TransactionsResponse> {
       throw error;
     }
     throw new Error('Erro ao buscar histórico de transações. Tente novamente.');
+  }
+}
+
+export interface AccountBalance {
+  id: string;
+  code: string | null;
+  balance: number;
+}
+
+export type AccountsResponse = AccountBalance[];
+
+/**
+ * Fetches all bank accounts for the authenticated user
+ * @returns Array of user's bank accounts
+ */
+export async function getAccounts(): Promise<AccountsResponse> {
+  const token = sessionStorage.getItem('auth_token');
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado');
+  }
+
+  try {
+    const response = await fetchWithTimeout(
+      `${API_BASE_URL}/v1/accounts`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      },
+      DEFAULT_TIMEOUT_MS
+    );
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Não autenticado');
+      }
+
+      if (response.status === 404) {
+        return [];
+      }
+
+      const error: ErrorResponse = await response.json().catch(() => ({
+        error: 'Erro ao buscar contas',
+      }));
+      throw new Error(error.error || 'Erro ao buscar contas');
+    }
+
+    const data = await response.json();
+
+    if (!Array.isArray(data)) {
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    return data as AccountsResponse;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Erro ao buscar contas. Tente novamente.');
+  }
+}
+
+/**
+ * Creates a new bank account for the authenticated user
+ * Always creates a new account, even if the user already has other accounts
+ * @param initialBalance - Optional initial balance (default: 0)
+ * @returns The newly created account
+ */
+export async function createAccount(
+  initialBalance?: number
+): Promise<AccountBalance> {
+  const token = sessionStorage.getItem('auth_token');
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado');
+  }
+
+  try {
+    const response = await fetchWithTimeout(
+      `${API_BASE_URL}/v1/accounts`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          initialBalance: initialBalance || 0,
+        }),
+      },
+      DEFAULT_TIMEOUT_MS
+    );
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Não autenticado');
+      }
+
+      const error: ErrorResponse = await response.json().catch(() => ({
+        error: 'Erro ao criar conta',
+      }));
+      throw new Error(error.error || 'Erro ao criar conta');
+    }
+
+    const data = await response.json();
+
+    if (!data || typeof data !== 'object' || !data.id) {
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    return data as AccountBalance;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Erro ao criar conta. Tente novamente.');
+  }
+}
+
+/**
+ * Fetches a bank account by its unique code
+ * @param code - Account code in format "XXXX-X"
+ * @returns Account information
+ */
+export async function getAccountByCode(code: string): Promise<AccountBalance> {
+  const token = sessionStorage.getItem('auth_token');
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado');
+  }
+
+  try {
+    const response = await fetchWithTimeout(
+      `${API_BASE_URL}/v1/accounts/${code}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      },
+      DEFAULT_TIMEOUT_MS
+    );
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Não autenticado');
+      }
+
+      if (response.status === 400) {
+        const error: ErrorResponse = await response.json().catch(() => ({
+          error: 'Formato de código inválido',
+        }));
+        throw new Error(error.error || 'Formato de código inválido');
+      }
+
+      if (response.status === 404) {
+        throw new Error('Conta não encontrada ou acesso negado');
+      }
+
+      const error: ErrorResponse = await response.json().catch(() => ({
+        error: 'Erro ao buscar conta',
+      }));
+      throw new Error(error.error || 'Erro ao buscar conta');
+    }
+
+    const data = await response.json();
+
+    if (!data || typeof data !== 'object' || !data.id) {
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    return data as AccountBalance;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Erro ao buscar conta. Tente novamente.');
   }
 }

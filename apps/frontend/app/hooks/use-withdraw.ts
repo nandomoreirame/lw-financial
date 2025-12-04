@@ -19,17 +19,24 @@ export interface UseWithdrawReturn {
  * Hook to withdraw money from account
  * Automatically invalidates balance cache after successful withdrawal
  * Handles 401 errors by redirecting to login
+ * @param accountId - Account ID (optional)
+ * @param accountCode - Account code in format "XXXX-X" (optional, takes precedence over accountId)
  */
-export function useWithdraw(accountId: string | null): UseWithdrawReturn {
+export function useWithdraw(
+  accountId: string | null,
+  accountCode?: string
+): UseWithdrawReturn {
   const queryClient = useQueryClient();
 
   const { mutateAsync, isPending, isSuccess, error, reset } = useMutation({
-    mutationFn: withdraw,
+    mutationFn: (amount: number) => withdraw(amount, accountCode),
     onSuccess: () => {
-      if (accountId) {
-        queryClient.invalidateQueries({ queryKey: ['balance', accountId] });
-      }
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({
+        queryKey: ['balance', accountCode || 'default'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['transactions', accountCode],
+      });
     },
     onError: (error: Error) => {
       if (isAuthenticationError(error)) {

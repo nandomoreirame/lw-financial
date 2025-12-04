@@ -15,9 +15,12 @@ export interface UseTransactionsReturn {
 
 /**
  * Hook to fetch and manage transaction history
+ * Optionally filters by accountCode if provided
  * Automatically invalidates cache after banking operations
+ *
+ * @param accountCode - Optional account code in format "XXXX-X" to filter transactions
  */
-export function useTransactions(): UseTransactionsReturn {
+export function useTransactions(accountCode?: string): UseTransactionsReturn {
   const queryClient = useQueryClient();
 
   const {
@@ -25,12 +28,15 @@ export function useTransactions(): UseTransactionsReturn {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['transactions'],
+    queryKey: ['transactions', accountCode],
     queryFn: async () => {
       try {
-        const result = await getTransactions();
+        const result = await getTransactions(accountCode);
         if (import.meta.env.DEV) {
-          console.log('[useTransactions] Fetched transactions:', result);
+          console.log('[useTransactions] Fetched transactions:', {
+            accountCode,
+            result,
+          });
         }
         return result;
       } catch (err) {
@@ -45,8 +51,10 @@ export function useTransactions(): UseTransactionsReturn {
   });
 
   const refetch = React.useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['transactions'] });
-  }, [queryClient]);
+    queryClient.invalidateQueries({
+      queryKey: ['transactions', accountCode],
+    });
+  }, [queryClient, accountCode]);
 
   return {
     transactions,

@@ -1,15 +1,11 @@
 /**
- * Home route - Protected route for displaying account balance
- * This is now the root route (/) and serves as the dashboard
+ * Home route - Redirects to first account
+ * This route redirects authenticated users to their first account page
  */
 
 import * as React from 'react';
-import { BalanceCard } from '../components/dashboard/balance-card';
-import { DepositForm } from '../components/dashboard/deposit-form';
-import { Header } from '../components/dashboard/header';
-import { TransactionHistory } from '../components/dashboard/transaction-history';
-import { WithdrawForm } from '../components/dashboard/withdraw-form';
-import { useBalance } from '../hooks/use-balance';
+import { redirect, useNavigate } from 'react-router';
+import { getFirstAccount, useAccounts } from '../hooks/use-accounts';
 import {
   checkAuthentication,
   requireAuth,
@@ -18,18 +14,14 @@ import type { Route } from './+types/home';
 
 export function meta(_args: Route.MetaArgs) {
   return [
-    { title: 'Dashboard - LW Financial' },
-    { name: 'description', content: 'Visualize seu saldo bancário' },
+    { title: 'LW Financial' },
+    { name: 'description', content: 'Sistema bancário' },
   ];
 }
 
 /**
- * Loader for home route (dashboard)
- * Validates authentication and extracts account ID
- *
- * Note: On server-side, if token is not in cookie, we allow the component
- * to check authentication on the client where sessionStorage is available.
- * This handles the case where user just logged in and token is only in sessionStorage.
+ * Loader for home route
+ * Validates authentication and allows client-side redirect
  */
 export async function loader({ request }: Route.LoaderArgs) {
   const isServerSide = typeof window === 'undefined';
@@ -37,97 +29,57 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   if (isServerSide && !authCheck.isAuthenticated) {
     return {
-      accountId: null,
       needsClientAuth: true,
     };
   }
 
-  requireAuth(request);
-
-  if (!authCheck.accountId) {
-    throw new Response('Account ID não encontrado', { status: 401 });
+  if (!authCheck.isAuthenticated) {
+    return redirect('/login');
   }
 
+  requireAuth(request);
+
   return {
-    accountId: authCheck.accountId,
     needsClientAuth: false,
   };
 }
 
 /**
- * Home page component (Dashboard)
- * Displays account balance with loading and error states
+ * Home page component
+ * Redirects to first account on client-side
  */
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const [clientAccountId, setClientAccountId] = React.useState<string | null>(
-    null
-  );
+  const navigate = useNavigate();
+  const { accounts, isLoading: isLoadingAccounts } = useAccounts();
 
   React.useEffect(() => {
     if (loaderData?.needsClientAuth) {
       const mockRequest = new Request(window.location.href);
       const authCheck = checkAuthentication(mockRequest);
 
-      if (!authCheck.isAuthenticated || !authCheck.accountId) {
-        const loginUrl = new URL('/login', window.location.origin);
-        loginUrl.searchParams.set(
-          'error',
-          encodeURIComponent(authCheck.error || 'Token inválido')
-        );
-        window.location.href = loginUrl.toString();
+      if (!authCheck.isAuthenticated) {
+        navigate('/login', { replace: true });
         return;
       }
-
-      setClientAccountId(authCheck.accountId);
     }
-  }, [loaderData?.needsClientAuth]);
 
-  const accountId = loaderData?.accountId || clientAccountId;
-  const { balance, formattedBalance, isLoading, error, refetch } =
-    useBalance(accountId);
+    if (!isLoadingAccounts && accounts.length > 0) {
+      const firstAccount = getFirstAccount(accounts);
+      if (firstAccount?.code) {
+        navigate(`/conta/${firstAccount.code}`, { replace: true });
+        return;
+      }
+    }
 
-  const handleRefresh = () => {
-    refetch();
-  };
-
-  const isRefreshing = isLoading && balance !== undefined;
-
-  if (loaderData?.needsClientAuth && !clientAccountId) {
-    return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="container mx-auto max-w-4xl">
-          <div className="text-center">Verificando autenticação...</div>
-        </div>
-      </div>
-    );
-  }
+    if (!isLoadingAccounts && accounts.length === 0) {
+      navigate('/login', { replace: true });
+    }
+  }, [accounts, isLoadingAccounts, navigate, loaderData?.needsClientAuth]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <div className="container mx-auto max-w-4xl p-4 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-2">
-            Visualize seu saldo bancário
-          </p>
-        </div>
-
-        <BalanceCard
-          balance={balance}
-          formattedBalance={formattedBalance}
-          isLoading={isLoading}
-          error={error}
-          onRefresh={handleRefresh}
-          isRefreshing={isRefreshing}
-        />
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <DepositForm accountId={accountId} />
-          <WithdrawForm accountId={accountId} currentBalance={balance} />
-        </div>
-
-        <TransactionHistory />
+    <div className="min-h-screen bg-background p-4">
+      <div className="container mx-auto max-w-4xl">
+        <div className="text-center">Redirecionando...</div>
       </div>
     </div>
   );

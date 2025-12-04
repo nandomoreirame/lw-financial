@@ -95,7 +95,6 @@ describe('Bank Operations API Integration Tests', () => {
       const userId = await createTestUser();
       const token = createTestToken(userId);
 
-      // Create test data that will be cleaned up
       const testAccountId = `test-account-reset-${Date.now()}`;
       await prisma.bankAccount.create({
         data: {
@@ -120,7 +119,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(accountCount).toBe(0);
       expect(transactionCount).toBe(0);
 
-      // Cleanup
       await prisma.user.delete({ where: { id: userId } });
     });
   });
@@ -153,7 +151,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(account).toBeTruthy();
       expect(Number(account?.balance)).toBe(10);
 
-      // Cleanup
       await prisma.bankAccount.delete({ where: { id: accountId } });
     });
 
@@ -185,7 +182,6 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // Cleanup
       await prisma.bankAccount.delete({ where: { id: accountId } });
     });
 
@@ -248,7 +244,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(account).toBeTruthy();
       expect(Number(account?.balance)).toBe(50.75);
 
-      // Cleanup
       await prisma.bankAccount.deleteMany({ where: { userId } });
       await prisma.user.delete({ where: { id: userId } });
     });
@@ -281,7 +276,6 @@ describe('Bank Operations API Integration Tests', () => {
       const body = JSON.parse(response.body);
       expect(body.destination.balance).toBe(125.5);
 
-      // Cleanup
       await prisma.bankAccount.deleteMany({ where: { userId } });
       await prisma.user.delete({ where: { id: userId } });
     });
@@ -329,7 +323,6 @@ describe('Bank Operations API Integration Tests', () => {
       });
       expect(response3.statusCode).toBe(400);
 
-      // Cleanup
       await prisma.user.delete({ where: { id: userId } });
     });
   });
@@ -358,7 +351,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(response.statusCode).toBe(200);
       expect(Number(response.body)).toBe(20);
 
-      // Cleanup
       await prisma.bankAccount.deleteMany({ where: { userId } });
       await prisma.user.delete({ where: { id: userId } });
     });
@@ -378,7 +370,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(response.statusCode).toBe(200);
       expect(Number(response.body)).toBe(0);
 
-      // Cleanup
       await prisma.user.delete({ where: { id: userId } });
     });
 
@@ -424,7 +415,6 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // Cleanup
       await prisma.bankAccount.delete({ where: { id: accountId } });
     });
 
@@ -467,7 +457,6 @@ describe('Bank Operations API Integration Tests', () => {
       const body = JSON.parse(response.body);
       expect(body).toHaveProperty('error');
 
-      // Cleanup
       await prisma.bankAccount.delete({ where: { id: accountId } });
     });
 
@@ -517,7 +506,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(body.origin).toHaveProperty('balance');
       expect(body.origin.balance).toBe(69.75);
 
-      // Cleanup
       await prisma.bankAccount.deleteMany({ where: { userId } });
       await prisma.user.delete({ where: { id: userId } });
     });
@@ -550,7 +538,6 @@ describe('Bank Operations API Integration Tests', () => {
       const body = JSON.parse(response.body);
       expect(body.error).toBe('Insufficient funds');
 
-      // Cleanup
       await prisma.bankAccount.deleteMany({ where: { userId } });
       await prisma.user.delete({ where: { id: userId } });
     });
@@ -581,7 +568,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(account).toBeTruthy();
       expect(Number(account?.balance)).toBe(0);
 
-      // Cleanup
       await prisma.bankAccount.deleteMany({ where: { userId } });
       await prisma.user.delete({ where: { id: userId } });
     });
@@ -644,7 +630,6 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      // Cleanup
       await prisma.bankAccount.deleteMany({
         where: { id: { in: [originId, destId] } },
       });
@@ -690,7 +675,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(destAccount).toBeTruthy();
       expect(Number(destAccount?.balance)).toBe(15);
 
-      // Cleanup
       await prisma.bankAccount.deleteMany({
         where: { id: { in: [originId, destId] } },
       });
@@ -739,7 +723,6 @@ describe('Bank Operations API Integration Tests', () => {
       const body = JSON.parse(response.body);
       expect(body).toHaveProperty('error');
 
-      // Cleanup
       await prisma.bankAccount.delete({ where: { id: originId } });
     });
 
@@ -765,7 +748,6 @@ describe('Bank Operations API Integration Tests', () => {
 
       expect(response.statusCode).toBe(400);
 
-      // Cleanup
       await prisma.bankAccount.delete({ where: { id: accountId } });
     });
 
@@ -864,7 +846,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(balance1.statusCode).toBe(200);
       expect(Number(balance1.body)).toBe(20);
 
-      // Cleanup
       await prisma.bankAccount.deleteMany({ where: { userId } });
       await prisma.user.delete({ where: { id: userId } });
     });
@@ -900,7 +881,6 @@ describe('Bank Operations API Integration Tests', () => {
       expect(response.statusCode).toBe(200);
       expect(Number(response.body)).toBe(0);
 
-      // Cleanup
       await prisma.user.delete({ where: { id: userId } });
     });
   });

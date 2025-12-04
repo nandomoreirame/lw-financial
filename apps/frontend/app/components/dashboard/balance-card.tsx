@@ -3,9 +3,9 @@
  * Shows formatted balance, loading state, and error states
  */
 
+import { cn } from '@lw-financial/ui';
 import { BalanceSkeleton } from './balance-skeleton';
 import { RefreshButton } from './refresh-button';
-import { cn } from '@lw-financial/ui';
 
 export interface BalanceCardProps {
   balance: number | undefined;
@@ -14,6 +14,7 @@ export interface BalanceCardProps {
   error: Error | null;
   onRefresh: () => void;
   isRefreshing?: boolean;
+  accountCode?: string;
   className?: string;
 }
 
@@ -28,6 +29,7 @@ export function BalanceCard({
   error,
   onRefresh,
   isRefreshing = false,
+  accountCode,
   className,
 }: BalanceCardProps) {
   if (isLoading && balance === undefined) {
@@ -74,7 +76,14 @@ export function BalanceCard({
     <div className={cn('rounded-lg border bg-card p-6 space-y-4', className)}>
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-muted-foreground">Saldo</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-muted-foreground">Saldo</p>
+            {accountCode && (
+              <p className="text-xs text-muted-foreground">
+                Conta {accountCode}
+              </p>
+            )}
+          </div>
           <p className="text-3xl font-bold">{formattedBalance}</p>
         </div>
         <RefreshButton onRefresh={onRefresh} isLoading={isRefreshing} />
