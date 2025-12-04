@@ -1,8 +1,8 @@
 import '@lw-financial/ui/styles';
 
+import { Toaster } from '@lw-financial/ui';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Toaster } from '@lw-financial/ui';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import {
@@ -49,7 +49,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body suppressHydrationWarning>
         <QueryClientProvider client={queryClient}>
-          <>{children}</>
+          <>
+            {children}
+            <footer className="container mx-auto max-w-4xl py-8 px-6 flex items-center justify-between gap-2 text-center mb-8">
+              <p className="text-sm text-muted-foreground">
+                © 2025 LW Financial. Todos os direitos reservados.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Desenvolvido por{' '}
+                <a
+                  href="https://nandomoreira.dev/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:text-blue-600 underline hover:no-underline"
+                >
+                  Fernando Moreira
+                </a>
+              </p>
+            </footer>
+          </>
           {showDevtools && <ReactQueryDevtools initialIsOpen={false} />}
         </QueryClientProvider>
         <Toaster />
