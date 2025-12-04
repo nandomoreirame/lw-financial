@@ -2,7 +2,7 @@
  * Component for displaying login error messages
  */
 
-import { cn } from '@/lib/utils';
+import { cn } from '@lw-financial/ui';
 
 export interface LoginErrorProps {
   error?: string | null;

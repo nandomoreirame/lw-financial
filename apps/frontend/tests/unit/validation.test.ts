@@ -8,7 +8,7 @@ import {
   depositFormSchema,
   transactionAmountSchema,
   withdrawFormSchema,
-} from '../../app/lib/validation';
+} from '@lw-financial/ui';
 
 describe('transactionAmountSchema', () => {
   describe('Happy path - valid amounts', () => {
@@ -172,6 +172,7 @@ describe('transactionAmountSchema', () => {
     });
 
     test('should reject string input', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = transactionAmountSchema.safeParse('100' as any);
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -180,6 +181,7 @@ describe('transactionAmountSchema', () => {
     });
 
     test('should reject null', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = transactionAmountSchema.safeParse(null as any);
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -188,6 +190,7 @@ describe('transactionAmountSchema', () => {
     });
 
     test('should reject undefined', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = transactionAmountSchema.safeParse(undefined as any);
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -241,6 +244,7 @@ describe('depositFormSchema', () => {
 
   describe('Error cases - invalid form data', () => {
     test('should reject missing amount field', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = depositFormSchema.safeParse({} as any);
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -303,6 +307,7 @@ describe('withdrawFormSchema', () => {
 
   describe('Error cases - invalid form data', () => {
     test('should reject missing amount field', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = withdrawFormSchema.safeParse({} as any);
       expect(result.success).toBe(false);
       if (!result.success) {

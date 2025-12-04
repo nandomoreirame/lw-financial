@@ -12,8 +12,8 @@
   },
   "aliases": {
     "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
+    "utils": "@lw-financial/ui",
+    "ui": "@lw-financial/ui",
     "lib": "@/lib",
     "hooks": "@/hooks"
   }

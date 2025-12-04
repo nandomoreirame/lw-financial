@@ -8,7 +8,7 @@
 
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@lw-financial/ui';
 import * as React from 'react';
-import { cn } from '../../lib/utils';
+import { cn } from '@lw-financial/ui';
 
 export interface CurrencyInputProps extends Omit<
   React.InputHTMLAttributes<HTMLInputElement>,

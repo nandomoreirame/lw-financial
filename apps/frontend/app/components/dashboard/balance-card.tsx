@@ -5,7 +5,7 @@
 
 import { BalanceSkeleton } from './balance-skeleton';
 import { RefreshButton } from './refresh-button';
-import { cn } from '@/lib/utils';
+import { cn } from '@lw-financial/ui';
 
 export interface BalanceCardProps {
   balance: number | undefined;

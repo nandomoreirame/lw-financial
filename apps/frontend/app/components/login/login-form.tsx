@@ -3,16 +3,13 @@
  * Based on shadcn/ui login-01 block
  */
 
-import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from '@lw-financial/shared';
-import { Button } from '@lw-financial/ui';
+import { Button, cn, Input, Label } from '@lw-financial/ui';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { login as loginAPI } from '../../lib/api';
 import { storeToken } from '../../lib/auth';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
 import { LoginError } from './login-error';
 
 const loginSchema = z.object({

@@ -3,7 +3,7 @@
  */
 
 import { Button } from '@lw-financial/ui';
-import { cn } from '@/lib/utils';
+import { cn } from '@lw-financial/ui';
 
 export interface RefreshButtonProps {
   onRefresh: () => void;

@@ -5,11 +5,13 @@
 
 import * as React from 'react';
 import { ReceiptIcon } from 'lucide-react';
-import { formatCurrency } from '../../lib/format-currency';
-import { formatDateTime } from '../../lib/format-date';
-import { getTransactionTypeLabel } from '../../lib/transaction-types';
+import {
+  formatCurrency,
+  formatDateTime,
+  getTransactionTypeLabel,
+} from '@lw-financial/ui';
 import { useTransactions } from '../../hooks/use-transactions';
-import { cn } from '../../lib/utils';
+import { cn } from '@lw-financial/ui';
 import {
   Empty,
   EmptyDescription,

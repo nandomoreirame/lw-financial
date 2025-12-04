@@ -9,6 +9,7 @@ export {
   FormField,
   useFormField,
 } from './form';
+export { Input } from './input';
 export { InputGroup, InputGroupAddon, InputGroupInput } from './input-group';
 export { Label } from './label';
 export { Toaster } from './sonner';

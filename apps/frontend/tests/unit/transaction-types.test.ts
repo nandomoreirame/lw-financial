@@ -8,7 +8,7 @@ import {
   getTransactionTypeLabel,
   TRANSACTION_TYPES,
   type TransactionType,
-} from '../../app/lib/transaction-types';
+} from '@lw-financial/ui';
 
 describe('transaction-types utility', () => {
   describe('TRANSACTION_TYPES constant', () => {

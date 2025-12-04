@@ -18,11 +18,8 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { useWithdraw } from '../../hooks/use-withdraw';
-import { cn } from '../../lib/utils';
-import {
-  withdrawFormSchema,
-  type WithdrawFormData,
-} from '../../lib/validation';
+import { cn } from '@lw-financial/ui';
+import { withdrawFormSchema, type WithdrawFormData } from '@lw-financial/ui';
 import { CurrencyInput } from './currency-input';
 
 export interface WithdrawFormProps {

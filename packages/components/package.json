@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "ui:add": "bunx shadcn@latest add",
-    "test": "echo 'No tests yet'"
+    "test": "bun test ./**/*.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

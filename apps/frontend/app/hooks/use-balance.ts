@@ -5,7 +5,7 @@
 import * as React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getBalance } from '../lib/api';
-import { formatCurrency } from '../lib/format-currency';
+import { formatCurrency } from '@lw-financial/ui';
 
 export interface UseBalanceReturn {
   balance: number | undefined;
