@@ -13,6 +13,8 @@
     "build": "bun run --filter './apps/*' build",
     "build:frontend": "bun run --filter './apps/frontend' build",
     "build:backend": "bun run --filter './apps/backend' build",
+    "start:frontend": "bun run --filter './apps/frontend' start",
+    "start:backend": "bun run --filter './apps/backend' start",
     "lint": "bun run --filter './packages/*' lint && bun run --filter './apps/*' lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "type-check": "bun run --filter './packages/*' type-check && bun run --filter './apps/*' type-check",
