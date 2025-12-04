@@ -1,0 +1,145 @@
+openapi: 3.0.3
+info:
+  title: Account by Code API
+  description: API para buscar conta bancária por código único
+  version: 1.0.0
+  contact:
+    name: Backend Team
+
+servers:
+  - url: http://localhost:3333
+    description: Servidor de desenvolvimento
+  - url: https://api.lwfinancial.com
+    description: Servidor de produção
+
+paths:
+  /v1/accounts/{code}:
+    get:
+      summary: Buscar conta bancária por código
+      description: |
+        Endpoint para buscar uma conta bancária específica pelo seu código único.
+        A conta deve pertencer ao usuário autenticado.
+
+        Requisitos:
+        - Autenticação obrigatória via JWT token
+        - Código de conta no formato "XXXX-X" (4 dígitos, hífen, 1 dígito)
+        - Validação de propriedade: conta deve pertencer ao usuário autenticado
+        - Retorna 404 se conta não encontrada ou não pertence ao usuário
+      operationId: getAccountByCode
+      tags:
+        - Bank Accounts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: 'Código único da conta no formato "XXXX-X" (ex: "1234-5")'
+          schema:
+            type: string
+            pattern: '^\d{4}-\d$'
+            example: '1234-5'
+      responses:
+        '200':
+          description: Conta bancária encontrada e pertencente ao usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankAccount'
+              example:
+                id: 'clx1234567890abcdef'
+                code: '1234-5'
+                balance: '1250.75'
+                userId: 'clx1111111111111111'
+                createdAt: '2025-12-01T10:00:00.000Z'
+                updatedAt: '2025-12-03T14:30:00.000Z'
+        '400':
+          description: Formato de código inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Invalid account code format. Expected format: XXXX-X (4 digits, hyphen, 1 digit)'
+        '401':
+          description: Não autenticado ou token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Unauthorized'
+        '404':
+          description: Conta não encontrada ou não pertence ao usuário autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Account not found or access denied'
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'Internal server error'
+
+components:
+  schemas:
+    BankAccount:
+      type: object
+      required:
+        - id
+        - code
+        - balance
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Identificador único da conta (cuid)
+          example: 'clx1234567890abcdef'
+        code:
+          type: string
+          description: Código único da conta no formato "XXXX-X"
+          pattern: '^\d{4}-\d$'
+          example: '1234-5'
+        balance:
+          type: string
+          format: decimal
+          description: Saldo atual da conta em reais (R$)
+          example: '1250.75'
+        userId:
+          type: string
+          nullable: true
+          description: ID do usuário proprietário da conta
+          example: 'clx1111111111111111'
+        createdAt:
+          type: string
+          format: date-time
+          description: Data e hora de criação da conta
+          example: '2025-12-01T10:00:00.000Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: Data e hora da última atualização
+          example: '2025-12-03T14:30:00.000Z'
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Mensagem de erro descritiva
+          example: 'Account not found or access denied'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtido via endpoint de login
