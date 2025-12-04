@@ -5,9 +5,18 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from '@lw-financial/shared';
-import { Button, cn, Input, Label } from '@lw-financial/ui';
+import {
+  Button,
+  Card,
+  CardContent,
+  cn,
+  Input,
+  Label,
+  Separator,
+} from '@lw-financial/ui';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Link } from 'react-router';
 import { login as loginAPI } from '../../lib/api';
 import { storeToken } from '../../lib/auth';
 import { LoginError } from './login-error';
@@ -66,12 +75,8 @@ export function LoginForm({ className }: LoginFormProps) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className={cn('space-y-6', className)}
-      noValidate
-    >
-      <div className="space-y-2 text-center">
+    <div className={cn('w-full max-w-sm', className)}>
+      <div className="space-y-2 text-center mb-8">
         <div className="flex justify-center mb-2">
           <img src="/bank.svg" alt="Bank icon" className="h-12 w-12" />
         </div>
@@ -80,61 +85,87 @@ export function LoginForm({ className }: LoginFormProps) {
           Faça login para acessar sua conta
         </p>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="username">Username</Label>
-        <Input
-          id="username"
-          type="text"
-          autoComplete="username"
-          placeholder="Digite seu username"
-          {...register('username')}
-          aria-invalid={errors.username ? 'true' : 'false'}
-          aria-describedby={errors.username ? 'username-error' : undefined}
-        />
-        {errors.username && (
-          <p
-            id="username-error"
-            className="text-sm text-destructive"
-            role="alert"
+
+      <Card>
+        <CardContent>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className={cn('space-y-6', className)}
+            noValidate
           >
-            {errors.username.message}
-          </p>
-        )}
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                autoComplete="username"
+                placeholder="Digite seu username"
+                {...register('username')}
+                aria-invalid={errors.username ? 'true' : 'false'}
+                aria-describedby={
+                  errors.username ? 'username-error' : undefined
+                }
+              />
+              {errors.username && (
+                <p
+                  id="username-error"
+                  className="text-sm text-destructive"
+                  role="alert"
+                >
+                  {errors.username.message}
+                </p>
+              )}
+            </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center">
-          <Label htmlFor="password">Senha</Label>
-        </div>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          placeholder="Digite sua senha"
-          {...register('password')}
-          aria-invalid={errors.password ? 'true' : 'false'}
-          aria-describedby={errors.password ? 'password-error' : undefined}
-        />
-        {errors.password && (
-          <p
-            id="password-error"
-            className="text-sm text-destructive"
-            role="alert"
-          >
-            {errors.password.message}
-          </p>
-        )}
-      </div>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">Senha</Label>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Digite sua senha"
+                {...register('password')}
+                aria-invalid={errors.password ? 'true' : 'false'}
+                aria-describedby={
+                  errors.password ? 'password-error' : undefined
+                }
+              />
+              {errors.password && (
+                <p
+                  id="password-error"
+                  className="text-sm text-destructive"
+                  role="alert"
+                >
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
 
-      <LoginError error={error} />
+            <LoginError error={error} />
 
-      <Button
-        type="submit"
-        disabled={isSubmitting || isLoading}
-        className="w-full"
-      >
-        {isSubmitting || isLoading ? 'Entrando...' : 'Entrar'}
-      </Button>
-    </form>
+            <Button
+              type="submit"
+              disabled={isSubmitting || isLoading}
+              className="w-full"
+            >
+              {isSubmitting || isLoading ? 'Entrando...' : 'Entrar'}
+            </Button>
+
+            <Separator />
+
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
+                Não tem uma conta?{' '}
+                <Link to="/signup" className="text-primary hover:underline">
+                  Registre-se
+                </Link>
+              </p>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
