@@ -40,7 +40,7 @@ export async function bankRoutes(fastify: FastifyInstance) {
       schema: balanceSchema,
       preHandler: authenticateRequest,
     },
-    balanceHandler
+    balanceHandler as any
   );
 
   fastify.get(
@@ -58,7 +58,7 @@ export async function bankRoutes(fastify: FastifyInstance) {
       schema: createAccountSchema,
       preHandler: authenticateRequest,
     },
-    createAccountHandler
+    createAccountHandler as any
   );
 
   fastify.get(
@@ -67,7 +67,7 @@ export async function bankRoutes(fastify: FastifyInstance) {
       schema: accountByCodeSchema,
       preHandler: authenticateRequest,
     },
-    accountByCodeHandler
+    accountByCodeHandler as any
   );
 
   fastify.post('/event', { schema: eventSchema }, eventHandler);
@@ -88,7 +88,7 @@ export async function bankRoutes(fastify: FastifyInstance) {
       schema: transactionsSchema,
       preHandler: authenticateRequest,
     },
-    transactionsHandler
+    transactionsHandler as any
   );
   fastify.log.info('GET /transactions route registered successfully');
 
