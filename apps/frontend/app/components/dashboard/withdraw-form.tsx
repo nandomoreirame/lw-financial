@@ -7,25 +7,28 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
+  cn,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  withdrawFormSchema,
+  type WithdrawFormData,
 } from '@lw-financial/ui';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { useWithdraw } from '../../hooks/use-withdraw';
-import { cn } from '@lw-financial/ui';
-import { withdrawFormSchema, type WithdrawFormData } from '@lw-financial/ui';
 import { CurrencyInput } from './currency-input';
 
 export interface WithdrawFormProps {
   accountId: string | null;
+  accountCode?: string;
   currentBalance: number | undefined;
   className?: string;
+  onSuccess?: () => void;
 }
 
 /**
@@ -35,11 +38,15 @@ export interface WithdrawFormProps {
  */
 export function WithdrawForm({
   accountId,
+  accountCode,
   currentBalance,
   className,
+  onSuccess,
 }: WithdrawFormProps) {
-  const { withdraw, isLoading, isSuccess, error, reset } =
-    useWithdraw(accountId);
+  const { withdraw, isLoading, isSuccess, error, reset } = useWithdraw(
+    accountId,
+    accountCode
+  );
   const [insufficientFundsError, setInsufficientFundsError] = React.useState<
     string | null
   >(null);
@@ -58,8 +65,9 @@ export function WithdrawForm({
       form.reset();
       setInsufficientFundsError(null);
       reset();
+      onSuccess?.();
     }
-  }, [isSuccess, form, reset]);
+  }, [isSuccess, form, reset, onSuccess]);
 
   React.useEffect(() => {
     if (error && !insufficientFundsError) {
@@ -113,14 +121,7 @@ export function WithdrawForm({
   };
 
   return (
-    <div className={cn('rounded-lg border bg-card p-6 space-y-4', className)}>
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Sacar</h3>
-        <p className="text-sm text-muted-foreground">
-          Retire dinheiro da sua conta (R$ 0,01 a R$ 999.999,99)
-        </p>
-      </div>
-
+    <div className={cn('space-y-4', className)}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField

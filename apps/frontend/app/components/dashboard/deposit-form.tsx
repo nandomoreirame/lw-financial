@@ -6,32 +6,43 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
+  cn,
+  depositFormSchema,
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  type DepositFormData,
 } from '@lw-financial/ui';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { useDeposit } from '../../hooks/use-deposit';
-import { cn } from '@lw-financial/ui';
-import { depositFormSchema, type DepositFormData } from '@lw-financial/ui';
 import { CurrencyInput } from './currency-input';
 
 export interface DepositFormProps {
   accountId: string | null;
+  accountCode?: string;
   className?: string;
+  onSuccess?: () => void;
 }
 
 /**
  * Form component for depositing money
  * Uses Shadcn UI Form with CurrencyInput for currency input with R$ prefix
  */
-export function DepositForm({ accountId, className }: DepositFormProps) {
-  const { deposit, isLoading, isSuccess, error, reset } = useDeposit(accountId);
+export function DepositForm({
+  accountId,
+  accountCode,
+  className,
+  onSuccess,
+}: DepositFormProps) {
+  const { deposit, isLoading, isSuccess, error, reset } = useDeposit(
+    accountId,
+    accountCode
+  );
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const form = useForm<DepositFormData>({
@@ -46,8 +57,9 @@ export function DepositForm({ accountId, className }: DepositFormProps) {
       toast.success('Depósito realizado com sucesso!');
       form.reset();
       reset();
+      onSuccess?.();
     }
-  }, [isSuccess, form, reset]);
+  }, [isSuccess, form, reset, onSuccess]);
 
   React.useEffect(() => {
     if (error) {
@@ -75,14 +87,7 @@ export function DepositForm({ accountId, className }: DepositFormProps) {
   };
 
   return (
-    <div className={cn('rounded-lg border bg-card p-6 space-y-4', className)}>
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Depositar</h3>
-        <p className="text-sm text-muted-foreground">
-          Adicione dinheiro à sua conta (R$ 0,01 a R$ 999.999,99)
-        </p>
-      </div>
-
+    <div className={cn('space-y-4', className)}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
