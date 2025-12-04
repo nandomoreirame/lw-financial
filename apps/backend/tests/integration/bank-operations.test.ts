@@ -65,7 +65,36 @@ describe('Bank Operations API Integration Tests', () => {
   });
 
   describe('POST /reset', () => {
-    test('should reset system state successfully', async () => {
+    test('should reject reset without authentication token', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/reset',
+      });
+
+      expect(response.statusCode).toBe(401);
+      const body = JSON.parse(response.body);
+      expect(body).toHaveProperty('error');
+      expect(body.error).toBe('Authentication required');
+    });
+
+    test('should reject reset with invalid token', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/reset',
+        headers: {
+          authorization: 'Bearer invalid-token',
+        },
+      });
+
+      expect(response.statusCode).toBe(401);
+      const body = JSON.parse(response.body);
+      expect(body).toHaveProperty('error');
+    });
+
+    test('should reset system state successfully with valid token', async () => {
+      const userId = await createTestUser();
+      const token = createTestToken(userId);
+
       // Create test data that will be cleaned up
       const testAccountId = `test-account-reset-${Date.now()}`;
       await prisma.bankAccount.create({
@@ -78,6 +107,9 @@ describe('Bank Operations API Integration Tests', () => {
       const response = await app.inject({
         method: 'POST',
         url: '/reset',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       });
 
       expect(response.statusCode).toBe(200);
@@ -87,6 +119,9 @@ describe('Bank Operations API Integration Tests', () => {
       const transactionCount = await prisma.transaction.count();
       expect(accountCount).toBe(0);
       expect(transactionCount).toBe(0);
+
+      // Cleanup
+      await prisma.user.delete({ where: { id: userId } });
     });
   });
 
@@ -845,12 +880,16 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
+      const token = createTestToken(userId);
+
       await app.inject({
         method: 'POST',
         url: '/reset',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
       });
 
-      const token = createTestToken(userId);
       const response = await app.inject({
         method: 'GET',
         url: '/balance',

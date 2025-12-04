@@ -36,7 +36,14 @@ export async function bankRoutes(fastify: FastifyInstance) {
 
   fastify.post('/event', { schema: eventSchema }, eventHandler);
 
-  fastify.post('/reset', { schema: resetSchema }, resetHandler);
+  fastify.post(
+    '/reset',
+    {
+      schema: resetSchema,
+      preHandler: authenticateRequest,
+    },
+    resetHandler
+  );
 
   fastify.log.info('Registering GET /transactions route...');
   fastify.get(
