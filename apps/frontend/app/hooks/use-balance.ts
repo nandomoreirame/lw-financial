@@ -2,10 +2,10 @@
  * Hook for fetching and managing account balance using React Query
  */
 
-import * as React from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getBalance } from '../lib/api';
 import { formatCurrency } from '@lw-financial/ui';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import * as React from 'react';
+import { getBalance } from '../lib/api';
 
 export interface UseBalanceReturn {
   balance: number | undefined;
@@ -18,8 +18,9 @@ export interface UseBalanceReturn {
 /**
  * Hook to fetch and manage account balance
  * Automatically invalidates cache after banking operations
+ * @param accountCode - Account code in format "XXXX-X" (optional). If not provided, returns default account balance
  */
-export function useBalance(accountId: string | null): UseBalanceReturn {
+export function useBalance(accountCode?: string): UseBalanceReturn {
   const queryClient = useQueryClient();
 
   const {
@@ -27,14 +28,11 @@ export function useBalance(accountId: string | null): UseBalanceReturn {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['balance', accountId],
+    queryKey: ['balance', accountCode || 'default'],
     queryFn: async () => {
-      if (!accountId) {
-        throw new Error('Account ID não disponível');
-      }
-      return getBalance(accountId);
+      return getBalance(accountCode);
     },
-    enabled: !!accountId,
+    enabled: true,
     staleTime: 0,
     retry: 1,
   });
@@ -42,10 +40,10 @@ export function useBalance(accountId: string | null): UseBalanceReturn {
   const formattedBalance = balance !== undefined ? formatCurrency(balance) : '';
 
   const refetch = React.useCallback(() => {
-    if (accountId) {
-      queryClient.invalidateQueries({ queryKey: ['balance', accountId] });
-    }
-  }, [accountId, queryClient]);
+    queryClient.invalidateQueries({
+      queryKey: ['balance', accountCode || 'default'],
+    });
+  }, [accountCode, queryClient]);
 
   return {
     balance,

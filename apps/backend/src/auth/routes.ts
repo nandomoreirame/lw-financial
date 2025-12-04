@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../db/prisma';
+import { generateUniqueAccountCode } from '../bank/services/account-code.service';
 import { validateLogin, validateSignup } from '../middleware/validation';
 import {
   ErrorResponse,
@@ -42,7 +43,7 @@ export async function loginRoutes(fastify: FastifyInstance) {
       try {
         const url = new URL(
           request.url,
-          `http://${request.headers.host || 'localhost:3001'}`
+          `http://${request.headers.host || `localhost:${process.env.PORT || 3333}`}`
         );
 
         const headers = new Headers();
@@ -324,7 +325,6 @@ export async function loginRoutes(fastify: FastifyInstance) {
       const { username, email, name, pass } = request.body as SignupRequest;
 
       try {
-        // Verificar se username já existe
         const existingAccount = await prisma.account.findFirst({
           where: {
             accountId: username,
@@ -339,7 +339,6 @@ export async function loginRoutes(fastify: FastifyInstance) {
           } as ErrorResponse);
         }
 
-        // Verificar se email já existe
         const existingUser = await prisma.user.findUnique({
           where: {
             email,
@@ -353,12 +352,9 @@ export async function loginRoutes(fastify: FastifyInstance) {
           } as ErrorResponse);
         }
 
-        // Hash da senha
         const hashedPassword = await bcrypt.hash(pass, 10);
 
-        // Criar usuário, conta e conta bancária em uma transação
         const result = await prisma.$transaction(async (tx) => {
-          // Criar usuário
           const user = await tx.user.create({
             data: {
               email,
@@ -366,7 +362,6 @@ export async function loginRoutes(fastify: FastifyInstance) {
             },
           });
 
-          // Criar conta de autenticação
           const account = await tx.account.create({
             data: {
               accountId: username,
@@ -376,11 +371,12 @@ export async function loginRoutes(fastify: FastifyInstance) {
             },
           });
 
-          // Criar conta bancária inicial com saldo zero
+          const accountCode = await generateUniqueAccountCode();
           await tx.bankAccount.create({
             data: {
               userId: user.id,
               balance: 0,
+              code: accountCode,
             },
           });
 

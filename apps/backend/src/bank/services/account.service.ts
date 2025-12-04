@@ -1,11 +1,13 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../db/prisma';
+import { generateUniqueAccountCode } from './account-code.service';
 
 /**
  * Represents an account balance response
  */
 export interface AccountBalance {
   id: string;
+  code: string | null;
   balance: number;
 }
 
@@ -38,6 +40,38 @@ export class InsufficientFundsError extends Error {
  */
 export class AccountService {
   /**
+   * Gets a bank account by its unique code
+   * @param code - The account code in format "XXXX-X"
+   * @param userId - The user ID to validate ownership
+   * @returns The account balance if found and owned by user
+   * @throws AccountNotFoundError if account not found or not owned by user
+   */
+  async getAccountByCode(
+    code: string,
+    userId: string
+  ): Promise<AccountBalance> {
+    const account = await prisma.bankAccount.findUnique({
+      where: { code },
+    });
+
+    if (!account) {
+      throw new AccountNotFoundError(`Account with code ${code} not found`);
+    }
+
+    if (account.userId !== userId) {
+      throw new AccountNotFoundError(
+        `Account with code ${code} not found or access denied`
+      );
+    }
+
+    return {
+      id: account.id,
+      code: account.code,
+      balance: Number(account.balance),
+    };
+  }
+
+  /**
    * Gets all bank accounts for a user
    * @param userId - The user ID from the authenticated token
    * @returns Array of all bank accounts for the user
@@ -50,8 +84,38 @@ export class AccountService {
 
     return accounts.map((account) => ({
       id: account.id,
+      code: account.code,
       balance: Number(account.balance),
     }));
+  }
+
+  /**
+   * Creates a new bank account for a user
+   * Always creates a new account with a unique code
+   * @param userId - The user ID from the authenticated token
+   * @param initialBalance - Optional initial balance (default: 0)
+   * @returns The newly created bank account
+   */
+  async createAccount(
+    userId: string,
+    initialBalance: number = 0
+  ): Promise<AccountBalance> {
+    const newAccount = await prisma.$transaction(async (tx) => {
+      const code = await generateUniqueAccountCode();
+      return await tx.bankAccount.create({
+        data: {
+          balance: new Prisma.Decimal(initialBalance),
+          userId: userId,
+          code: code,
+        },
+      });
+    });
+
+    return {
+      id: newAccount.id,
+      code: newAccount.code,
+      balance: Number(newAccount.balance),
+    };
   }
 
   /**
@@ -76,11 +140,15 @@ export class AccountService {
       };
     }
 
-    const newAccount = await prisma.bankAccount.create({
-      data: {
-        balance: new Prisma.Decimal(0),
-        userId: userId,
-      },
+    const newAccount = await prisma.$transaction(async (tx) => {
+      const code = await generateUniqueAccountCode();
+      return await tx.bankAccount.create({
+        data: {
+          balance: new Prisma.Decimal(0),
+          userId: userId,
+          code: code,
+        },
+      });
     });
 
     return {
@@ -111,11 +179,15 @@ export class AccountService {
     });
 
     if (!account) {
-      account = await prisma.bankAccount.create({
-        data: {
-          id: accountId,
-          balance: new Prisma.Decimal(0),
-        },
+      account = await prisma.$transaction(async (tx) => {
+        const code = await generateUniqueAccountCode();
+        return await tx.bankAccount.create({
+          data: {
+            id: accountId,
+            balance: new Prisma.Decimal(0),
+            code: code,
+          },
+        });
       });
     }
 
@@ -124,13 +196,27 @@ export class AccountService {
 
   /**
    * Creates a new account with an initial deposit or deposits to an existing account
+   * @param destinationId - Account ID or account code
+   * @param amount - Deposit amount
+   * @param userId - Optional user ID for validation
+   * @param accountCode - Optional account code (if provided, will lookup account by code)
    * @returns The account balance after the operation
    */
   async deposit(
     destinationId: string,
     amount: number,
-    userId?: string
+    userId?: string,
+    accountCode?: string
   ): Promise<AccountBalance> {
+    if (accountCode) {
+      if (!userId) {
+        throw new AccountNotFoundError(
+          'User ID required when using account code'
+        );
+      }
+      const account = await this.getAccountByCode(accountCode, userId);
+      return this.deposit(account.id, amount, userId);
+    }
     const result = await prisma.$transaction(async (tx) => {
       let account = await tx.bankAccount.findUnique({
         where: { id: destinationId },
@@ -144,11 +230,13 @@ export class AccountService {
           },
         });
       } else {
+        const code = await generateUniqueAccountCode();
         account = await tx.bankAccount.create({
           data: {
             id: destinationId,
             balance: new Prisma.Decimal(amount),
             userId: userId,
+            code: code,
           },
         });
       }
@@ -167,20 +255,35 @@ export class AccountService {
 
     return {
       id: result.id,
+      code: result.code,
       balance: Number(result.balance),
     };
   }
 
   /**
    * Withdraws from an account
+   * @param originId - Account ID or account code
+   * @param amount - Withdraw amount
+   * @param userId - Optional user ID for validation
+   * @param accountCode - Optional account code (if provided, will lookup account by code)
    * @throws AccountNotFoundError if account doesn't exist
    * @throws InsufficientFundsError if balance is insufficient
    */
   async withdraw(
     originId: string,
     amount: number,
-    userId?: string
+    userId?: string,
+    accountCode?: string
   ): Promise<AccountBalance> {
+    if (accountCode) {
+      if (!userId) {
+        throw new AccountNotFoundError(
+          'User ID required when using account code'
+        );
+      }
+      const account = await this.getAccountByCode(accountCode, userId);
+      return this.withdraw(account.id, amount, userId);
+    }
     const result = await prisma.$transaction(async (tx) => {
       const account = await tx.bankAccount.findUnique({
         where: { id: originId },
@@ -216,6 +319,7 @@ export class AccountService {
 
     return {
       id: result.id,
+      code: result.code,
       balance: Number(result.balance),
     };
   }
@@ -250,10 +354,12 @@ export class AccountService {
       });
 
       if (!destAccount) {
+        const code = await generateUniqueAccountCode();
         destAccount = await tx.bankAccount.create({
           data: {
             id: destinationId,
             balance: new Prisma.Decimal(0),
+            code: code,
           },
         });
       }
@@ -288,10 +394,12 @@ export class AccountService {
     return {
       origin: {
         id: result.updatedOrigin.id,
+        code: result.updatedOrigin.code,
         balance: Number(result.updatedOrigin.balance),
       },
       destination: {
         id: result.updatedDest.id,
+        code: result.updatedDest.code,
         balance: Number(result.updatedDest.balance),
       },
     };

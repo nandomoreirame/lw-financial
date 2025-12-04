@@ -19,6 +19,7 @@ interface EventRequestBody {
   origin?: string;
   destination?: string;
   amount: number;
+  accountCode?: string;
 }
 
 /**
@@ -143,8 +144,37 @@ export async function eventHandler(
       case 'deposit': {
         let accountId: string;
         let userId: string | undefined;
+        const { accountCode } = request.body;
 
-        if (!destination) {
+        if (accountCode) {
+          if (!user) {
+            return reply.status(401).send({
+              error: 'Authentication required when using account code',
+            });
+          }
+
+          if (!/^\d{4}-\d$/.test(accountCode)) {
+            return reply.status(400).send({
+              error: 'Invalid account code format. Expected format: XXXX-X',
+            });
+          }
+
+          try {
+            userId = user.userId;
+            const account = await accountService.getAccountByCode(
+              accountCode,
+              userId
+            );
+            accountId = account.id;
+          } catch (error) {
+            if (error instanceof AccountNotFoundError) {
+              return reply.status(404).send({
+                error: 'Account not found or access denied',
+              });
+            }
+            throw error;
+          }
+        } else if (!destination) {
           if (!user) {
             return reply.status(401).send({
               error: 'Authentication required when destination is not provided',
@@ -161,7 +191,12 @@ export async function eventHandler(
           }
         }
 
-        const result = await accountService.deposit(accountId, amount, userId);
+        const result = await accountService.deposit(
+          accountId,
+          amount,
+          userId,
+          accountCode
+        );
         return reply.status(201).send({
           destination: result,
         });
@@ -170,8 +205,37 @@ export async function eventHandler(
       case 'withdraw': {
         let accountId: string;
         let userId: string | undefined;
+        const { accountCode } = request.body;
 
-        if (!origin) {
+        if (accountCode) {
+          if (!user) {
+            return reply.status(401).send({
+              error: 'Authentication required when using account code',
+            });
+          }
+
+          if (!/^\d{4}-\d$/.test(accountCode)) {
+            return reply.status(400).send({
+              error: 'Invalid account code format. Expected format: XXXX-X',
+            });
+          }
+
+          try {
+            userId = user.userId;
+            const account = await accountService.getAccountByCode(
+              accountCode,
+              userId
+            );
+            accountId = account.id;
+          } catch (error) {
+            if (error instanceof AccountNotFoundError) {
+              return reply.status(404).send({
+                error: 'Account not found or access denied',
+              });
+            }
+            throw error;
+          }
+        } else if (!origin) {
           if (!user) {
             return reply.status(401).send({
               error: 'Authentication required when origin is not provided',
@@ -188,7 +252,12 @@ export async function eventHandler(
           }
         }
 
-        const result = await accountService.withdraw(accountId, amount, userId);
+        const result = await accountService.withdraw(
+          accountId,
+          amount,
+          userId,
+          accountCode
+        );
         return reply.status(201).send({
           origin: result,
         });
@@ -267,6 +336,12 @@ export const eventSchema = {
         maximum: 999999.99,
         description:
           'Valor da operação em reais (R$). Mínimo: R$ 0,01. Máximo: R$ 999.999,99. Precisão: 2 casas decimais.',
+      },
+      accountCode: {
+        type: 'string',
+        description:
+          'Código da conta no formato XXXX-X. Opcional. Se fornecido, a operação será aplicada à conta especificada. Requer autenticação.',
+        pattern: '^\\d{4}-\\d$',
       },
     },
   },

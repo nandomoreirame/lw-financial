@@ -56,7 +56,7 @@ export function SignupForm({ className }: SignupFormProps) {
 
       storeToken(response.token);
 
-      window.location.href = '/';
+      window.location.href = '/onboarding';
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Erro ao criar conta';
@@ -79,7 +79,7 @@ export function SignupForm({ className }: SignupFormProps) {
       </div>
 
       <Card>
-        <CardContent>
+        <CardContent className="p-6">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className={cn('space-y-6', className)}
@@ -177,7 +177,10 @@ export function SignupForm({ className }: SignupFormProps) {
               )}
             </div>
 
-            <LoginError error={error} />
+            <LoginError
+              error={error}
+              defaultMessage="Erro ao criar conta. Tente novamente."
+            />
 
             <Button
               type="submit"

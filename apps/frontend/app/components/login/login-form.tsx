@@ -87,7 +87,7 @@ export function LoginForm({ className }: LoginFormProps) {
       </div>
 
       <Card>
-        <CardContent>
+        <CardContent className="p-6">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className={cn('space-y-6', className)}

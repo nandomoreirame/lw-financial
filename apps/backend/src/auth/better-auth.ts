@@ -18,10 +18,10 @@ export const auth = betterAuth({
   baseURL:
     process.env.BETTER_AUTH_URL ||
     process.env.BETTER_AUTH_BASE_URL ||
-    'http://localhost:3333',
+    `http://localhost:${process.env.PORT || 3333}`,
   trustedOrigins: [
     process.env.CLIENT_ORIGIN || 'http://localhost:5173',
-    'http://localhost:3333',
+    `http://localhost:${process.env.PORT || 3333}`,
   ],
   email: {
     sendVerificationEmail: async ({
