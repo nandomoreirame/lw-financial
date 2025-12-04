@@ -60,8 +60,8 @@ export function useAuth(): UseAuthReturn {
         storeToken(response.token);
         setToken(response.token);
 
-        // Redirect to dashboard
-        navigate('/dashboard');
+        // Redirect to home (dashboard)
+        navigate('/');
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Erro ao fazer login';

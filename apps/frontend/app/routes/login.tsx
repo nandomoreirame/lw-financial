@@ -23,8 +23,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   const authCheck = checkAuthentication(request);
 
   if (authCheck.isAuthenticated) {
-    // User is already logged in, redirect to dashboard
-    throw redirect('/dashboard');
+    // User is already logged in, redirect to home (dashboard)
+    throw redirect('/');
   }
 
   // Check for error message in query params (from protected route redirect)

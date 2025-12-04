@@ -64,7 +64,7 @@ export function LoginForm({ className }: LoginFormProps) {
       // Use window.location.href to force full page reload
       // This ensures the loader runs on the client where sessionStorage is available
       // After SSR, the loader will run on the client and can access sessionStorage
-      window.location.href = '/dashboard';
+      window.location.href = '/';
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Erro ao fazer login';
