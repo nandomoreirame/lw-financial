@@ -1,6 +1,15 @@
 import { FastifyInstance } from 'fastify';
 import { authenticateRequest } from '../middleware/authentication';
+import {
+  accountByCodeHandler,
+  accountByCodeSchema,
+} from './handlers/account-by-code';
+import { accountsHandler, accountsSchema } from './handlers/accounts';
 import { balanceHandler, balanceSchema } from './handlers/balance';
+import {
+  createAccountHandler,
+  createAccountSchema,
+} from './handlers/create-account';
 import { eventHandler, eventSchema } from './handlers/event';
 import { resetHandler, resetSchema } from './handlers/reset';
 import {
@@ -34,6 +43,33 @@ export async function bankRoutes(fastify: FastifyInstance) {
     balanceHandler
   );
 
+  fastify.get(
+    '/accounts',
+    {
+      schema: accountsSchema,
+      preHandler: authenticateRequest,
+    },
+    accountsHandler
+  );
+
+  fastify.post(
+    '/accounts',
+    {
+      schema: createAccountSchema,
+      preHandler: authenticateRequest,
+    },
+    createAccountHandler
+  );
+
+  fastify.get(
+    '/accounts/:code',
+    {
+      schema: accountByCodeSchema,
+      preHandler: authenticateRequest,
+    },
+    accountByCodeHandler
+  );
+
   fastify.post('/event', { schema: eventSchema }, eventHandler);
 
   fastify.post(
@@ -57,6 +93,6 @@ export async function bankRoutes(fastify: FastifyInstance) {
   fastify.log.info('GET /transactions route registered successfully');
 
   fastify.log.info(
-    'Bank routes registered: /balance, /event, /reset, /transactions'
+    'Bank routes registered: /balance, /accounts, /accounts (POST), /accounts/:code, /event, /reset, /transactions'
   );
 }
