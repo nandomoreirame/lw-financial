@@ -5,7 +5,10 @@ nixPkgs = ["nodejs-22_x", "bun"]
 cmds = ["bun install --frozen-lockfile"]
 
 [phases.build]
-cmds = ["bun run --filter './apps/backend' prisma:generate", "bun run --filter './apps/backend' build"]
+cmds = [
+  "cd apps/backend && bun run prisma:generate",
+  "cd apps/backend && bun run build"
+]
 
 [start]
-cmd = "bun run --filter './apps/backend' start:prod"
+cmd = "cd apps/backend && bun run start:prod"
