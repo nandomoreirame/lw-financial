@@ -53,7 +53,7 @@ export function LoginError({
   return (
     <div
       className={cn(
-        'rounded-md bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive',
+        'bg-destructive/10 border-destructive/20 text-destructive rounded-md border p-3 text-sm',
         className
       )}
       role="alert"

@@ -73,9 +73,9 @@ export default function Onboarding({ loaderData }: Route.ComponentProps) {
 
   if (loaderData?.needsClientAuth && !clientAuthChecked) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="bg-background flex min-h-screen items-center justify-center p-4">
         <div className="container mx-auto max-w-4xl text-center">
-          <Spinner className="size-10 mx-auto mb-4" />
+          <Spinner className="mx-auto mb-4 size-10" />
           <span className="text-xl font-medium">Carregando. Aguarde...</span>
         </div>
       </div>

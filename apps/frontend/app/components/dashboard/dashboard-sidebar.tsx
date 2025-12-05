@@ -109,30 +109,30 @@ export function DashboardSidebar({
   const currentAccountCode = currentAccount?.code || urlAccountCode;
 
   return (
-    <aside className="fixed left-0 top-0 flex h-screen w-64 flex-col border-r border-border bg-card">
-      <div className="border-b border-border p-6">
-        <div className="flex items-center gap-2 mb-4">
+    <aside className="border-border bg-card fixed top-0 left-0 flex h-screen w-64 flex-col border-r">
+      <div className="border-border border-b p-6">
+        <div className="mb-4 flex items-center gap-2">
           <img src="/bank.svg" alt="Bank icon" className="h-6 w-6" />
-          <h1 className="text-xl font-bold text-foreground">LW Financial</h1>
+          <h1 className="text-foreground text-xl font-bold">LW Financial</h1>
         </div>
         <div className="mt-4">
           {isLoading ? (
-            <div className="rounded-md border border-border bg-muted px-3 py-2 text-sm">
+            <div className="border-border bg-muted rounded-md border px-3 py-2 text-sm">
               Carregando contas...
             </div>
           ) : error ? (
-            <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <div className="border-destructive/20 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm">
               Erro ao carregar contas
             </div>
           ) : accounts.length === 0 ? (
             <div className="space-y-2">
-              <div className="rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
+              <div className="border-border bg-muted text-muted-foreground rounded-md border px-3 py-2 text-sm">
                 Nenhuma conta encontrada
               </div>
               <NewAccountDialog
                 trigger={
                   <Button variant="outline" size="sm" className="w-full">
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="mr-2 h-4 w-4" />
                     Criar conta
                   </Button>
                 }
@@ -163,7 +163,7 @@ export function DashboardSidebar({
               </SelectContent>
             </Select>
           ) : currentAccount ? (
-            <div className="rounded-md border border-border bg-muted px-3 py-2 text-sm">
+            <div className="border-border bg-muted rounded-md border px-3 py-2 text-sm">
               {formatAccountName(currentAccount.code, currentAccount.id)}
             </div>
           ) : null}
@@ -214,7 +214,7 @@ export function DashboardSidebar({
         </div>
       </nav>
 
-      <div className="border-t border-border p-4">
+      <div className="border-border border-t p-4">
         <UserDropdown />
       </div>
     </aside>

@@ -50,11 +50,11 @@ export function TransactionHistory({
 
   if (isLoading) {
     return (
-      <div className="rounded-lg border bg-card p-6 space-y-4">
+      <div className="bg-card space-y-4 rounded-lg border p-6">
         <h2 className="text-lg font-semibold">Histórico de Transações</h2>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 animate-pulse rounded bg-muted" />
+            <div key={i} className="bg-muted h-16 animate-pulse rounded" />
           ))}
         </div>
       </div>
@@ -63,11 +63,11 @@ export function TransactionHistory({
 
   if (error) {
     return (
-      <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-destructive">
+      <div className="border-destructive/20 bg-destructive/10 space-y-4 rounded-lg border p-6">
+        <h2 className="text-destructive text-lg font-semibold">
           Erro ao carregar histórico
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {error.message ||
             'Erro ao buscar histórico de transações. Tente novamente.'}
         </p>
@@ -77,7 +77,7 @@ export function TransactionHistory({
 
   if (!transactions || transactions.length === 0) {
     return (
-      <div className="rounded-lg border bg-card p-6 space-y-4">
+      <div className="bg-card space-y-4 rounded-lg border p-6">
         <h2 className="text-lg font-semibold">Histórico de Transações</h2>
         <Empty className="border-0">
           <EmptyHeader>
@@ -96,7 +96,7 @@ export function TransactionHistory({
   }
 
   return (
-    <div className="rounded-lg border bg-card p-6 space-y-4">
+    <div className="bg-card space-y-4 rounded-lg border p-6">
       <h2 className="text-lg font-semibold">Histórico de Transações</h2>
       <div className="space-y-2">
         {transactions.map((transaction) => (
@@ -169,7 +169,7 @@ function TransactionItem({
   return (
     <div
       className={cn(
-        'flex items-center justify-between rounded-lg border bg-background p-4',
+        'bg-background flex items-center justify-between rounded-lg border p-4',
         className
       )}
     >
@@ -177,7 +177,7 @@ function TransactionItem({
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{typeLabel}</span>
         </div>
-        <p className="text-xs text-muted-foreground">{formattedDateTime}</p>
+        <p className="text-muted-foreground text-xs">{formattedDateTime}</p>
       </div>
       <div className="text-right">
         <p className={cn('text-sm font-semibold', amountColor)}>

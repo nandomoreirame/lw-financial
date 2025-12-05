@@ -196,7 +196,7 @@ export function TransferForm({
                   />
                 </FormControl>
                 {insufficientFundsError && (
-                  <p className="text-sm font-medium text-destructive">
+                  <p className="text-destructive text-sm font-medium">
                     {insufficientFundsError}
                   </p>
                 )}
@@ -219,7 +219,7 @@ export function TransferForm({
             {isLoading ? (
               <>
                 <span
-                  className="h-4 w-4 inline-block animate-spin"
+                  className="inline-block h-4 w-4 animate-spin"
                   aria-hidden="true"
                 >
                   ↻

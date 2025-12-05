@@ -31,7 +31,7 @@ export function RefreshButton({
       aria-label="Atualizar saldo"
     >
       <span
-        className={cn('h-4 w-4 inline-block', isLoading && 'animate-spin')}
+        className={cn('inline-block h-4 w-4', isLoading && 'animate-spin')}
         aria-hidden="true"
       >
         ↻

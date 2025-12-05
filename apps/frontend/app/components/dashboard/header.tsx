@@ -17,7 +17,7 @@ export function Header() {
   };
 
   return (
-    <header className="w-full border-b bg-background">
+    <header className="bg-background w-full border-b">
       <div className="container mx-auto max-w-4xl px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

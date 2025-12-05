@@ -128,9 +128,9 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
 
   if (loaderData?.needsClientAuth && !clientAccountId) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="bg-background flex min-h-screen items-center justify-center p-4">
         <div className="container mx-auto max-w-4xl text-center">
-          <Spinner className="size-10 mx-auto mb-4" />
+          <Spinner className="mx-auto mb-4 size-10" />
           <span className="text-xl font-medium">
             Carregando conta. Aguarde...
           </span>
@@ -141,15 +141,15 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
 
   if (accountCode && !isValidCode) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         <DashboardSidebar />
         <main className="ml-64 p-8">
           <div className="mx-auto max-w-4xl">
-            <div className="rounded-lg border border-destructive bg-destructive/10 p-6">
-              <h2 className="text-xl font-semibold text-destructive">
+            <div className="border-destructive bg-destructive/10 rounded-lg border p-6">
+              <h2 className="text-destructive text-xl font-semibold">
                 Código de Conta Inválido
               </h2>
-              <p className="mt-2 text-muted-foreground">
+              <p className="text-muted-foreground mt-2">
                 O formato do código deve ser XXXX-X (4 dígitos, hífen, 1
                 dígito).
               </p>
@@ -162,15 +162,15 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
 
   if (accountError && accountError.message.includes('não encontrada')) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         <DashboardSidebar />
         <main className="ml-64 p-8">
           <div className="mx-auto max-w-4xl">
-            <div className="rounded-lg border border-destructive bg-destructive/10 p-6">
-              <h2 className="text-xl font-semibold text-destructive">
+            <div className="border-destructive bg-destructive/10 rounded-lg border p-6">
+              <h2 className="text-destructive text-xl font-semibold">
                 Conta Não Encontrada
               </h2>
-              <p className="mt-2 text-muted-foreground">
+              <p className="text-muted-foreground mt-2">
                 A conta solicitada não foi encontrada ou você não tem permissão
                 para acessá-la.
               </p>
@@ -183,7 +183,7 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
 
   if (isLoadingAccount || isLoadingBalance) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         <DashboardSidebar />
         <main className="ml-64 p-8">
           <div className="mx-auto max-w-4xl">
@@ -195,7 +195,7 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <DashboardSidebar
         selectedAccountCode={accountCode}
         onAccountChange={handleAccountChange}

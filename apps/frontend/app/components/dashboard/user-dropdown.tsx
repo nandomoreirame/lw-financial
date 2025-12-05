@@ -81,7 +81,7 @@ export function UserDropdown() {
           <div className="flex flex-col items-start">
             <span className="text-sm font-medium">{userName}</span>
             {userEmail && (
-              <span className="text-xs text-muted-foreground">{userEmail}</span>
+              <span className="text-muted-foreground text-xs">{userEmail}</span>
             )}
           </div>
         </Button>
@@ -91,7 +91,7 @@ export function UserDropdown() {
           <div className="flex flex-col">
             <span>{userName}</span>
             {userEmail && (
-              <span className="text-xs font-normal text-muted-foreground">
+              <span className="text-muted-foreground text-xs font-normal">
                 {userEmail}
               </span>
             )}

@@ -133,7 +133,7 @@ export function NewAccountForm({ className, onSuccess }: NewAccountFormProps) {
             {isSubmitting ? (
               <>
                 <span
-                  className="h-4 w-4 inline-block animate-spin"
+                  className="inline-block h-4 w-4 animate-spin"
                   aria-hidden="true"
                 >
                   ↻

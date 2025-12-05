@@ -76,12 +76,12 @@ export function LoginForm({ className }: LoginFormProps) {
 
   return (
     <div className={cn('w-full max-w-sm', className)}>
-      <div className="space-y-2 text-center mb-8">
-        <div className="flex justify-center mb-2">
+      <div className="mb-8 space-y-2 text-center">
+        <div className="mb-2 flex justify-center">
           <img src="/bank.svg" alt="Bank icon" className="h-12 w-12" />
         </div>
         <h1 className="text-3xl font-bold">LW Financial</h1>
-        <p className="text-balance text-muted-foreground">
+        <p className="text-muted-foreground text-balance">
           Faça login para acessar sua conta
         </p>
       </div>
@@ -109,7 +109,7 @@ export function LoginForm({ className }: LoginFormProps) {
               {errors.username && (
                 <p
                   id="username-error"
-                  className="text-sm text-destructive"
+                  className="text-destructive text-sm"
                   role="alert"
                 >
                   {errors.username.message}
@@ -135,7 +135,7 @@ export function LoginForm({ className }: LoginFormProps) {
               {errors.password && (
                 <p
                   id="password-error"
-                  className="text-sm text-destructive"
+                  className="text-destructive text-sm"
                   role="alert"
                 >
                   {errors.password.message}
@@ -156,7 +156,7 @@ export function LoginForm({ className }: LoginFormProps) {
             <Separator />
 
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Não tem uma conta?{' '}
                 <Link to="/signup" className="text-primary hover:underline">
                   Registre-se

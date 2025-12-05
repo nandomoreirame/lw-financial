@@ -41,7 +41,7 @@ export function DepositDialog({
 
   const defaultTrigger = (
     <Button>
-      <ArrowDown className="h-4 w-4 mr-2" />
+      <ArrowDown className="mr-2 h-4 w-4" />
       Depositar
     </Button>
   );

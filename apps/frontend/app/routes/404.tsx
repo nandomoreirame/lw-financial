@@ -35,11 +35,11 @@ export async function loader({ request }: Route.LoaderArgs) {
  */
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="text-center space-y-4">
+    <div className="bg-background flex min-h-screen items-center justify-center p-4">
+      <div className="space-y-4 text-center">
         <h1 className="text-6xl font-bold">404</h1>
-        <p className="text-xl text-muted-foreground">Página não encontrada</p>
-        <a href="/" className="inline-block text-primary hover:underline">
+        <p className="text-muted-foreground text-xl">Página não encontrada</p>
+        <a href="/" className="text-primary inline-block hover:underline">
           Voltar para a página inicial
         </a>
       </div>

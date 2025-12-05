@@ -40,15 +40,15 @@ export function BalanceCard({
     return (
       <div
         className={cn(
-          'rounded-lg border border-destructive/20 bg-destructive/10 p-6 space-y-4',
+          'border-destructive/20 bg-destructive/10 space-y-4 rounded-lg border p-6',
           className
         )}
       >
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-destructive">
+          <h3 className="text-destructive text-sm font-medium">
             Erro ao carregar saldo
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {error.message ||
               'Erro ao buscar informações de saldo. Tente novamente.'}
           </p>
@@ -60,10 +60,10 @@ export function BalanceCard({
 
   if (balance === undefined || balance === null) {
     return (
-      <div className={cn('rounded-lg border bg-card p-6 space-y-4', className)}>
+      <div className={cn('bg-card space-y-4 rounded-lg border p-6', className)}>
         <div className="space-y-2">
           <h3 className="text-sm font-medium">Saldo</h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Saldo não disponível no momento
           </p>
         </div>
@@ -73,13 +73,13 @@ export function BalanceCard({
   }
 
   return (
-    <div className={cn('rounded-lg border bg-card p-6 space-y-4', className)}>
+    <div className={cn('bg-card space-y-4 rounded-lg border p-6', className)}>
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-muted-foreground">Saldo</p>
+            <p className="text-muted-foreground text-sm font-medium">Saldo</p>
             {accountCode && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Conta {accountCode}
               </p>
             )}

@@ -118,12 +118,12 @@ export function OnboardingForm({ className }: OnboardingFormProps) {
 
   return (
     <div className={cn('w-full max-w-md', className)}>
-      <div className="space-y-2 text-center mb-8">
-        <div className="flex justify-center mb-2">
+      <div className="mb-8 space-y-2 text-center">
+        <div className="mb-2 flex justify-center">
           <img src="/bank.svg" alt="Bank icon" className="h-12 w-12" />
         </div>
         <h1 className="text-3xl font-bold">Configure sua conta bancária</h1>
-        <p className="text-balance text-muted-foreground">
+        <p className="text-muted-foreground text-balance">
           Adicione um saldo inicial (opcional)
         </p>
       </div>
@@ -172,7 +172,7 @@ export function OnboardingForm({ className }: OnboardingFormProps) {
                   {isLoading ? (
                     <>
                       <span
-                        className="h-4 w-4 inline-block animate-spin mr-2"
+                        className="mr-2 inline-block h-4 w-4 animate-spin"
                         aria-hidden="true"
                       >
                         ↻

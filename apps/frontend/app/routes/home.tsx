@@ -96,9 +96,9 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   if (!isLoadingAccounts && accounts.length > 0 && !accounts[0]?.code) {
     return (
-      <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+      <div className="bg-background flex min-h-screen items-center justify-center p-4">
         <div className="container mx-auto max-w-md">
-          <div className="rounded-lg border border-yellow-500 bg-yellow-50 p-6 dark:bg-yellow-950 dark:border-yellow-600">
+          <div className="rounded-lg border border-yellow-500 bg-yellow-50 p-6 dark:border-yellow-600 dark:bg-yellow-950">
             <div className="flex items-start gap-3">
               <div className="shrink-0">
                 <svg
@@ -156,11 +156,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+    <div className="bg-background flex min-h-screen items-center justify-center p-4">
       <div className="container mx-auto max-w-4xl">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <div className="text-center text-muted-foreground">
+          <div className="border-primary h-12 w-12 animate-spin rounded-full border-b-2"></div>
+          <div className="text-muted-foreground text-center">
             Redirecionando...
           </div>
         </div>

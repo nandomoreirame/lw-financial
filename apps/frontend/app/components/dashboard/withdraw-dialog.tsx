@@ -43,7 +43,7 @@ export function WithdrawDialog({
 
   const defaultTrigger = (
     <Button>
-      <ArrowUp className="h-4 w-4 mr-2" />
+      <ArrowUp className="mr-2 h-4 w-4" />
       Sacar
     </Button>
   );

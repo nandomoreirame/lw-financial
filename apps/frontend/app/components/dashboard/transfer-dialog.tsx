@@ -41,7 +41,7 @@ export function TransferDialog({
 
   const defaultTrigger = (
     <Button>
-      <ArrowRightLeft className="h-4 w-4 mr-2" />
+      <ArrowRightLeft className="mr-2 h-4 w-4" />
       Transferir
     </Button>
   );

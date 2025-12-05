@@ -68,12 +68,12 @@ export function SignupForm({ className }: SignupFormProps) {
 
   return (
     <div className={cn('w-full max-w-sm', className)}>
-      <div className="space-y-2 text-center mb-8">
-        <div className="flex justify-center mb-2">
+      <div className="mb-8 space-y-2 text-center">
+        <div className="mb-2 flex justify-center">
           <img src="/bank.svg" alt="Bank icon" className="h-12 w-12" />
         </div>
         <h1 className="text-3xl font-bold">LW Financial</h1>
-        <p className="text-balance text-muted-foreground">
+        <p className="text-muted-foreground text-balance">
           Crie sua conta para começar
         </p>
       </div>
@@ -99,7 +99,7 @@ export function SignupForm({ className }: SignupFormProps) {
               {errors.name && (
                 <p
                   id="name-error"
-                  className="text-sm text-destructive"
+                  className="text-destructive text-sm"
                   role="alert"
                 >
                   {errors.name.message}
@@ -121,7 +121,7 @@ export function SignupForm({ className }: SignupFormProps) {
               {errors.email && (
                 <p
                   id="email-error"
-                  className="text-sm text-destructive"
+                  className="text-destructive text-sm"
                   role="alert"
                 >
                   {errors.email.message}
@@ -145,7 +145,7 @@ export function SignupForm({ className }: SignupFormProps) {
               {errors.username && (
                 <p
                   id="username-error"
-                  className="text-sm text-destructive"
+                  className="text-destructive text-sm"
                   role="alert"
                 >
                   {errors.username.message}
@@ -169,7 +169,7 @@ export function SignupForm({ className }: SignupFormProps) {
               {errors.pass && (
                 <p
                   id="password-error"
-                  className="text-sm text-destructive"
+                  className="text-destructive text-sm"
                   role="alert"
                 >
                   {errors.pass.message}
@@ -193,7 +193,7 @@ export function SignupForm({ className }: SignupFormProps) {
             <Separator />
 
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Já tem uma conta?{' '}
                 <Link to="/login" className="text-primary hover:underline">
                   Faça login

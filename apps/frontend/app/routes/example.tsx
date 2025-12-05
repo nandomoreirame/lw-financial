@@ -36,11 +36,11 @@ export default function ExampleRoute() {
 
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-6">Example Page</h1>
+      <h1 className="mb-6 text-3xl font-bold">Example Page</h1>
 
       {/* React Query Example */}
       <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">React Query Example</h2>
+        <h2 className="mb-4 text-2xl font-semibold">React Query Example</h2>
         {isLoading && <p>Loading...</p>}
         {error && <p className="text-red-500">Error: {error.message}</p>}
         {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
@@ -48,34 +48,34 @@ export default function ExampleRoute() {
 
       {/* React Hook Form Example */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">React Hook Form Example</h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-md">
+        <h2 className="mb-4 text-2xl font-semibold">React Hook Form Example</h2>
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-md space-y-4">
           <div>
-            <label htmlFor="name" className="block mb-1">
+            <label htmlFor="name" className="mb-1 block">
               Name
             </label>
             <input
               id="name"
               {...register('name')}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full rounded border px-3 py-2"
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+              <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="email" className="block mb-1">
+            <label htmlFor="email" className="mb-1 block">
               Email
             </label>
             <input
               id="email"
               type="email"
               {...register('email')}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full rounded border px-3 py-2"
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="mt-1 text-sm text-red-500">
                 {errors.email.message}
               </p>
             )}
@@ -83,7 +83,7 @@ export default function ExampleRoute() {
 
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
           >
             Submit
           </button>
