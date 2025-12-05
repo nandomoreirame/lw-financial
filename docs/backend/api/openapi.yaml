@@ -1,0 +1,1061 @@
+openapi: 3.0.0
+info:
+  title: LW Financial API
+  description: |
+    API REST completa para operações bancárias e autenticação do sistema LW Financial.
+
+    ## Autenticação
+
+    A maioria dos endpoints requer autenticação via JWT token. Para obter um token, use o endpoint `/v1/login` ou `/v1/signup`.
+
+    ## Versionamento
+
+    A API está versionada no prefixo `/v1`. Todas as requisições devem incluir este prefixo.
+
+    ## Limites e Políticas
+
+    - **Rate Limiting**: Não implementado atualmente
+    - **Timeout**: 30 segundos por requisição
+    - **Tamanho máximo de payload**: 1MB
+    - **Tokens JWT**: Expiração de 1 hora
+
+    ## Códigos de Conta
+
+    As contas bancárias possuem códigos únicos no formato `XXXX-X` (4 dígitos, hífen, 1 dígito).
+    Exemplo: `1234-5`
+
+  version: 1.0.0
+  contact:
+    name: LW Financial Support
+    email: support@lwfinancial.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3333/v1
+    description: Servidor de desenvolvimento
+  - url: https://api.lwfinancial.com/v1
+    description: Servidor de produção (exemplo)
+
+tags:
+  - name: auth
+    description: Endpoints de autenticação e registro de usuários
+  - name: health
+    description: Endpoints de verificação de saúde do sistema
+  - name: bank
+    description: Endpoints de operações bancárias (requerem autenticação)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtido através do endpoint /v1/login ou /v1/signup
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Mensagem de erro descritiva
+        code:
+          type: string
+          description: Código de erro (opcional)
+      required:
+        - error
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - pass
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 20
+          pattern: '^[a-zA-Z0-9]+$'
+          description: Nome de usuário (3-20 caracteres alfanuméricos)
+          example: admin
+        pass:
+          type: string
+          minLength: 6
+          description: Senha do usuário (mínimo 6 caracteres)
+          example: admin123
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT para autenticação em requisições subsequentes
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      required:
+        - token
+
+    SignupRequest:
+      type: object
+      required:
+        - username
+        - email
+        - name
+        - pass
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 20
+          pattern: '^[a-zA-Z0-9]+$'
+          description: Nome de usuário (3-20 caracteres alfanuméricos, único)
+          example: novousuario
+        email:
+          type: string
+          format: email
+          description: Email do usuário (único)
+          example: novo@example.com
+        name:
+          type: string
+          minLength: 1
+          description: Nome completo do usuário
+          example: Novo Usuário
+        pass:
+          type: string
+          minLength: 6
+          description: Senha do usuário (mínimo 6 caracteres)
+          example: senha123
+
+    SignupResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT para autenticação em requisições subsequentes
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      required:
+        - token
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        timestamp:
+          type: string
+          format: date-time
+          example: '2025-01-15T10:30:00.000Z'
+      required:
+        - status
+        - timestamp
+
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único da conta (CUID)
+          example: clx123456789
+        code:
+          type: string
+          nullable: true
+          pattern: '^\d{4}-\d$'
+          description: Código único da conta no formato XXXX-X
+          example: '1234-5'
+        balance:
+          type: number
+          format: double
+          description: Saldo da conta em reais (R$)
+          example: 1500.5
+      required:
+        - id
+        - balance
+
+    AccountList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Account'
+
+    CreateAccountRequest:
+      type: object
+      properties:
+        initialBalance:
+          type: number
+          minimum: 0
+          maximum: 999999.99
+          format: double
+          description: Saldo inicial da conta (opcional). Se não fornecido, será 0.
+          example: 100.0
+
+    EventRequest:
+      type: object
+      required:
+        - type
+        - amount
+      properties:
+        type:
+          type: string
+          enum:
+            - deposit
+            - withdraw
+            - transfer
+          description: Tipo de operação bancária
+        amount:
+          type: number
+          minimum: 0.01
+          maximum: 999999.99
+          format: double
+          description: |
+            Valor da operação em reais (R$).
+            Mínimo: R$ 0,01. Máximo: R$ 999.999,99.
+            Precisão: 2 casas decimais.
+          example: 100.5
+        accountCode:
+          type: string
+          pattern: '^\d{4}-\d$'
+          description: |
+            Código da conta no formato XXXX-X.
+            Opcional para depósitos e saques autenticados (backend identifica automaticamente a conta padrão).
+            Requer autenticação.
+          example: '1234-5'
+        originAccountCode:
+          type: string
+          pattern: '^\d{4}-\d$'
+          description: |
+            Código da conta de origem no formato XXXX-X.
+            Opcional para transferências. Se fornecido, será usado em vez do ID.
+            Requer autenticação e a conta deve pertencer ao usuário.
+          example: '1234-5'
+        destinationAccountCode:
+          type: string
+          pattern: '^\d{4}-\d$'
+          description: |
+            Código da conta de destino no formato XXXX-X.
+            Opcional para transferências. Se fornecido, será usado em vez do ID.
+            Não requer que a conta pertença ao usuário.
+          example: '5678-9'
+        origin:
+          type: string
+          description: |
+            ID da conta de origem (UUID/CUID).
+            Obrigatório para transferências não autenticadas.
+            Para saques autenticados, pode ser omitido (backend identifica automaticamente).
+          example: clx123456789
+        destination:
+          type: string
+          description: |
+            ID da conta de destino (UUID/CUID).
+            Obrigatório para transferências não autenticadas.
+            Para depósitos autenticados, pode ser omitido (backend identifica automaticamente).
+          example: clx987654321
+
+    EventResponse:
+      oneOf:
+        - type: object
+          properties:
+            destination:
+              type: object
+              properties:
+                id:
+                  type: string
+                balance:
+                  type: number
+          required:
+            - destination
+        - type: object
+          properties:
+            origin:
+              type: object
+              properties:
+                id:
+                  type: string
+                balance:
+                  type: number
+          required:
+            - origin
+        - type: object
+          properties:
+            origin:
+              type: object
+              properties:
+                id:
+                  type: string
+                balance:
+                  type: number
+            destination:
+              type: object
+              properties:
+                id:
+                  type: string
+                balance:
+                  type: number
+          required:
+            - origin
+            - destination
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID único da transação (CUID)
+          example: clx111111111
+        type:
+          type: string
+          enum:
+            - DEPOSIT
+            - WITHDRAW
+            - TRANSFER
+            - INITIAL_BALANCE
+          description: Tipo de transação
+        amount:
+          type: string
+          description: Valor da transação em reais (R$)
+          example: '100.50'
+        originAccountId:
+          type: string
+          nullable: true
+          description: ID da conta de origem
+          example: clx123456789
+        originAccountCode:
+          type: string
+          nullable: true
+          pattern: '^\d{4}-\d$'
+          description: Código da conta de origem
+          example: '1234-5'
+        destinationAccountId:
+          type: string
+          nullable: true
+          description: ID da conta de destino
+          example: clx987654321
+        destinationAccountCode:
+          type: string
+          nullable: true
+          pattern: '^\d{4}-\d$'
+          description: Código da conta de destino
+          example: '5678-9'
+        userId:
+          type: string
+          nullable: true
+          description: ID do usuário que realizou a transação
+          example: clxuser123
+        createdAt:
+          type: string
+          format: date-time
+          description: Data e hora de criação da transação
+          example: '2025-01-15T10:30:00.000Z'
+      required:
+        - id
+        - type
+        - amount
+        - createdAt
+
+    TransactionList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Transaction'
+      maxItems: 20
+      description: Lista de até 20 transações mais recentes
+
+paths:
+  /health:
+    get:
+      summary: Verificação de saúde do sistema
+      description: |
+        Endpoint de health check para verificar se o sistema está operacional.
+        Não requer autenticação.
+      tags:
+        - health
+      operationId: getHealth
+      responses:
+        '200':
+          description: Sistema operacional
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: ok
+                timestamp: '2025-01-15T10:30:00.000Z'
+
+  /login:
+    post:
+      summary: Autenticação de usuário
+      description: |
+        Autentica um usuário existente e retorna um token JWT válido por 1 hora.
+
+        O token JWT contém:
+        - `userId`: ID do usuário
+        - `username`: Nome de usuário
+        - `email`: Email do usuário
+        - `iat`: Timestamp de emissão
+        - `exp`: Timestamp de expiração (1 hora)
+      tags:
+        - auth
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              default:
+                summary: Login padrão
+                value:
+                  username: admin
+                  pass: admin123
+      responses:
+        '200':
+          description: Login bem-sucedido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Erro de validação de entrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Validation error message
+        '403':
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Invalid credentials
+        '405':
+          description: Método HTTP não permitido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Method not allowed. Use POST
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Internal authentication error
+                code: AUTH_FAILURE
+
+  /signup:
+    post:
+      summary: Registro de novo usuário
+      description: |
+        Registra um novo usuário no sistema e cria automaticamente uma conta bancária padrão.
+
+        Após o registro bem-sucedido:
+        1. Um usuário é criado no sistema
+        2. Uma conta bancária padrão é criada automaticamente
+        3. Um token JWT é retornado para autenticação imediata
+
+        O token JWT tem as mesmas características do endpoint `/login`.
+      tags:
+        - auth
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+            examples:
+              default:
+                summary: Registro padrão
+                value:
+                  username: novousuario
+                  email: novo@example.com
+                  name: Novo Usuário
+                  pass: senha123
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResponse'
+              example:
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Erro de validação de entrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Validation error message
+        '409':
+          description: Usuário ou email já existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                usernameExists:
+                  summary: Usuário já existe
+                  value:
+                    error: Username already exists
+                emailExists:
+                  summary: Email já existe
+                  value:
+                    error: Email already exists
+        '405':
+          description: Método HTTP não permitido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Method not allowed. Use POST
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Internal server error
+                code: SIGNUP_FAILURE
+
+  /balance:
+    get:
+      summary: Consultar saldo
+      description: |
+        Consulta o saldo da conta bancária do usuário autenticado.
+
+        - Se `account_code` for fornecido, retorna o saldo dessa conta específica
+        - Caso contrário, retorna o saldo da conta padrão do usuário
+
+        O `userId` é extraído automaticamente do token JWT.
+      tags:
+        - bank
+      operationId: getBalance
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: account_code
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: '^\d{4}-\d$'
+          description: Código da conta no formato XXXX-X (opcional)
+          example: '1234-5'
+      responses:
+        '200':
+          description: Saldo da conta
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+              examples:
+                default:
+                  summary: Saldo padrão
+                  value: 1500.5
+                specificAccount:
+                  summary: Saldo de conta específica
+                  value: 250.0
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: User information not found in token
+        '404':
+          description: Conta não encontrada ou acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Account not found or access denied
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Internal server error
+
+  /accounts:
+    get:
+      summary: Listar contas bancárias
+      description: |
+        Lista todas as contas bancárias do usuário autenticado.
+
+        O `userId` é extraído automaticamente do token JWT.
+      tags:
+        - bank
+      operationId: getAccounts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de contas bancárias
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountList'
+              example:
+                - id: clx123456789
+                  code: '1234-5'
+                  balance: 1500.5
+                - id: clx987654321
+                  code: '5678-9'
+                  balance: 250.0
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: User information not found in token
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Internal server error
+
+    post:
+      summary: Criar nova conta bancária
+      description: |
+        Cria uma nova conta bancária para o usuário autenticado.
+
+        **Importante**: Sempre cria uma nova conta, mesmo que o usuário já tenha outras contas.
+        O sistema suporta múltiplas contas por usuário.
+
+        O `userId` é extraído automaticamente do token JWT.
+      tags:
+        - bank
+      operationId: createAccount
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+            examples:
+              default:
+                summary: Conta com saldo inicial
+                value:
+                  initialBalance: 100.0
+              zeroBalance:
+                summary: Conta sem saldo inicial
+                value: {}
+      responses:
+        '201':
+          description: Conta criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+              example:
+                id: clx123456789
+                code: '1234-5'
+                balance: 100.0
+        '400':
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Initial balance must be between 0 and 999.999,99
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: User information not found in token
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Internal server error
+
+  /accounts/{code}:
+    get:
+      summary: Buscar conta por código
+      description: |
+        Busca uma conta bancária pelo código único no formato `XXXX-X`.
+
+        O código deve estar no formato correto (4 dígitos, hífen, 1 dígito).
+        O `userId` é extraído do token JWT para validar que a conta pertence ao usuário.
+      tags:
+        - bank
+      operationId: getAccountByCode
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{4}-\d$'
+          description: Código da conta no formato XXXX-X
+          example: '1234-5'
+      responses:
+        '200':
+          description: Dados da conta bancária
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+              example:
+                id: clx123456789
+                code: '1234-5'
+                balance: 1500.5
+        '400':
+          description: Formato de código inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidFormat:
+                  summary: Formato inválido
+                  value:
+                    error: 'Invalid account code format. Expected format: XXXX-X'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: User information not found in token
+        '404':
+          description: Conta não encontrada ou acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Account not found or access denied
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Internal server error
+
+  /event:
+    post:
+      summary: Processar evento bancário
+      description: |
+        Processa eventos bancários (depósito, saque, transferência).
+
+        ## Comportamento para Usuários Autenticados
+
+        Para depósitos e saques autenticados:
+        - O backend identifica automaticamente a conta padrão do usuário a partir do token JWT
+        - Não é necessário enviar `destination` (depósito) ou `origin` (saque) no body
+        - Se `accountCode` for fornecido, a operação será aplicada à conta especificada
+
+        Para transferências:
+        - Ainda requer `originAccountCode` e `destinationAccountCode` (ou `origin` e `destination`) no body
+        - A conta de origem deve pertencer ao usuário autenticado
+
+        ## Tipos de Operação
+
+        ### Depósito (`deposit`)
+        - Credita valor na conta de destino
+        - Para usuários autenticados, usa a conta padrão se `accountCode` não for fornecido
+
+        ### Saque (`withdraw`)
+        - Debita valor da conta de origem
+        - Requer saldo suficiente
+        - Para usuários autenticados, usa a conta padrão se `accountCode` não for fornecido
+
+        ### Transferência (`transfer`)
+        - Transfere valor da conta de origem para a conta de destino
+        - Requer saldo suficiente na conta de origem
+        - A conta de origem deve pertencer ao usuário autenticado
+        - A conta de destino pode pertencer a qualquer usuário
+        - Não é possível transferir para a mesma conta
+      tags:
+        - bank
+      operationId: processEvent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+            examples:
+              deposit:
+                summary: Depósito autenticado
+                value:
+                  type: deposit
+                  amount: 100.5
+                  accountCode: '1234-5'
+              withdraw:
+                summary: Saque autenticado
+                value:
+                  type: withdraw
+                  amount: 50.0
+                  accountCode: '1234-5'
+              transfer:
+                summary: Transferência
+                value:
+                  type: transfer
+                  originAccountCode: '1234-5'
+                  destinationAccountCode: '5678-9'
+                  amount: 100.0
+      responses:
+        '201':
+          description: Operação realizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+              examples:
+                deposit:
+                  summary: Resposta de depósito
+                  value:
+                    destination:
+                      id: clx123456789
+                      balance: 1500.5
+                withdraw:
+                  summary: Resposta de saque
+                  value:
+                    origin:
+                      id: clx123456789
+                      balance: 1400.5
+                transfer:
+                  summary: Resposta de transferência
+                  value:
+                    origin:
+                      id: clx123456789
+                      balance: 1300.5
+                    destination:
+                      id: clx987654321
+                      balance: 350.0
+        '400':
+          description: Requisição inválida ou saldo insuficiente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidAmount:
+                  summary: Valor inválido
+                  value:
+                    error: Invalid amount
+                insufficientFunds:
+                  summary: Saldo insuficiente
+                  value:
+                    error: Insufficient funds
+                sameAccount:
+                  summary: Mesma conta
+                  value:
+                    error: Origin and destination cannot be the same
+                missingDestination:
+                  summary: Destino ausente
+                  value:
+                    error: Destination account is required for transfer
+                invalidFormat:
+                  summary: Formato inválido
+                  value:
+                    error: 'Invalid account code format. Expected format: XXXX-X'
+        '401':
+          description: Não autenticado ou token inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Authentication required when using account code
+        '404':
+          description: Conta não encontrada
+          content:
+            application/json:
+              schema:
+                type: number
+              example: 0
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Internal server error
+
+  /transactions:
+    get:
+      summary: Histórico de transações
+      description: |
+        Retorna o histórico de transações do usuário autenticado.
+
+        - Retorna até 20 transações mais recentes
+        - Ordenadas por data de criação (mais recente primeiro)
+        - Pode ser filtrado por `accountCode` para retornar apenas transações de uma conta específica
+        - Inclui transação de saldo inicial (`INITIAL_BALANCE`) se aplicável
+
+        O `userId` é extraído automaticamente do token JWT.
+      tags:
+        - bank
+      operationId: getTransactions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: accountCode
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: '^\d{4}-\d$'
+          description: Código da conta no formato XXXX-X para filtrar transações
+          example: '1234-5'
+      responses:
+        '200':
+          description: Lista de transações do usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionList'
+              example:
+                - id: clx111111111
+                  type: DEPOSIT
+                  amount: '100.50'
+                  originAccountId: null
+                  originAccountCode: null
+                  destinationAccountId: clx123456789
+                  destinationAccountCode: '1234-5'
+                  userId: clxuser123
+                  createdAt: '2025-01-15T10:30:00.000Z'
+                - id: clx222222222
+                  type: WITHDRAW
+                  amount: '50.00'
+                  originAccountId: clx123456789
+                  originAccountCode: '1234-5'
+                  destinationAccountId: null
+                  destinationAccountCode: null
+                  userId: clxuser123
+                  createdAt: '2025-01-15T09:15:00.000Z'
+                - id: clx333333333
+                  type: TRANSFER
+                  amount: '100.00'
+                  originAccountId: clx123456789
+                  originAccountCode: '1234-5'
+                  destinationAccountId: clx987654321
+                  destinationAccountCode: '5678-9'
+                  userId: clxuser123
+                  createdAt: '2025-01-15T08:00:00.000Z'
+                - id: initial-balance-clx123456789
+                  type: INITIAL_BALANCE
+                  amount: '1000.00'
+                  originAccountId: null
+                  originAccountCode: null
+                  destinationAccountId: clx123456789
+                  destinationAccountCode: '1234-5'
+                  userId: clxuser123
+                  createdAt: '2025-01-10T00:00:00.000Z'
+        '400':
+          description: Formato de código de conta inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidFormat:
+                  summary: Formato inválido
+                  value:
+                    error: 'Invalid account code format. Expected format: XXXX-X'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: User information not found in token
+        '404':
+          description: Conta não encontrada ou acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Account not found or access denied
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Internal server error
+
+  /reset:
+    post:
+      summary: Reset do sistema
+      description: |
+        Reseta o estado do sistema, limpando todas as contas e transações.
+
+        **⚠️ ATENÇÃO**: Esta operação é destrutiva e não pode ser desfeita.
+        Use apenas em ambientes de desenvolvimento/teste.
+
+        Requer autenticação JWT.
+      tags:
+        - bank
+      operationId: resetSystem
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Sistema resetado com sucesso
+          content:
+            application/json:
+              schema:
+                type: string
+              example: OK
+        '401':
+          description: Não autorizado - Token JWT inválido ou ausente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Authentication error
+        '500':
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Internal server error
