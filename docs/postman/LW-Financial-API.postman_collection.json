@@ -1,0 +1,748 @@
+{
+  "info": {
+    "_postman_id": "lw-financial-api-collection",
+    "name": "LW Financial API Collection",
+    "description": "Collection completa da API LW Financial com todos os endpoints de autenticação e operações bancárias.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "lw-financial"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/health",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "health"]
+            },
+            "description": "Endpoint de verificação de saúde do sistema"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.environment.set('auth_token', response.token);",
+                  "        ",
+                  "        // Decodifica o token JWT para extrair dados do usuário",
+                  "        try {",
+                  "            const tokenParts = response.token.split('.');",
+                  "            const payload = JSON.parse(atob(tokenParts[1]));",
+                  "            ",
+                  "            if (payload.userId) {",
+                  "                pm.environment.set('user_id', payload.userId);",
+                  "            }",
+                  "            if (payload.username) {",
+                  "                pm.environment.set('username', payload.username);",
+                  "            }",
+                  "            if (payload.email) {",
+                  "                pm.environment.set('user_email', payload.email);",
+                  "            }",
+                  "            ",
+                  "            console.log('Token e dados do usuário salvos no environment');",
+                  "            console.log('User ID:', payload.userId);",
+                  "            console.log('Username:', payload.username);",
+                  "            console.log('Email:', payload.email);",
+                  "        } catch (e) {",
+                  "            console.log('Erro ao decodificar token:', e);",
+                  "        }",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"admin\",\n    \"pass\": \"admin123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "login"]
+            },
+            "description": "Autenticação de usuário e obtenção de token JWT"
+          },
+          "response": []
+        },
+        {
+          "name": "Signup",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.environment.set('auth_token', response.token);",
+                  "        ",
+                  "        // Decodifica o token JWT para extrair dados do usuário",
+                  "        try {",
+                  "            const tokenParts = response.token.split('.');",
+                  "            const payload = JSON.parse(atob(tokenParts[1]));",
+                  "            ",
+                  "            if (payload.userId) {",
+                  "                pm.environment.set('user_id', payload.userId);",
+                  "            }",
+                  "            if (payload.username) {",
+                  "                pm.environment.set('username', payload.username);",
+                  "            }",
+                  "            if (payload.email) {",
+                  "                pm.environment.set('user_email', payload.email);",
+                  "            }",
+                  "            ",
+                  "            console.log('Token e dados do usuário salvos no environment');",
+                  "            console.log('User ID:', payload.userId);",
+                  "            console.log('Username:', payload.username);",
+                  "            console.log('Email:', payload.email);",
+                  "        } catch (e) {",
+                  "            console.log('Erro ao decodificar token:', e);",
+                  "        }",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"novousuario\",\n    \"email\": \"novo@example.com\",\n    \"name\": \"Novo Usuário\",\n    \"pass\": \"senha123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/signup",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "signup"]
+            },
+            "description": "Registro de novo usuário e criação de conta bancária"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints de autenticação"
+    },
+    {
+      "name": "Bank Operations",
+      "item": [
+        {
+          "name": "Get Balance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/balance",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "balance"],
+              "query": [
+                {
+                  "key": "account_code",
+                  "value": "",
+                  "description": "Código da conta no formato XXXX-X (opcional)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Consulta o saldo da conta bancária. Se account_code for fornecido, retorna o saldo dessa conta específica. Caso contrário, retorna o saldo da conta padrão do usuário autenticado."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Balance by Account Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/balance?account_code={{account_code}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "balance"],
+              "query": [
+                {
+                  "key": "account_code",
+                  "value": "{{account_code}}",
+                  "description": "Código da conta no formato XXXX-X"
+                }
+              ]
+            },
+            "description": "Consulta o saldo de uma conta específica pelo código"
+          },
+          "response": []
+        },
+        {
+          "name": "List Accounts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const accounts = pm.response.json();",
+                  "    if (Array.isArray(accounts) && accounts.length > 0) {",
+                  "        // Salva o código da primeira conta",
+                  "        const firstAccount = accounts[0];",
+                  "        if (firstAccount.code) {",
+                  "            pm.environment.set('account_code', firstAccount.code);",
+                  "            console.log('Código da conta salvo:', firstAccount.code);",
+                  "        }",
+                  "        ",
+                  "        // Salva o ID da primeira conta",
+                  "        if (firstAccount.id) {",
+                  "            pm.environment.set('account_id', firstAccount.id);",
+                  "        }",
+                  "        ",
+                  "        // Se houver mais de uma conta, salva a segunda como destino",
+                  "        if (accounts.length > 1 && accounts[1].code) {",
+                  "            pm.environment.set('destination_account_code', accounts[1].code);",
+                  "            if (accounts[1].id) {",
+                  "                pm.environment.set('destination_account_id', accounts[1].id);",
+                  "            }",
+                  "        }",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/accounts",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "accounts"]
+            },
+            "description": "Lista todas as contas bancárias do usuário autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Account by Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const account = pm.response.json();",
+                  "    ",
+                  "    // Salva o ID da conta",
+                  "    if (account.id) {",
+                  "        pm.environment.set('account_id', account.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/accounts/{{account_code}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "accounts", "{{account_code}}"]
+            },
+            "description": "Busca uma conta bancária pelo código único no formato XXXX-X"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const account = pm.response.json();",
+                  "    ",
+                  "    // Salva o código da conta criada",
+                  "    if (account.code) {",
+                  "        pm.environment.set('account_code', account.code);",
+                  "        console.log('Código da conta criada salvo:', account.code);",
+                  "    }",
+                  "    ",
+                  "    // Salva o ID da conta criada",
+                  "    if (account.id) {",
+                  "        pm.environment.set('account_id', account.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"initialBalance\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/accounts",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "accounts"]
+            },
+            "description": "Cria uma nova conta bancária para o usuário autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Deposit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    ",
+                  "    // Salva o ID da conta de destino após depósito",
+                  "    if (response.destination && response.destination.id) {",
+                  "        pm.environment.set('account_id', response.destination.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"type\": \"deposit\",\n    \"amount\": 100.50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/event",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "event"]
+            },
+            "description": "Realiza um depósito na conta padrão do usuário autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Deposit to Account Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    ",
+                  "    // Salva o ID da conta de destino após depósito",
+                  "    if (response.destination && response.destination.id) {",
+                  "        pm.environment.set('account_id', response.destination.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"type\": \"deposit\",\n    \"amount\": 100.50,\n    \"accountCode\": \"{{account_code}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/event",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "event"]
+            },
+            "description": "Realiza um depósito em uma conta específica usando o código da conta"
+          },
+          "response": []
+        },
+        {
+          "name": "Withdraw",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    ",
+                  "    // Salva o ID da conta de origem após saque",
+                  "    if (response.origin && response.origin.id) {",
+                  "        pm.environment.set('account_id', response.origin.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"type\": \"withdraw\",\n    \"amount\": 50.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/event",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "event"]
+            },
+            "description": "Realiza um saque da conta padrão do usuário autenticado"
+          },
+          "response": []
+        },
+        {
+          "name": "Withdraw from Account Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    ",
+                  "    // Salva o ID da conta de origem após saque",
+                  "    if (response.origin && response.origin.id) {",
+                  "        pm.environment.set('account_id', response.origin.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"type\": \"withdraw\",\n    \"amount\": 50.00,\n    \"accountCode\": \"{{account_code}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/event",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "event"]
+            },
+            "description": "Realiza um saque de uma conta específica usando o código da conta"
+          },
+          "response": []
+        },
+        {
+          "name": "Transfer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    ",
+                  "    // Salva os IDs das contas após transferência",
+                  "    if (response.origin && response.origin.id) {",
+                  "        pm.environment.set('origin_account_id', response.origin.id);",
+                  "    }",
+                  "    if (response.destination && response.destination.id) {",
+                  "        pm.environment.set('destination_account_id', response.destination.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"type\": \"transfer\",\n    \"originAccountCode\": \"{{account_code}}\",\n    \"destinationAccountCode\": \"{{destination_account_code}}\",\n    \"amount\": 25.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/event",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "event"]
+            },
+            "description": "Realiza uma transferência entre contas usando códigos de conta"
+          },
+          "response": []
+        },
+        {
+          "name": "Transfer by Account IDs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"type\": \"transfer\",\n    \"origin\": \"{{origin_account_id}}\",\n    \"destination\": \"{{destination_account_id}}\",\n    \"amount\": 25.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/event",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "event"]
+            },
+            "description": "Realiza uma transferência entre contas usando IDs de conta"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "transactions"],
+              "query": [
+                {
+                  "key": "accountCode",
+                  "value": "",
+                  "description": "Código da conta no formato XXXX-X para filtrar transações (opcional)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Retorna o histórico de transações do usuário autenticado (até 20 mais recentes)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transactions by Account Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/transactions?accountCode={{account_code}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "transactions"],
+              "query": [
+                {
+                  "key": "accountCode",
+                  "value": "{{account_code}}",
+                  "description": "Código da conta no formato XXXX-X"
+                }
+              ]
+            },
+            "description": "Retorna o histórico de transações de uma conta específica"
+          },
+          "response": []
+        },
+        {
+          "name": "Reset System",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/v1/reset",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "reset"]
+            },
+            "description": "Reseta o estado do sistema (limpa todas as contas e transações). Requer autenticação JWT."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints de operações bancárias"
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3333",
+      "type": "string"
+    }
+  ]
+}
