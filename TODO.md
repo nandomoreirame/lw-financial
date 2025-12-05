@@ -4,7 +4,7 @@
 
 ---
 
-## 🎯 Status Geral
+## Status Geral
 
 - **Features Concluídas**: 5/6 (83.3%)
 - **Features Em Progresso**: 1/6 (16.7%)
@@ -13,7 +13,7 @@
 
 ---
 
-## 🔴 Prioridade Alta
+## Prioridade Alta
 
 ### Feature 004-auth-dashboard - Testes Pendentes
 
@@ -51,7 +51,7 @@
 
 ---
 
-## 🟡 Prioridade Média
+## Prioridade Média
 
 ### Feature Nova - US-019: Dashboard - Realizar Transferência
 
@@ -104,7 +104,7 @@
 
 ---
 
-## 🟢 Prioridade Baixa
+## Prioridade Baixa
 
 ### Melhorias e Otimizações
 

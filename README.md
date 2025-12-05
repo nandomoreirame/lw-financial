@@ -2,7 +2,7 @@
 
 Sistema bancário completo desenvolvido com Bun Workspaces, contendo frontend e backend. O projeto implementa um sistema de gerenciamento de contas bancárias com autenticação, operações de depósito, saque, transferência e histórico de transações.
 
-## 📊 Status do Projeto
+## Status do Projeto
 
 - **Progresso Geral**: 100% das funcionalidades implementadas
 - **Histórias de Usuário**: 22 de 22 concluídas (100%)
@@ -70,7 +70,7 @@ cd apps/frontend && bun run dev
 cd apps/backend && bun run dev
 ```
 
-## 🚀 Funcionalidades Implementadas
+## Funcionalidades Implementadas
 
 ### Autenticação e Segurança
 
@@ -106,7 +106,7 @@ cd apps/backend && bun run dev
 - ✅ Design responsivo com Tailwind CSS v4
 - ✅ Componentes acessíveis (Shadcn UI)
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 ### Frontend
 
@@ -137,7 +137,7 @@ cd apps/backend && bun run dev
 - **Docker Compose** - Containerização do PostgreSQL
 - **Swagger/OpenAPI** - Documentação de API
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Autenticação
 
@@ -165,7 +165,7 @@ Todos os endpoints bancários requerem autenticação via JWT token no header:
 Authorization: Bearer <jwt_token>
 ```
 
-## 🎨 Rotas do Frontend
+## Rotas do Frontend
 
 - `/` - Home (redireciona para login se não autenticado)
 - `/login` - Tela de login
@@ -174,7 +174,7 @@ Authorization: Bearer <jwt_token>
 - `/conta/:accountCode` - Dashboard da conta específica
 - `*` - Página 404
 
-## 📜 Scripts Disponíveis
+## Scripts Disponíveis
 
 ```bash
 # Desenvolvimento
@@ -201,7 +201,7 @@ bun run db:migrate:deploy # Aplica migrations do Prisma
 bun run clean            # Remove builds e cache
 ```
 
-## ⚙️ Configuração
+## Configuração
 
 ### Pré-requisitos
 
@@ -227,12 +227,12 @@ Edite `apps/backend/.env` com suas configurações:
 
 ```env
 # Servidor
-PORT=3001
+PORT=3333
 
 # Autenticação
 BETTER_AUTH_SECRET=your-secret-key-here-min-32-chars-change-in-production
-BETTER_AUTH_URL=http://localhost:3001
-BETTER_AUTH_BASE_URL=http://localhost:3001
+BETTER_AUTH_URL=http://localhost:3333
+BETTER_AUTH_BASE_URL=http://localhost:3333
 
 # CORS
 CLIENT_ORIGIN=http://localhost:5173
@@ -301,8 +301,8 @@ bun run dev
 Isso irá iniciar:
 
 - Frontend em `http://localhost:5173`
-- Backend em `http://localhost:3001`
-- Swagger UI em `http://localhost:3001/docs`
+- Backend em `http://localhost:3333`
+- Swagger UI em `http://localhost:3333/docs`
 
 2. **Ou execute separadamente:**
 
@@ -336,7 +336,7 @@ bun run ui:add card
 bun run ui:add dialog
 ```
 
-## 📋 Histórias de Usuário Implementadas
+## Histórias de Usuário Implementadas
 
 ### Fase 1: Fundação e Autenticação ✅
 
@@ -371,7 +371,7 @@ bun run ui:add dialog
 
 **Total**: 22 de 22 historias concluidas (100%)
 
-## 📚 Documentação
+## Documentação
 
 Toda a documentação do projeto está organizada no diretório [`./docs/`](./docs/README.md).
 
@@ -399,7 +399,7 @@ Toda a documentação do projeto está organizada no diretório [`./docs/`](./do
 - [Bun Docs](https://bun.sh/docs) - Runtime e package manager
 - [Better Auth Docs](https://www.better-auth.com) - Sistema de autenticação
 
-## 🧪 Testes
+## Testes
 
 O projeto inclui testes unitários e de integração:
 
@@ -431,7 +431,7 @@ bun test
 - ✅ Testes de utilitários (formatação, validação)
 - ✅ Testes de integração de API
 
-## 🔒 Segurança
+## Segurança
 
 ### Autenticação
 
@@ -454,7 +454,7 @@ bun test
 - CORS configurado adequadamente
 - Validação de saldo antes de operações de saque/transferência
 
-## 🎯 Proximos Passos
+## Proximos Passos
 
 ### Melhorias Futuras
 
@@ -465,7 +465,7 @@ bun test
 - Implementar notificacoes em tempo real
 - Adicionar exportacao de extrato em PDF
 
-## 🤝 Contribuindo
+## Contribuindo
 
 1. **Faça um fork do projeto**
 2. **Crie uma branch para sua feature:**
@@ -500,7 +500,7 @@ bun test
 - **Conventional Commits**: Padrão de mensagens de commit
 - **Git Flow**: Estrutura de branches (feature/, bugfix/, etc.)
 
-## 📄 Licença
+## Licença
 
 Este projeto é privado e proprietário.
 

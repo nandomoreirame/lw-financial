@@ -152,7 +152,7 @@ POST /v1/event
 ### cURL
 
 ```bash
-curl -X POST http://localhost:3001/v1/event \
+curl -X POST http://localhost:3333/v1/event \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <seu-token-jwt>" \
   -d '{

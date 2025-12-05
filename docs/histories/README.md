@@ -6,7 +6,7 @@ Este diretório contém todas as histórias de usuário do sistema bancário, or
 
 As histórias estão organizadas em 3 fases principais:
 
-### 📁 [Fase 1: Fundação e Autenticação](./fase-1-fundacao-autenticacao/)
+### [Fase 1: Fundação e Autenticação](./fase-1-fundacao-autenticacao/)
 
 **Backend - Autenticação e Segurança**
 
@@ -20,7 +20,7 @@ Contém as histórias relacionadas à autenticação e segurança do sistema:
 
 ---
 
-### 📁 [Fase 2: Operações Bancárias](./fase-2-operacoes-bancarias/)
+### [Fase 2: Operações Bancárias](./fase-2-operacoes-bancarias/)
 
 **Backend - Operações Core**
 
@@ -42,7 +42,7 @@ Contém todas as histórias relacionadas às operações bancárias:
 
 ---
 
-### 📁 [Fase 3: Interface do Usuário](./fase-3-interface-usuario/)
+### [Fase 3: Interface do Usuário](./fase-3-interface-usuario/)
 
 **Frontend - Telas e Interações**
 

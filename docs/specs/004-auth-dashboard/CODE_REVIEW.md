@@ -1,19 +1,19 @@
-# Code Review: Interface de Autenticação e Dashboard de Saldo
+#Code Review: Interface de Autenticação e Dashboard de Saldo
 
 **Feature**: 004-auth-dashboard
 **Date**: 2025-12-02
 **Reviewer**: Auto (AI Assistant)
 
-## Checklist de Revisão
+##Checklist de Revisão
 
-### ✅ Funcionalidade
+### Funcionalidade
 
 - [x] **O código faz o que deveria fazer**: Implementação completa de login e dashboard conforme especificação
 - [x] **Casos extremos são tratados**: Edge cases cobertos (token expirado, erros de rede, saldo não disponível)
 - [x] **Tratamento de erros é apropriado**: Erros tratados com mensagens user-friendly
 - [x] **Sem bugs óbvios ou erros de lógica**: Lógica implementada corretamente
 
-### ⚠️ Qualidade do Código
+### Qualidade do Código
 
 - [x] **Código é legível e bem estruturado**: Código bem organizado e legível
 - [x] **Funções são pequenas e focadas**: Funções têm responsabilidades claras
@@ -21,7 +21,7 @@
 - [x] **Sem duplicação de código**: Código reutilizável, sem duplicações significativas
 - [x] **Segue convenções do projeto**: Segue padrões do React Router 7 e TypeScript
 
-### ⚠️ Segurança
+### Segurança
 
 - [x] **Sem vulnerabilidades de segurança óbvias**: Implementação segura
 - [x] **Validação de entrada está presente**: Validação client-side e server-side
@@ -30,11 +30,11 @@
 
 ---
 
-## Problemas Identificados
+##Problemas Identificados
 
-### 🔴 Críticos
+###🔴 Críticos
 
-#### 1. **Console.error em produção** (`apps/frontend/app/lib/auth.ts:72`)
+####1. **Console.error em produção** (`apps/frontend/app/lib/auth.ts:72`)
 
 **Problema**: `console.error` pode expor informações sensíveis em produção.
 
@@ -51,7 +51,7 @@ if (import.meta.env.DEV) {
 }
 ```
 
-#### 2. **Token exposto em sessionStorage** (`apps/frontend/app/lib/api.ts:54`)
+####2. **Token exposto em sessionStorage** (`apps/frontend/app/lib/api.ts:54`)
 
 **Problema**: Token acessível via JavaScript, vulnerável a XSS.
 
@@ -59,7 +59,7 @@ if (import.meta.env.DEV) {
 
 **Recomendação**: Adicionar comentário explicando o trade-off e medidas de mitigação (CSP headers, sanitização).
 
-#### 3. **Falta de validação de URL da API** (`apps/frontend/app/lib/api.ts:6`)
+####3. **Falta de validação de URL da API** (`apps/frontend/app/lib/api.ts:6`)
 
 **Problema**: URL da API pode ser manipulada via variável de ambiente.
 
@@ -78,15 +78,15 @@ const API_BASE_URL = (() => {
 })();
 ```
 
-### 🟡 Melhorias Recomendadas
+###🟡 Melhorias Recomendadas
 
-#### 4. **Decodificação de JWT sem tratamento de base64 inválido** (`apps/frontend/app/lib/auth.ts:69`)
+####4. **Decodificação de JWT sem tratamento de base64 inválido** (`apps/frontend/app/lib/auth.ts:69`)
 
 **Problema**: `atob` pode lançar exceção se payload não for base64 válido.
 
 **Status**: Já tratado com try/catch, mas pode melhorar mensagem de erro.
 
-#### 5. **Parsing de cookies pode falhar com valores especiais** (`apps/frontend/app/middleware/protected-route.ts:33-37`)
+####5. **Parsing de cookies pode falhar com valores especiais** (`apps/frontend/app/middleware/protected-route.ts:33-37`)
 
 **Problema**: Parsing manual de cookies pode falhar com valores que contêm `=`.
 
@@ -108,7 +108,7 @@ function parseCookies(cookieHeader: string): Record<string, string> {
 }
 ```
 
-#### 6. **Race condition no LoginForm** (`apps/frontend/app/components/login/login-form.tsx:67-70`)
+####6. **Race condition no LoginForm** (`apps/frontend/app/components/login/login-form.tsx:67-70`)
 
 **Problema**: Verificação de `fetcher.data?.success` pode executar múltiplas vezes.
 
@@ -127,7 +127,7 @@ useEffect(() => {
 }, [fetcher.data, fetcher.state, navigate]);
 ```
 
-#### 7. **Timeout hardcoded no dashboard** (`apps/frontend/app/routes/dashboard.tsx:56`)
+####7. **Timeout hardcoded no dashboard** (`apps/frontend/app/routes/dashboard.tsx:56`)
 
 **Problema**: `setTimeout` com valor fixo pode não ser suficiente para requisições lentas.
 
@@ -138,19 +138,19 @@ const { isFetching } = useQuery({...});
 const isRefreshing = isFetching;
 ```
 
-#### 8. **Falta de cleanup no useEffect** (`apps/frontend/app/hooks/use-auth.ts:35-43`)
+####8. **Falta de cleanup no useEffect** (`apps/frontend/app/hooks/use-auth.ts:35-43`)
 
 **Problema**: `useEffect` sem cleanup pode causar memory leaks se componente desmontar durante operação assíncrona.
 
 **Status**: Baixo risco, mas pode melhorar com cleanup.
 
-#### 9. **Validação de token no client-side pode ser bypassada** (`apps/frontend/app/middleware/protected-route.ts`)
+####9. **Validação de token no client-side pode ser bypassada** (`apps/frontend/app/middleware/protected-route.ts`)
 
 **Problema**: Validação client-side não é suficiente - deve sempre validar no server-side.
 
 **Status**: Já implementado no loader (server-side), mas pode adicionar comentário explicando.
 
-#### 10. **Falta de tratamento para valores NaN/Infinity em formatCurrency** (`apps/frontend/app/lib/format-currency.ts`)
+####10. **Falta de tratamento para valores NaN/Infinity em formatCurrency** (`apps/frontend/app/lib/format-currency.ts`)
 
 **Problema**: `Intl.NumberFormat` pode retornar valores inesperados para NaN/Infinity.
 
@@ -168,7 +168,7 @@ export function formatCurrency(value: number): string {
 }
 ```
 
-### 🟢 Boas Práticas Identificadas
+###🟢 Boas Práticas Identificadas
 
 1. ✅ **Separação de responsabilidades**: Código bem organizado em lib, hooks, components
 2. ✅ **TypeScript strict**: Tipos bem definidos, interfaces claras
@@ -180,9 +180,9 @@ export function formatCurrency(value: number): string {
 
 ---
 
-## Correções Aplicadas
+##Correções Aplicadas
 
-### ✅ Prioridade Alta - CORRIGIDAS
+### Prioridade Alta - CORRIGIDAS
 
 1. ✅ **Remover console.error de produção** (`apps/frontend/app/lib/auth.ts`) - **CORRIGIDO**
    - Adicionada verificação `import.meta.env.DEV` antes de logar erros
@@ -193,7 +193,7 @@ export function formatCurrency(value: number): string {
 3. ✅ **Melhorar parsing de cookies** (`apps/frontend/app/middleware/protected-route.ts`) - **CORRIGIDO**
    - Implementado parsing robusto que trata valores com `=` corretamente
 
-### ✅ Prioridade Média - CORRIGIDAS
+### Prioridade Média - CORRIGIDAS
 
 4. ✅ **Validar URL da API** (`apps/frontend/app/lib/api.ts`) - **CORRIGIDO**
    - Adicionada validação de URL e protocolo (apenas http/https)
@@ -204,14 +204,14 @@ export function formatCurrency(value: number): string {
 6. ✅ **Melhorar tratamento de refresh no dashboard** (`apps/frontend/app/routes/dashboard.tsx`) - **CORRIGIDO**
    - Removido `setTimeout` hardcoded, usando estado do React Query
 
-### Prioridade Baixa
+###Prioridade Baixa
 
 7. **Adicionar cleanup em useEffect** (`apps/frontend/app/hooks/use-auth.ts`)
 8. **Documentar trade-offs de segurança** (sessionStorage vs httpOnly cookie)
 
 ---
 
-## Resumo
+##Resumo
 
 **Status Geral**: ✅ **APROVADO**
 

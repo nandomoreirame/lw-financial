@@ -1,4 +1,4 @@
-# Relatório de Progresso do Projeto
+#Relatório de Progresso do Projeto
 
 **Data**: 2025-12-03
 **Última Atualização**: 2025-12-03
@@ -6,9 +6,9 @@
 
 ---
 
-## 📊 Resumo Executivo
+##Resumo Executivo
 
-### Status Geral do Projeto
+###Status Geral do Projeto
 
 | Métrica                   | Valor | Percentual |
 | ------------------------- | ----- | ---------- |
@@ -20,7 +20,7 @@
 | **Tasks Concluídas**      | ~290+ | ~96.7%     |
 | **Tasks Pendentes**       | ~10   | ~3.3%      |
 
-### Progresso por Feature
+###Progresso por Feature
 
 | Feature ID | Nome                  | Status                 | Tasks Concluídas | Tasks Pendentes | Progresso |
 | ---------- | --------------------- | ---------------------- | ---------------- | --------------- | --------- |
@@ -33,22 +33,22 @@
 
 ---
 
-## 📋 Detalhamento por Feature
+##Detalhamento por Feature
 
-### ✅ 001-login-fastify-auth (100% Concluída)
+### 001-login-fastify-auth (100% Concluída)
 
 **Status**: ✅ **Concluída**
 **Data de Conclusão**: 2025-12-02
 **Tasks**: 35/35 concluídas
 
-#### Fases Implementadas:
+####Fases Implementadas:
 
 - ✅ Phase 1: Setup (9 tasks)
 - ✅ Phase 2: Foundational (8 tasks)
 - ✅ Phase 3: User Story 1 - Login (9 tasks)
 - ✅ Phase 4: Polish & Cross-Cutting (9 tasks)
 
-#### Funcionalidades:
+####Funcionalidades:
 
 - Endpoint `/login` funcional
 - Validação de credenciais (admin/admin123)
@@ -58,13 +58,13 @@
 
 ---
 
-### ✅ 002-protected-routes (100% Concluída)
+### 002-protected-routes (100% Concluída)
 
 **Status**: ✅ **Concluída**
 **Data de Conclusão**: 2025-12-02
 **Tasks**: 59/59 concluídas
 
-#### Fases Implementadas:
+####Fases Implementadas:
 
 - ✅ Phase 1: Setup (4 tasks)
 - ✅ Phase 2: Foundational (2 tasks)
@@ -75,7 +75,7 @@
 - ✅ Phase 7: Testing (18 tasks)
 - ✅ Phase 8: Polish & Cross-Cutting (6 tasks)
 
-#### Funcionalidades:
+####Funcionalidades:
 
 - Middleware de autenticação completo
 - Validação de JWT tokens
@@ -85,13 +85,13 @@
 
 ---
 
-### ✅ 003-bank-account-model (100% Concluída)
+### 003-bank-account-model (100% Concluída)
 
 **Status**: ✅ **Concluída**
 **Data de Conclusão**: 2025-12-02
 **Tasks**: 39/39 concluídas
 
-#### Fases Implementadas:
+####Fases Implementadas:
 
 - ✅ Phase 1: Setup (3 tasks)
 - ✅ Phase 2: Foundational (1 task)
@@ -100,7 +100,7 @@
 - ✅ Phase 5: Migration & Testing (13 tasks)
 - ✅ Phase 6: Polish & Cross-Cutting (9 tasks)
 
-#### Funcionalidades:
+####Funcionalidades:
 
 - Modelo `BankAccount` no Prisma
 - Modelo `Transaction` no Prisma
@@ -111,13 +111,13 @@
 
 ---
 
-### 🟡 004-auth-dashboard (94% Concluída)
+###🟡 004-auth-dashboard (94% Concluída)
 
 **Status**: 🟡 **Quase Concluída**
 **Progresso**: 47/50 tasks (94%)
 **Tasks Pendentes**: 3
 
-#### Fases Implementadas:
+####Fases Implementadas:
 
 - ✅ Phase 1: Setup (4 tasks)
 - ✅ Phase 2: Foundational (3 tasks)
@@ -125,7 +125,7 @@
 - ✅ Phase 4: User Story 2 - Dashboard (15/18 tasks) - **3 tasks pendentes**
 - ✅ Phase 5: Polish & Cross-Cutting (10 tasks)
 
-#### Tasks Pendentes:
+####Tasks Pendentes:
 
 - [ ] T020 [US1] Adicionar testes unitários para componente LoginForm
 - [ ] T021 [US1] Adicionar testes de integração para fluxo completo de login
@@ -134,7 +134,7 @@
 - [ ] T039 [US2] Adicionar testes de integração para fluxo completo do dashboard
 - [ ] T040 [US2] Verificar que saldo é exibido em <2 segundos
 
-#### Funcionalidades Implementadas:
+####Funcionalidades Implementadas:
 
 - ✅ Tela de login funcional
 - ✅ Dashboard com visualização de saldo
@@ -145,13 +145,13 @@
 
 ---
 
-### ✅ 005-deposit-withdraw (100% Concluída)
+### 005-deposit-withdraw (100% Concluída)
 
 **Status**: ✅ **Concluída**
 **Data de Conclusão**: 2025-12-02
 **Tasks**: 45/45 concluídas
 
-#### Fases Implementadas:
+####Fases Implementadas:
 
 - ✅ Phase 1: Setup (4 tasks)
 - ✅ Phase 2: Foundational (6 tasks)
@@ -159,7 +159,7 @@
 - ✅ Phase 4: User Story 2 - Withdraw (13 tasks)
 - ✅ Phase 5: Polish & Cross-Cutting (10 tasks)
 
-#### Funcionalidades:
+####Funcionalidades:
 
 - Formulário de depósito funcional
 - Formulário de saque funcional
@@ -173,13 +173,13 @@
 
 ---
 
-### ✅ 006-logout-transactions (100% Concluída)
+### 006-logout-transactions (100% Concluída)
 
 **Status**: ✅ **Concluída**
 **Data de Conclusão**: 2025-12-03
 **Tasks**: 18/18 concluídas
 
-#### Fases Implementadas:
+####Fases Implementadas:
 
 - ✅ Phase 1: Setup (2 tasks)
 - ✅ Phase 2: Foundational (4 tasks)
@@ -187,7 +187,7 @@
 - ✅ Phase 4: User Story 2 - Transaction History (6 tasks)
 - ✅ Phase 5: Polish & Cross-Cutting (2 tasks)
 
-#### Funcionalidades:
+####Funcionalidades:
 
 - ✅ Botão de logout no header do dashboard
 - ✅ Remoção de token JWT do sessionStorage
@@ -204,9 +204,9 @@
 
 ---
 
-## 🎯 Histórias de Usuário (User Stories)
+##Histórias de Usuário (User Stories)
 
-### Fase 1: Fundação e Autenticação
+###Fase 1: Fundação e Autenticação
 
 | US ID  | Título                             | Status       | Feature                |
 | ------ | ---------------------------------- | ------------ | ---------------------- |
@@ -214,7 +214,7 @@
 | US-002 | Proteção de Rotas Autenticadas     | ✅ Concluída | 002-protected-routes   |
 | US-003 | Validação de Credenciais Inválidas | ✅ Concluída | 001-login-fastify-auth |
 
-### Fase 2: Operações Bancárias
+###Fase 2: Operações Bancárias
 
 | US ID  | Título                                      | Status       | Feature                |
 | ------ | ------------------------------------------- | ------------ | ---------------------- |
@@ -230,7 +230,7 @@
 | US-013 | Tentar Transferência de Conta Inexistente   | ✅ Concluída | Backend Core           |
 | US-014 | Tentar Transferência com Saldo Insuficiente | ✅ Concluída | Backend Core           |
 
-### Fase 3: Interface de Usuário
+###Fase 3: Interface de Usuário
 
 | US ID  | Título                              | Status       | Feature                                  |
 | ------ | ----------------------------------- | ------------ | ---------------------------------------- |
@@ -249,9 +249,9 @@
 
 ---
 
-## 📈 Métricas de Qualidade
+##📈 Métricas de Qualidade
 
-### Cobertura de Testes
+###Cobertura de Testes
 
 | Feature                 | Testes Unitários     | Testes de Integração | Cobertura |
 | ----------------------- | -------------------- | -------------------- | --------- |
@@ -262,7 +262,7 @@
 | 005-deposit-withdraw    | ✅ Implementados     | ✅ Implementados     | Alta      |
 | 006-logout-transactions | ✅ 27 testes         | -                    | Alta      |
 
-### Code Quality
+###Code Quality
 
 - ✅ TypeScript configurado em todo o projeto
 - ✅ Linting configurado (ESLint)
@@ -274,13 +274,13 @@
 
 ---
 
-## 🚧 Bloqueios e Dependências
+##🚧 Bloqueios e Dependências
 
-### Bloqueios Atuais
+###Bloqueios Atuais
 
 **Nenhum bloqueio crítico identificado.**
 
-### Dependências Pendentes
+###Dependências Pendentes
 
 1. **US-019 - Dashboard - Realizar Transferência**
    - Depende de: Backend já implementado (US-012)
@@ -294,9 +294,9 @@
 
 ---
 
-## 🎯 Próximos Passos Recomendados
+##Próximos Passos Recomendados
 
-### Prioridade Alta
+###Prioridade Alta
 
 1. **Completar Testes (004-auth-dashboard)**
    - Adicionar testes unitários para LoginForm
@@ -305,7 +305,7 @@
    - Adicionar testes de integração para dashboard
    - Validar critérios de performance (SC-001, SC-002, SC-003, SC-005)
 
-### Prioridade Média
+###Prioridade Média
 
 2. **Implementar US-019 - Transferência no Dashboard**
    - Criar componente TransferForm
@@ -313,7 +313,7 @@
    - Adicionar validações
    - Adicionar testes
 
-### Prioridade Baixa
+###Prioridade Baixa
 
 3. **Melhorias e Otimizações**
    - Revisar performance de queries
@@ -323,9 +323,9 @@
 
 ---
 
-## 📊 Análise de Riscos
+##Análise de Riscos
 
-### Riscos Identificados
+###Riscos Identificados
 
 | Risco                                  | Severidade | Probabilidade | Mitigação                      |
 | -------------------------------------- | ---------- | ------------- | ------------------------------ |
@@ -333,7 +333,7 @@
 | Falta de cobertura em algumas features | Baixa      | Média         | Adicionar testes incrementais  |
 | US-019 pendente pode impactar UX       | Baixa      | Baixa         | Implementar quando necessário  |
 
-### Riscos Mitigados
+###Riscos Mitigados
 
 - ✅ Autenticação robusta implementada
 - ✅ Proteção de rotas completa
@@ -343,9 +343,9 @@
 
 ---
 
-## 📝 Notas Importantes
+## Notas Importantes
 
-### Melhorias Implementadas Recentemente
+###Melhorias Implementadas Recentemente
 
 1. **Componente Empty do Shadcn UI** (006-logout-transactions)
    - Substituído estado vazio simples por componente profissional
@@ -359,7 +359,7 @@
    - Invalidação automática após operações bancárias
    - Atualização em tempo real do histórico
 
-### Decisões Arquiteturais
+###Decisões Arquiteturais
 
 - ✅ Monorepo com Bun
 - ✅ React Router 7 (Remix) para frontend
@@ -373,7 +373,7 @@
 
 ---
 
-## 🎉 Conquistas
+##🎉 Conquistas
 
 - ✅ **6 features principais implementadas**
 - ✅ **21 de 22 user stories concluídas (95.5%)**
@@ -386,7 +386,7 @@
 
 ---
 
-## 📅 Histórico de Atualizações
+##📅 Histórico de Atualizações
 
 - **2025-12-03**: Relatório inicial criado
   - Análise completa de todas as features

@@ -1,4 +1,4 @@
-# Tasks: Dashboard Deposit and Withdraw Operations
+#Tasks: Dashboard Deposit and Withdraw Operations
 
 **Input**: Design documents from `/specs/005-deposit-withdraw/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
@@ -7,18 +7,18 @@
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
-## Format: `[ID] [P?] [Story] Description`
+##Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., [US1], [US2])
 - Include exact file paths in descriptions
 
-## Path Conventions
+##Path Conventions
 
 - **Web app**: `apps/frontend/`, `apps/backend/`
 - All paths shown use absolute structure from repository root
 
-## Phase 1: Setup (Shared Infrastructure)
+##Phase 1: Setup (Shared Infrastructure)
 
 **Purpose**: Project initialization and verification of existing infrastructure
 
@@ -29,7 +29,7 @@
 
 ---
 
-## Phase 2: Foundational (Blocking Prerequisites)
+##Phase 2: Foundational (Blocking Prerequisites)
 
 **Purpose**: Core backend modification that MUST be complete before ANY user story can be implemented
 
@@ -46,13 +46,13 @@
 
 ---
 
-## Phase 3: User Story 1 - Deposit Money (Priority: P1) 🎯 MVP
+##Phase 3: User Story 1 - Deposit Money (Priority: P1) MVP
 
 **Goal**: As an authenticated user, I want to deposit money into my account through the dashboard, so that I can add funds to my balance.
 
 **Independent Test**: Navigate to dashboard, enter deposit amount (R$ 0,01 to R$ 999.999,99), submit form, verify balance updates and success message appears.
 
-### Implementation for User Story 1
+###Implementation for User Story 1
 
 - [x] T011 [P] [US1] Add deposit() function to apps/frontend/app/lib/api.ts
 - [x] T012 [P] [US1] Create use-deposit hook in apps/frontend/app/hooks/use-deposit.ts
@@ -71,13 +71,13 @@
 
 ---
 
-## Phase 4: User Story 2 - Withdraw Money (Priority: P2)
+##Phase 4: User Story 2 - Withdraw Money (Priority: P2)
 
 **Goal**: As an authenticated user, I want to withdraw money from my account through the dashboard, so that I can access my funds.
 
 **Independent Test**: Navigate to dashboard with positive balance, enter withdrawal amount that doesn't exceed balance, submit form, verify balance decreases and success message appears.
 
-### Implementation for User Story 2
+###Implementation for User Story 2
 
 - [x] T023 [P] [US2] Add withdraw() function to apps/frontend/app/lib/api.ts
 - [x] T024 [P] [US2] Create use-withdraw hook in apps/frontend/app/hooks/use-withdraw.ts
@@ -97,7 +97,7 @@
 
 ---
 
-## Phase 5: Polish & Cross-Cutting Concerns
+##Phase 5: Polish & Cross-Cutting Concerns
 
 **Purpose**: Improvements that affect multiple user stories and final refinements
 
@@ -114,9 +114,9 @@
 
 ---
 
-## Dependencies & Execution Order
+##Dependencies & Execution Order
 
-### Phase Dependencies
+###Phase Dependencies
 
 - **Setup (Phase 1)**: No dependencies - can start immediately
 - **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
@@ -124,12 +124,12 @@
 - **User Story 2 (Phase 4)**: Depends on Foundational completion - Can work independently of US1
 - **Polish (Phase 5)**: Depends on all user stories being complete
 
-### User Story Dependencies
+###User Story Dependencies
 
 - **User Story 1 (P1)**: Can start after Foundational (Phase 2) - No dependencies on other stories
 - **User Story 2 (P2)**: Can start after Foundational (Phase 2) - Independent of US1, but benefits from having funds to withdraw
 
-### Within Each User Story
+###Within Each User Story
 
 - API functions before hooks
 - Hooks before components
@@ -137,7 +137,7 @@
 - Core implementation before error handling
 - Story complete before moving to next priority
 
-### Parallel Opportunities
+###Parallel Opportunities
 
 - **Phase 1**: T003 and T004 can run in parallel
 - **Phase 2**: T005-T009 can be worked on sequentially (same file modifications)
@@ -147,34 +147,34 @@
 
 ---
 
-## Parallel Example: User Story 1
+##Parallel Example: User Story 1
 
 ```bash
-# Launch API function and hook together:
+#Launch API function and hook together:
 Task: "Add deposit() function to apps/frontend/app/lib/api.ts"
 Task: "Create use-deposit hook in apps/frontend/app/hooks/use-deposit.ts"
 Task: "Create transaction amount validation schema with zod in apps/frontend/app/lib/validation.ts"
 
-# These can be done in parallel as they're in different files
+#These can be done in parallel as they're in different files
 ```
 
 ---
 
-## Parallel Example: User Story 2
+##Parallel Example: User Story 2
 
 ```bash
-# Launch API function and hook together:
+#Launch API function and hook together:
 Task: "Add withdraw() function to apps/frontend/app/lib/api.ts"
 Task: "Create use-withdraw hook in apps/frontend/app/hooks/use-withdraw.ts"
 
-# These can be done in parallel as they're in different files
+#These can be done in parallel as they're in different files
 ```
 
 ---
 
-## Implementation Strategy
+##Implementation Strategy
 
-### MVP First (User Story 1 Only)
+###MVP First (User Story 1 Only)
 
 1. Complete Phase 1: Setup (verify infrastructure)
 2. Complete Phase 2: Foundational (modify backend - CRITICAL)
@@ -182,14 +182,14 @@ Task: "Create use-withdraw hook in apps/frontend/app/hooks/use-withdraw.ts"
 4. **STOP and VALIDATE**: Test deposit flow independently
 5. Deploy/demo if ready
 
-### Incremental Delivery
+###Incremental Delivery
 
 1. Complete Setup + Foundational → Backend ready for automatic account identification
 2. Add User Story 1 (Deposit) → Test independently → Deploy/Demo (MVP!)
 3. Add User Story 2 (Withdraw) → Test independently → Deploy/Demo
 4. Add Polish phase → Final refinements → Deploy
 
-### Parallel Team Strategy
+###Parallel Team Strategy
 
 With multiple developers:
 
@@ -202,7 +202,7 @@ With multiple developers:
 
 ---
 
-## Notes
+##Notes
 
 - [P] tasks = different files, no dependencies
 - [US1]/[US2] label maps task to specific user story for traceability

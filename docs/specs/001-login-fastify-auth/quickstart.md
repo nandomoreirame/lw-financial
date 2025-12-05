@@ -32,7 +32,7 @@ Criar/atualizar `apps/backend/.env`:
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/lw-financial"
 BETTER_AUTH_SECRET="your-secret-key-here-min-32-chars"
 BETTER_AUTH_URL="http://localhost:3333"
-PORT=3001
+PORT=3333
 ```
 
 **Importante**: Gerar um secret seguro para `BETTER_AUTH_SECRET`:
@@ -219,7 +219,7 @@ fastify.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3333;
 
 fastify.listen({ port: Number(PORT) }, (err) => {
   if (err) {

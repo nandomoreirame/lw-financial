@@ -1,4 +1,4 @@
-# Tasks: Multi-Account Management with Account Code Routing
+#Tasks: Multi-Account Management with Account Code Routing
 
 **Input**: Design documents from `/specs/007-multi-account-routing/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
@@ -7,15 +7,15 @@
 
 **Organization**: Tasks are organized by user story to enable independent implementation and testing of each story.
 
-## Format: `[ID] [P?] [Story] Description`
+##Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2)
 - Include exact file paths in descriptions
 
-## Dependencies
+##Dependencies
 
-### User Story Completion Order
+###User Story Completion Order
 
 - **US1 (Account Code Generation)** → **Foundation** for all other stories
   - Must be completed before US2, US3, US4, US5
@@ -37,14 +37,14 @@
   - Requires routing to know which account is active
   - Uses account selection to apply transactions to correct account
 
-### Parallel Execution Opportunities
+###Parallel Execution Opportunities
 
 - **Backend tasks** can run in parallel with **Frontend tasks** after Phase 2
 - **Service layer tasks** can run in parallel with **Handler tasks** within same story
 - **Component tasks** can run in parallel with **Hook tasks** within same story
 - **Database migration** must complete before any backend tasks that use the schema
 
-## Phase 1: Setup (Shared Infrastructure)
+##Phase 1: Setup (Shared Infrastructure)
 
 **Purpose**: Project initialization, database migration, and shared infrastructure
 
@@ -57,7 +57,7 @@
 
 ---
 
-## Phase 2: Foundational (Blocking Prerequisites)
+##Phase 2: Foundational (Blocking Prerequisites)
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
@@ -72,7 +72,7 @@
 
 ---
 
-## Phase 3: User Story 1 - Account Code Generation (Priority: P1) 🎯 MVP
+##Phase 3: User Story 1 - Account Code Generation (Priority: P1) MVP
 
 **Goal**: As a system, I want to automatically generate a unique account code when a bank account is created, so that each account can be uniquely identified and accessed via a human-readable code.
 
@@ -101,7 +101,7 @@
 
 ---
 
-## Phase 4: User Story 2 - Account Code Routing (Priority: P1)
+##Phase 4: User Story 2 - Account Code Routing (Priority: P1)
 
 **Goal**: As an authenticated user, I want to access a specific account using a URL with the account code (e.g., `/conta/1234-5`), so that I can view and manage that specific account directly via a shareable URL.
 
@@ -147,7 +147,7 @@
 
 ---
 
-## Phase 5: User Story 3 - Account Selection in Sidebar (Priority: P1)
+##Phase 5: User Story 3 - Account Selection in Sidebar (Priority: P1)
 
 **Goal**: As an authenticated user, I want to select an account from a dropdown in the sidebar, so that I can quickly switch between my multiple bank accounts.
 
@@ -184,7 +184,7 @@
 
 ---
 
-## Phase 6: User Story 4 - Account-Specific Transaction History (Priority: P1)
+##Phase 6: User Story 4 - Account-Specific Transaction History (Priority: P1)
 
 **Goal**: As an authenticated user, I want to view transaction history filtered by the currently selected account, so that I can see only transactions relevant to that specific account.
 
@@ -223,7 +223,7 @@
 
 ---
 
-## Phase 7: User Story 5 - Account-Specific Deposit and Withdrawal (Priority: P1)
+##Phase 7: User Story 5 - Account-Specific Deposit and Withdrawal (Priority: P1)
 
 **Goal**: As an authenticated user, I want to perform deposits and withdrawals on the currently selected account, so that my transactions are applied to the correct account.
 
@@ -269,7 +269,7 @@
 
 ---
 
-## Phase 8: Polish & Cross-Cutting Concerns
+##Phase 8: Polish & Cross-Cutting Concerns
 
 **Purpose**: Integration, error handling improvements, and final polish
 
@@ -287,9 +287,9 @@
 
 ---
 
-## Implementation Strategy
+##Implementation Strategy
 
-### MVP Scope
+###MVP Scope
 
 **Phase 1 MVP**: User Story 1 (Account Code Generation) alone delivers immediate value by providing unique identifiers for all accounts. This can be deployed independently.
 
@@ -297,7 +297,7 @@
 
 **Full Feature**: All 5 user stories work together to provide complete multi-account management experience.
 
-### Incremental Delivery Plan
+###Incremental Delivery Plan
 
 1. **Week 1**: Setup + US1 (Account Code Generation)
    - Database migration
@@ -318,13 +318,13 @@
    - Integration testing
    - Final polish
 
-### Testing Strategy
+###Testing Strategy
 
 - **Unit Tests**: Account code generation service, validation helpers
 - **Integration Tests**: Account creation with code, routing, API endpoints
 - **E2E Tests**: Full flow from account creation to transaction on selected account
 
-### Risk Mitigation
+###Risk Mitigation
 
 - **Database Migration**: Test migration on staging first, create rollback plan
 - **Backward Compatibility**: Ensure existing accounts can be backfilled, existing API calls still work

@@ -1,4 +1,4 @@
-# Implementation Tasks: Protected Routes Authentication
+#Implementation Tasks: Protected Routes Authentication
 
 **Feature**: Protected Routes Authentication
 **Branch**: `002-protected-routes`
@@ -6,13 +6,13 @@
 **Spec**: [spec.md](./spec.md)
 **Plan**: [plan.md](./plan.md)
 
-## Overview
+##Overview
 
 Implementar middleware de autenticação para proteger rotas da API usando validação de tokens JWT. O sistema deve validar tokens no header `Authorization: Bearer <token>`, verificar assinatura e expiração, e retornar 401 Unauthorized para requisições não autenticadas ou com tokens inválidos.
 
-## Dependencies
+##Dependencies
 
-### Story Completion Order
+###Story Completion Order
 
 1. **User Story 1** (P1) - Block Unauthenticated Access: Foundation for all authentication
 2. **User Story 2** (P1) - Validate JWT Token: Depends on User Story 1 (header parsing)
@@ -20,7 +20,7 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 
 **Note**: User Stories 1 and 2 are both P1 and work together. User Story 3 enhances both but is lower priority.
 
-## Implementation Strategy
+##Implementation Strategy
 
 **MVP Scope**: User Stories 1 and 2 (P1) - Complete authentication protection
 **Incremental Delivery**:
@@ -29,31 +29,31 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 - Phase 5: Enhanced error messages
 - Phase 6: Testing and polish
 
-## Parallel Execution Opportunities
+##Parallel Execution Opportunities
 
-### Phase 2 (Foundational)
+###Phase 2 (Foundational)
 
 - T005 and T006 can be done in parallel (types and error constants in different files)
 
-### User Story 1
+###User Story 1
 
 - T008, T009, T010, T011 can be done in parallel (different validation checks)
 
-### User Story 2
+###User Story 2
 
 - T016, T017, T018, T019 can be done in parallel (different validation steps)
 
-### User Story 3
+###User Story 3
 
 - All tasks (T027-T030) can be done in parallel (error message improvements)
 
-### Testing Phase
+###Testing Phase
 
 - Unit tests (T036-T048) and integration tests (T049-T053) can be written in parallel
 
 ---
 
-## Phase 1: Setup
+##Phase 1: Setup
 
 **Goal**: Verify prerequisites and project structure
 
@@ -66,7 +66,7 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 
 ---
 
-## Phase 2: Foundational Tasks
+##Phase 2: Foundational Tasks
 
 **Goal**: Create foundational types and error constants needed by all user stories
 
@@ -77,13 +77,13 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 
 ---
 
-## Phase 3: User Story 1 - Block Unauthenticated Access to Protected Routes (Priority: P1) 🎯 MVP
+##Phase 3: User Story 1 - Block Unauthenticated Access to Protected Routes (Priority: P1) MVP
 
 **Goal**: Implement middleware that blocks access to protected routes without authentication token
 
 **Independent Test**: Attempt to access a protected route without an `Authorization` header and verify that the system returns 401 Unauthorized with error message "Authentication required".
 
-### Implementation for User Story 1
+###Implementation for User Story 1
 
 - [x] T007 [US1] Create authentication middleware function skeleton in apps/backend/src/middleware/authentication.ts
 - [x] T008 [US1] Implement Authorization header presence check in apps/backend/src/middleware/authentication.ts
@@ -99,13 +99,13 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 
 ---
 
-## Phase 4: User Story 2 - Validate JWT Token Format and Signature (Priority: P1) 🎯 MVP
+##Phase 4: User Story 2 - Validate JWT Token Format and Signature (Priority: P1) MVP
 
 **Goal**: Implement JWT token validation (signature and expiration) to ensure only valid tokens grant access
 
 **Independent Test**: Send request with various invalid token formats (malformed JWT, expired token, tampered token) and verify all are rejected with 401 Unauthorized. Send request with valid token and verify request proceeds to route handler.
 
-### Implementation for User Story 2
+###Implementation for User Story 2
 
 - [x] T016 [US2] Extract JWT token from Authorization header (remove "Bearer " prefix) in apps/backend/src/middleware/authentication.ts
 - [x] T017 [US2] Implement JWT token structure validation (3 parts separated by '.') in apps/backend/src/middleware/authentication.ts
@@ -123,13 +123,13 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 
 ---
 
-## Phase 5: User Story 3 - Provide Clear Error Messages for Authentication Failures (Priority: P2)
+##Phase 5: User Story 3 - Provide Clear Error Messages for Authentication Failures (Priority: P2)
 
 **Goal**: Enhance error messages to be clear and actionable without leaking sensitive information
 
 **Independent Test**: Send various invalid authentication requests and verify error responses contain clear, non-sensitive error messages in JSON format.
 
-### Implementation for User Story 3
+###Implementation for User Story 3
 
 - [x] T027 [US3] Standardize error message format to JSON { "error": "..." } in apps/backend/src/middleware/authentication.ts
 - [x] T028 [US3] Ensure error messages are generic (don't differentiate expired vs invalid) in apps/backend/src/middleware/authentication.ts
@@ -140,7 +140,7 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 
 ---
 
-## Phase 6: Integration & Application
+##Phase 6: Integration & Application
 
 **Goal**: Integrate middleware with Fastify server and provide mechanism to apply to routes
 
@@ -154,11 +154,11 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 
 ---
 
-## Phase 7: Testing
+##Phase 7: Testing
 
 **Goal**: Create comprehensive tests for authentication middleware
 
-### Unit Tests
+###Unit Tests
 
 - [x] T036 [P] Create unit test file apps/backend/tests/unit/authentication.test.ts
 - [x] T037 [P] [US1] Test missing Authorization header returns 401 in apps/backend/tests/unit/authentication.test.ts
@@ -174,7 +174,7 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 - [x] T047 [P] [US3] Test error messages are in JSON format in apps/backend/tests/unit/authentication.test.ts
 - [x] T048 [P] [US3] Test error messages are generic (no sensitive info) in apps/backend/tests/unit/authentication.test.ts
 
-### Integration Tests
+###Integration Tests
 
 - [x] T049 [P] Create integration test file apps/backend/tests/integration/protected-routes.test.ts
 - [x] T050 [P] [US1] Test protected route without token returns 401 in apps/backend/tests/integration/protected-routes.test.ts
@@ -186,7 +186,7 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 
 ---
 
-## Phase 8: Polish & Cross-Cutting Concerns
+##Phase 8: Polish & Cross-Cutting Concerns
 
 **Goal**: Final polish, documentation, and performance validation
 
@@ -201,7 +201,7 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 
 ---
 
-## Task Summary
+##Task Summary
 
 - **Total Tasks**: 59
 - **Setup Tasks**: 4 (Phase 1)
@@ -213,7 +213,7 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 - **Testing Tasks**: 18 (Phase 7)
 - **Polish Tasks**: 6 (Phase 8)
 
-## MVP Scope
+##MVP Scope
 
 **Minimum Viable Product**: Phases 1-4 (User Stories 1 and 2)
 
@@ -224,7 +224,7 @@ Implementar middleware de autenticação para proteger rotas da API usando valid
 
 **Enhanced Version**: Add Phase 5 (User Story 3) for improved error messages
 
-## Notes
+##Notes
 
 - All tasks follow strict checklist format with Task ID, Story label, and file paths
 - Tasks marked with [P] can be executed in parallel

@@ -1,4 +1,4 @@
-# Tasks: Login no Sistema
+#Tasks: Login no Sistema
 
 **Input**: Design documents from `/specs/001-login-fastify-auth/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
@@ -7,13 +7,13 @@
 
 **Organization**: Tasks are organized by user story to enable independent implementation and testing of each story.
 
-## Format: `[ID] [P?] [Story] Description`
+##Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1)
 - Include exact file paths in descriptions
 
-## Phase 1: Setup (Shared Infrastructure)
+##Phase 1: Setup (Shared Infrastructure)
 
 **Purpose**: Project initialization and dependency installation
 
@@ -29,7 +29,7 @@
 
 ---
 
-## Phase 2: Foundational (Blocking Prerequisites)
+##Phase 2: Foundational (Blocking Prerequisites)
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
@@ -48,13 +48,13 @@
 
 ---
 
-## Phase 3: User Story 1 - Autenticação com Credenciais Válidas (Priority: P1) 🎯 MVP
+##Phase 3: User Story 1 - Autenticação com Credenciais Válidas (Priority: P1) MVP
 
 **Goal**: Implementar endpoint `/login` que aceita username e senha, valida formato, verifica credenciais hardcoded (admin/admin123), e retorna token JWT em caso de sucesso.
 
 **Independent Test**: Enviar requisição POST para `/login` com credenciais válidas (username: "admin", pass: "admin123") e verificar que retorna status 200 OK com token JWT no formato `{ "token": "<jwt_token>" }`.
 
-### Implementation for User Story 1
+###Implementation for User Story 1
 
 - [x] T018 [US1] Create Better Auth route handler in apps/backend/src/auth/routes.ts
 - [x] T019 [US1] Implement POST /login endpoint in apps/backend/src/auth/routes.ts
@@ -71,7 +71,7 @@
 
 ---
 
-## Phase 4: Polish & Cross-Cutting Concerns
+##Phase 4: Polish & Cross-Cutting Concerns
 
 **Purpose**: Improvements and validation
 
@@ -86,20 +86,20 @@
 
 ---
 
-## Dependencies & Execution Order
+##Dependencies & Execution Order
 
-### Phase Dependencies
+###Phase Dependencies
 
 - **Setup (Phase 1)**: No dependencies - can start immediately
 - **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
 - **User Story 1 (Phase 3)**: Depends on Foundational phase completion
 - **Polish (Phase 4)**: Depends on User Story 1 completion
 
-### User Story Dependencies
+###User Story Dependencies
 
 - **User Story 1 (P1)**: Can start after Foundational (Phase 2) - No dependencies on other stories
 
-### Within User Story 1
+###Within User Story 1
 
 - Zod schema (T010) before validation middleware (T014)
 - Better Auth config (T012) before route handler (T018)
@@ -108,7 +108,7 @@
 - Endpoint implementation (T019-T023) before error handling (T025-T026)
 - All implementation tasks before testing (T027)
 
-### Parallel Opportunities
+###Parallel Opportunities
 
 **Phase 1 (Setup)**:
 
@@ -125,31 +125,31 @@
 
 ---
 
-## Parallel Example: User Story 1
+##Parallel Example: User Story 1
 
 ```bash
-# After Foundational phase, these can be prepared in parallel:
-# - Better Auth route handler structure
-# - TypeScript types definition
-# - Error response formatting
+#After Foundational phase, these can be prepared in parallel:
+#- Better Auth route handler structure
+#- TypeScript types definition
+#- Error response formatting
 
-# But implementation must follow order:
-# 1. Create route handler (T018)
-# 2. Implement POST /login (T019)
-# 3. Add validation (T020)
-# 4. Add credential check (T021)
-# 5. Add token generation (T022)
-# 6. Add success response (T023)
-# 7. Register routes (T024)
-# 8. Add error handling (T025-T026)
-# 9. Test (T027)
+#But implementation must follow order:
+#1. Create route handler (T018)
+#2. Implement POST /login (T019)
+#3. Add validation (T020)
+#4. Add credential check (T021)
+#5. Add token generation (T022)
+#6. Add success response (T023)
+#7. Register routes (T024)
+#8. Add error handling (T025-T026)
+#9. Test (T027)
 ```
 
 ---
 
-## Implementation Strategy
+##Implementation Strategy
 
-### MVP First (User Story 1 Only)
+###MVP First (User Story 1 Only)
 
 1. Complete Phase 1: Setup (install dependencies, create directories)
 2. Complete Phase 2: Foundational (Zod schema, Better Auth config, Fastify migration, validation middleware)
@@ -157,13 +157,13 @@
 4. **STOP and VALIDATE**: Test User Story 1 independently via cURL/Postman
 5. Deploy/demo if ready
 
-### Incremental Delivery
+###Incremental Delivery
 
 1. Complete Setup + Foundational → Foundation ready
 2. Add User Story 1 → Test independently → Deploy/Demo (MVP!)
 3. Add Polish tasks → Final validation → Deploy
 
-### Execution Flow
+###Execution Flow
 
 **Sequential (Single Developer)**:
 
@@ -179,7 +179,7 @@ Phase 1 (Setup) → Phase 2 (Foundational) → Phase 3 (US1) → Phase 4 (Polish
 
 ---
 
-## Notes
+##Notes
 
 - [P] tasks = different files, no dependencies
 - [US1] label maps task to User Story 1 for traceability

@@ -4,7 +4,7 @@
 
 ### Server Configuration
 
-- `PORT`: Port number for the server (default: 3001)
+- `PORT`: Port number for the server (default: 3333)
 
 ### Better Auth Configuration
 
@@ -38,7 +38,7 @@
 ## Example .env file
 
 ```env
-PORT=3001
+PORT=3333
 BETTER_AUTH_SECRET=your-secret-key-here-min-32-chars-change-in-production
 BETTER_AUTH_URL=http://localhost:3333
 BETTER_AUTH_BASE_URL=http://localhost:3333
