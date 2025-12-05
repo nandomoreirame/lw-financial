@@ -3,6 +3,7 @@
  * Redirects to dashboard if user is not authenticated
  */
 
+import { Spinner } from '@lw-financial/ui';
 import * as React from 'react';
 import { OnboardingForm } from '../components/onboarding/onboarding-form';
 import {
@@ -72,8 +73,11 @@ export default function Onboarding({ loaderData }: Route.ComponentProps) {
 
   if (loaderData?.needsClientAuth && !clientAuthChecked) {
     return (
-      <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-        <div className="text-center">Verificando autenticação...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="container mx-auto max-w-4xl text-center">
+          <Spinner className="size-10 mx-auto mb-4" />
+          <span className="text-xl font-medium">Carregando. Aguarde...</span>
+        </div>
       </div>
     );
   }

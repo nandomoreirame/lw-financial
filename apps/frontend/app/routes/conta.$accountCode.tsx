@@ -3,6 +3,7 @@
  * Route: /conta/:accountCode
  */
 
+import { Spinner } from '@lw-financial/ui';
 import * as React from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { BalanceCard } from '../components/dashboard/balance-card';
@@ -127,9 +128,12 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
 
   if (loaderData?.needsClientAuth && !clientAccountId) {
     return (
-      <div className="min-h-screen bg-background p-4">
-        <div className="container mx-auto max-w-4xl">
-          <div className="text-center">Verificando autenticação...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="container mx-auto max-w-4xl text-center">
+          <Spinner className="size-10 mx-auto mb-4" />
+          <span className="text-xl font-medium">
+            Carregando conta. Aguarde...
+          </span>
         </div>
       </div>
     );
