@@ -9,6 +9,7 @@ import { BalanceCard } from '../components/dashboard/balance-card';
 import { DashboardSidebar } from '../components/dashboard/dashboard-sidebar';
 import { DepositDialog } from '../components/dashboard/deposit-dialog';
 import { TransactionHistory } from '../components/dashboard/transaction-history';
+import { TransferDialog } from '../components/dashboard/transfer-dialog';
 import { WithdrawDialog } from '../components/dashboard/withdraw-dialog';
 import { useAccountByCode } from '../hooks/use-account-by-code';
 import { getFirstAccount, useAccounts } from '../hooks/use-accounts';
@@ -219,6 +220,10 @@ export default function AccountPage({ loaderData }: Route.ComponentProps) {
             <WithdrawDialog
               accountId={accountId}
               accountCode={accountCode}
+              currentBalance={balance}
+            />
+            <TransferDialog
+              originAccountCode={accountCode}
               currentBalance={balance}
             />
           </div>

@@ -56,3 +56,25 @@ export const withdrawFormSchema = z.object({
 });
 
 export type WithdrawFormData = z.infer<typeof withdrawFormSchema>;
+
+/**
+ * Account code validation schema
+ * Validates account code format: XXXX-X (4 digits, hyphen, 1 digit)
+ */
+export const accountCodeSchema = z
+  .string({
+    required_error: 'Código da conta é obrigatório',
+    invalid_type_error: 'Código da conta deve ser uma string',
+  })
+  .min(1, 'Código da conta é obrigatório')
+  .regex(/^\d{4}-\d$/, 'Formato inválido. Use o formato XXXX-X (ex: 1234-5)');
+
+/**
+ * Transfer form schema
+ */
+export const transferFormSchema = z.object({
+  destinationAccountCode: accountCodeSchema,
+  amount: transactionAmountSchema,
+});
+
+export type TransferFormData = z.infer<typeof transferFormSchema>;

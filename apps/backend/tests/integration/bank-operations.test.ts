@@ -763,7 +763,7 @@ describe('Bank Operations API Integration Tests', () => {
         },
       });
 
-      expect(response1.statusCode).toBe(400);
+      expect(response1.statusCode).toBe(401);
 
       const originId = `account-origin-${Date.now()}-${Math.random()}`;
       const response2 = await app.inject({

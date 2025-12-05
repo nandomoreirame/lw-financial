@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { generateUniqueAccountCode } from '../src/bank/services/account-code.service';
 
 const prisma = new PrismaClient();
 
@@ -73,21 +74,27 @@ async function main() {
     where: { userId: adminUser.id },
   });
 
+  const adminAccountCode = await generateUniqueAccountCode();
   const adminBankAccount = existingAdminAccount
     ? await prisma.bankAccount.update({
         where: { id: existingAdminAccount.id },
-        data: { balance: 100000.0 },
+        data: {
+          balance: 100000.0,
+          code: existingAdminAccount.code || adminAccountCode,
+        },
       })
     : await prisma.bankAccount.create({
         data: {
           userId: adminUser.id,
           balance: 100000.0,
+          code: adminAccountCode,
         },
       });
 
   console.log('Admin bank account created/updated:', {
     id: adminBankAccount.id,
     userId: adminBankAccount.userId,
+    code: adminBankAccount.code,
     balance: adminBankAccount.balance.toString(),
   });
 
@@ -95,21 +102,27 @@ async function main() {
     where: { userId: regularUser.id },
   });
 
+  const userAccountCode = await generateUniqueAccountCode();
   const userBankAccount = existingUserAccount
     ? await prisma.bankAccount.update({
         where: { id: existingUserAccount.id },
-        data: { balance: 100000.0 },
+        data: {
+          balance: 100000.0,
+          code: existingUserAccount.code || userAccountCode,
+        },
       })
     : await prisma.bankAccount.create({
         data: {
           userId: regularUser.id,
           balance: 100000.0,
+          code: userAccountCode,
         },
       });
 
   console.log('User bank account created/updated:', {
     id: userBankAccount.id,
     userId: userBankAccount.userId,
+    code: userBankAccount.code,
     balance: userBankAccount.balance.toString(),
   });
 
@@ -117,10 +130,12 @@ async function main() {
   console.log('Admin:');
   console.log('  Username: admin');
   console.log('  Password: admin123');
+  console.log('  Account Code:', adminBankAccount.code);
   console.log('  Balance: R$ 100.000,00');
   console.log('\nUser:');
   console.log('  Username: user');
   console.log('  Password: user123');
+  console.log('  Account Code:', userBankAccount.code);
   console.log('  Balance: R$ 100.000,00');
   console.log('\nSeed completed successfully!');
 }

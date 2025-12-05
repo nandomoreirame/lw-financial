@@ -14,13 +14,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@lw-financial/ui';
-import { ArrowDown, ArrowUp, LogOut, User } from 'lucide-react';
+import { ArrowDown, ArrowRightLeft, ArrowUp, LogOut, User } from 'lucide-react';
 import * as React from 'react';
+import { toast } from 'sonner';
 import { useAccounts } from '../../hooks/use-accounts';
 import { useAuth } from '../../hooks/use-auth';
 import { useBalance } from '../../hooks/use-balance';
 import { decodeToken, getToken } from '../../lib/auth';
 import { DepositDialog } from './deposit-dialog';
+import { TransferDialog } from './transfer-dialog';
 import { WithdrawDialog } from './withdraw-dialog';
 
 /**
@@ -47,6 +49,7 @@ export function UserDropdown() {
   const { balance } = useBalance(currentAccount?.code || undefined);
   const [depositOpen, setDepositOpen] = React.useState(false);
   const [withdrawOpen, setWithdrawOpen] = React.useState(false);
+  const [transferOpen, setTransferOpen] = React.useState(false);
 
   const userInfo = token ? decodeToken(token) : null;
   const userName = userInfo?.username || 'Usuário';
@@ -62,6 +65,10 @@ export function UserDropdown() {
 
   const handleWithdrawClick = () => {
     setWithdrawOpen(true);
+  };
+
+  const handleTransferClick = () => {
+    setTransferOpen(true);
   };
 
   return (
@@ -99,8 +106,14 @@ export function UserDropdown() {
           <ArrowUp className="mr-2 h-4 w-4" />
           Sacar
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleTransferClick}>
+          <ArrowRightLeft className="mr-2 h-4 w-4" />
+          Transferir
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => toast.info('Funcionalidade ainda não implementada')}
+        >
           <User className="mr-2 h-4 w-4" />
           Perfil
         </DropdownMenuItem>
@@ -123,6 +136,13 @@ export function UserDropdown() {
         currentBalance={balance}
         open={withdrawOpen}
         onOpenChange={setWithdrawOpen}
+        trigger={<div style={{ display: 'none' }} />}
+      />
+      <TransferDialog
+        originAccountCode={currentAccount?.code || undefined}
+        currentBalance={balance}
+        open={transferOpen}
+        onOpenChange={setTransferOpen}
         trigger={<div style={{ display: 'none' }} />}
       />
     </DropdownMenu>

@@ -138,7 +138,11 @@ function TransactionItem({
     accountId &&
     transaction.destinationAccountId === accountId;
 
-  if (isTransferSent) {
+  if (isTransferSent && transaction.destinationAccountCode) {
+    typeLabel = `Transferência para ${transaction.destinationAccountCode}`;
+  } else if (isTransferReceived && transaction.originAccountCode) {
+    typeLabel = `Transferência de ${transaction.originAccountCode}`;
+  } else if (isTransferSent) {
     typeLabel = 'Transferência Enviada';
   } else if (isTransferReceived) {
     typeLabel = 'Transferência Recebida';

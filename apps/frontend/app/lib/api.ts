@@ -255,6 +255,17 @@ export interface WithdrawResponse {
   };
 }
 
+export interface TransferResponse {
+  origin: {
+    id: string;
+    balance: number;
+  };
+  destination: {
+    id: string;
+    balance: number;
+  };
+}
+
 export type TransactionType =
   | 'DEPOSIT'
   | 'WITHDRAW'
@@ -266,7 +277,9 @@ export interface Transaction {
   type: TransactionType;
   amount: string;
   originAccountId: string | null;
+  originAccountCode: string | null;
   destinationAccountId: string | null;
+  destinationAccountCode: string | null;
   userId: string | null;
   createdAt: string;
 }
@@ -621,6 +634,130 @@ export async function createAccount(
       throw error;
     }
     throw new Error('Erro ao criar conta. Tente novamente.');
+  }
+}
+
+/**
+ * Performs transfer request to backend
+ * The origin account can be identified by accountCode or automatically from the JWT token
+ * @param destinationAccountCode - Destination account code in format "XXXX-X" (required)
+ * @param amount - Transfer amount (0.01 to 999999.99)
+ * @param originAccountCode - Optional origin account code in format "XXXX-X" (defaults to user's default account)
+ * @returns Transfer response with origin and destination account IDs and balances
+ */
+export async function transfer(
+  destinationAccountCode: string,
+  amount: number,
+  originAccountCode?: string
+): Promise<TransferResponse> {
+  const token = sessionStorage.getItem('auth_token');
+
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado');
+  }
+
+  if (!originAccountCode) {
+    throw new Error(
+      'Código da conta de origem é necessário para transferências'
+    );
+  }
+
+  const body: {
+    type: string;
+    amount: number;
+    originAccountCode?: string;
+    destinationAccountCode: string;
+  } = {
+    type: 'transfer',
+    amount,
+    originAccountCode,
+    destinationAccountCode,
+  };
+
+  try {
+    const response = await fetchWithTimeout(
+      `${API_BASE_URL}/v1/event`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      },
+      DEFAULT_TIMEOUT_MS
+    );
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Não autenticado');
+      }
+
+      if (response.status === 400) {
+        const error: ErrorResponse = await response.json().catch(() => ({
+          error: 'Erro na requisição',
+        }));
+        const errorMessage = error.error || 'Erro na requisição';
+
+        const lowerMessage = errorMessage.toLowerCase();
+        if (
+          lowerMessage.includes('insufficient funds') ||
+          lowerMessage === 'saldo insuficiente' ||
+          lowerMessage.includes('saldo insuficiente')
+        ) {
+          throw new Error('Saldo insuficiente para transferência');
+        }
+
+        if (
+          lowerMessage.includes('same') ||
+          lowerMessage.includes('mesma') ||
+          lowerMessage.includes('origin and destination cannot be the same')
+        ) {
+          throw new Error('A conta de origem e destino não podem ser a mesma');
+        }
+
+        if (
+          lowerMessage.includes('not found') ||
+          lowerMessage.includes('não encontrada')
+        ) {
+          throw new Error('Conta de destino não encontrada');
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      const error: ErrorResponse = await response.json().catch(() => ({
+        error: 'Erro ao realizar transferência',
+      }));
+      throw new Error(error.error || 'Erro ao realizar transferência');
+    }
+
+    const data = await response.json();
+
+    if (
+      !data ||
+      typeof data !== 'object' ||
+      !data.origin ||
+      !data.destination
+    ) {
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    if (
+      typeof data.origin.balance !== 'number' ||
+      !data.origin.id ||
+      typeof data.destination.balance !== 'number' ||
+      !data.destination.id
+    ) {
+      throw new Error('Dados de resposta inválidos');
+    }
+
+    return data as TransferResponse;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Erro ao realizar transferência. Tente novamente.');
   }
 }
 

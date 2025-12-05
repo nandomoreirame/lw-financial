@@ -72,6 +72,31 @@ export class AccountService {
   }
 
   /**
+   * Gets account by code without validating ownership
+   * Used for transfers where destination account may belong to another user
+   * @param code - The account code in format "XXXX-X"
+   * @returns The account balance if found
+   * @throws AccountNotFoundError if account not found
+   */
+  async getAccountByCodeWithoutOwnership(
+    code: string
+  ): Promise<AccountBalance> {
+    const account = await prisma.bankAccount.findUnique({
+      where: { code },
+    });
+
+    if (!account) {
+      throw new AccountNotFoundError(`Account with code ${code} not found`);
+    }
+
+    return {
+      id: account.id,
+      code: account.code,
+      balance: Number(account.balance),
+    };
+  }
+
+  /**
    * Gets all bank accounts for a user
    * @param userId - The user ID from the authenticated token
    * @returns Array of all bank accounts for the user

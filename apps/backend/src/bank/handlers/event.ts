@@ -18,6 +18,8 @@ interface EventRequestBody {
   type: EventType;
   origin?: string;
   destination?: string;
+  originAccountCode?: string;
+  destinationAccountCode?: string;
   amount: number;
   accountCode?: string;
 }
@@ -102,6 +104,71 @@ function extractUserFromToken(
 }
 
 /**
+ * Helper function to resolve account ID from account code or fallback to default account
+ * @param accountCode - Optional account code in format "XXXX-X"
+ * @param user - User information from JWT token (required if accountCode is provided)
+ * @param requireOwnership - Whether to validate that the account belongs to the user
+ * @param fallbackAccountId - Optional fallback account ID (used when accountCode is not provided)
+ * @returns Account ID
+ * @throws Error with appropriate status code and message if validation fails
+ */
+async function resolveAccountId(
+  accountCode: string | undefined,
+  user: { userId: string; username: string; email: string } | null,
+  requireOwnership: boolean,
+  fallbackAccountId?: string
+): Promise<string> {
+  if (accountCode) {
+    if (!user) {
+      throw {
+        statusCode: 401,
+        message: 'Authentication required when using account code',
+      };
+    }
+
+    if (!/^\d{4}-\d$/.test(accountCode)) {
+      throw {
+        statusCode: 400,
+        message: 'Invalid account code format. Expected format: XXXX-X',
+      };
+    }
+
+    try {
+      const account = requireOwnership
+        ? await accountService.getAccountByCode(accountCode, user.userId)
+        : await accountService.getAccountByCodeWithoutOwnership(accountCode);
+      return account.id;
+    } catch (error) {
+      if (error instanceof AccountNotFoundError) {
+        throw {
+          statusCode: 404,
+          message: requireOwnership
+            ? 'Account not found or access denied'
+            : 'Account not found',
+        };
+      }
+      throw error;
+    }
+  }
+
+  if (fallbackAccountId) {
+    return fallbackAccountId;
+  }
+
+  if (!user) {
+    throw {
+      statusCode: 401,
+      message: 'Authentication required when account is not provided',
+    };
+  }
+
+  const defaultAccount = await accountService.getOrCreateDefaultAccount(
+    user.userId
+  );
+  return defaultAccount.id;
+}
+
+/**
  * Handler for POST /event endpoint
  * Processes deposit, withdraw, and transfer operations
  *
@@ -142,149 +209,128 @@ export async function eventHandler(
   try {
     switch (type) {
       case 'deposit': {
-        let accountId: string;
-        let userId: string | undefined;
         const { accountCode } = request.body;
+        const userId = user?.userId;
 
-        if (accountCode) {
-          if (!user) {
-            return reply.status(401).send({
-              error: 'Authentication required when using account code',
-            });
-          }
+        try {
+          const accountId = await resolveAccountId(
+            accountCode,
+            user,
+            true,
+            destination
+          );
 
-          if (!/^\d{4}-\d$/.test(accountCode)) {
-            return reply.status(400).send({
-              error: 'Invalid account code format. Expected format: XXXX-X',
-            });
+          const result = await accountService.deposit(
+            accountId,
+            amount,
+            userId,
+            accountCode
+          );
+          return reply.status(201).send({
+            destination: result,
+          });
+        } catch (error: unknown) {
+          if (
+            error &&
+            typeof error === 'object' &&
+            'statusCode' in error &&
+            'message' in error
+          ) {
+            return reply
+              .status(error.statusCode as number)
+              .send({ error: error.message as string });
           }
-
-          try {
-            userId = user.userId;
-            const account = await accountService.getAccountByCode(
-              accountCode,
-              userId
-            );
-            accountId = account.id;
-          } catch (error) {
-            if (error instanceof AccountNotFoundError) {
-              return reply.status(404).send({
-                error: 'Account not found or access denied',
-              });
-            }
-            throw error;
-          }
-        } else if (!destination) {
-          if (!user) {
-            return reply.status(401).send({
-              error: 'Authentication required when destination is not provided',
-            });
-          }
-          userId = user.userId;
-          const defaultAccount =
-            await accountService.getOrCreateDefaultAccount(userId);
-          accountId = defaultAccount.id;
-        } else {
-          accountId = destination;
-          if (user) {
-            userId = user.userId;
-          }
+          throw error;
         }
-
-        const result = await accountService.deposit(
-          accountId,
-          amount,
-          userId,
-          accountCode
-        );
-        return reply.status(201).send({
-          destination: result,
-        });
       }
 
       case 'withdraw': {
-        let accountId: string;
-        let userId: string | undefined;
         const { accountCode } = request.body;
+        const userId = user?.userId;
 
-        if (accountCode) {
-          if (!user) {
-            return reply.status(401).send({
-              error: 'Authentication required when using account code',
-            });
-          }
+        try {
+          const accountId = await resolveAccountId(
+            accountCode,
+            user,
+            true,
+            origin
+          );
 
-          if (!/^\d{4}-\d$/.test(accountCode)) {
-            return reply.status(400).send({
-              error: 'Invalid account code format. Expected format: XXXX-X',
-            });
+          const result = await accountService.withdraw(
+            accountId,
+            amount,
+            userId,
+            accountCode
+          );
+          return reply.status(201).send({
+            origin: result,
+          });
+        } catch (error: unknown) {
+          if (
+            error &&
+            typeof error === 'object' &&
+            'statusCode' in error &&
+            'message' in error
+          ) {
+            return reply
+              .status(error.statusCode as number)
+              .send({ error: error.message as string });
           }
-
-          try {
-            userId = user.userId;
-            const account = await accountService.getAccountByCode(
-              accountCode,
-              userId
-            );
-            accountId = account.id;
-          } catch (error) {
-            if (error instanceof AccountNotFoundError) {
-              return reply.status(404).send({
-                error: 'Account not found or access denied',
-              });
-            }
-            throw error;
-          }
-        } else if (!origin) {
-          if (!user) {
-            return reply.status(401).send({
-              error: 'Authentication required when origin is not provided',
-            });
-          }
-          userId = user.userId;
-          const defaultAccount =
-            await accountService.getOrCreateDefaultAccount(userId);
-          accountId = defaultAccount.id;
-        } else {
-          accountId = origin;
-          if (user) {
-            userId = user.userId;
-          }
+          throw error;
         }
-
-        const result = await accountService.withdraw(
-          accountId,
-          amount,
-          userId,
-          accountCode
-        );
-        return reply.status(201).send({
-          origin: result,
-        });
       }
 
       case 'transfer': {
-        if (!origin || !destination) {
-          return reply.status(400).send({
-            error: 'Origin and destination are required for transfer',
-          });
-        }
-
-        if (origin === destination) {
-          return reply
-            .status(400)
-            .send({ error: 'Origin and destination cannot be the same' });
-        }
-
+        const { originAccountCode, destinationAccountCode } = request.body;
         const userId = user?.userId;
 
-        const result = await accountService.transfer(
-          origin,
-          destination,
-          amount,
-          userId
-        );
-        return reply.status(201).send(result);
+        try {
+          const originId = await resolveAccountId(
+            originAccountCode,
+            user,
+            true,
+            origin
+          );
+
+          if (!destinationAccountCode && !destination) {
+            return reply.status(400).send({
+              error: 'Destination account is required for transfer',
+            });
+          }
+
+          const destinationId = await resolveAccountId(
+            destinationAccountCode,
+            user,
+            false,
+            destination
+          );
+
+          if (originId === destinationId) {
+            return reply
+              .status(400)
+              .send({ error: 'Origin and destination cannot be the same' });
+          }
+
+          const result = await accountService.transfer(
+            originId,
+            destinationId,
+            amount,
+            userId
+          );
+          return reply.status(201).send(result);
+        } catch (error: unknown) {
+          if (
+            error &&
+            typeof error === 'object' &&
+            'statusCode' in error &&
+            'message' in error
+          ) {
+            return reply
+              .status(error.statusCode as number)
+              .send({ error: error.message as string });
+          }
+          throw error;
+        }
       }
 
       default:
@@ -341,6 +387,18 @@ export const eventSchema = {
         type: 'string',
         description:
           'Código da conta no formato XXXX-X. Opcional. Se fornecido, a operação será aplicada à conta especificada. Requer autenticação.',
+        pattern: '^\\d{4}-\\d$',
+      },
+      originAccountCode: {
+        type: 'string',
+        description:
+          'Código da conta de origem no formato XXXX-X. Opcional para transferências. Se fornecido, será usado em vez do ID. Requer autenticação e a conta deve pertencer ao usuário.',
+        pattern: '^\\d{4}-\\d$',
+      },
+      destinationAccountCode: {
+        type: 'string',
+        description:
+          'Código da conta de destino no formato XXXX-X. Opcional para transferências. Se fornecido, será usado em vez do ID. Não requer que a conta pertença ao usuário.',
         pattern: '^\\d{4}-\\d$',
       },
     },

@@ -12,13 +12,14 @@ import {
   SelectValue,
 } from '@lw-financial/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowDown, ArrowUp, Plus } from 'lucide-react';
+import { ArrowDown, ArrowRightLeft, ArrowUp, Plus } from 'lucide-react';
 import * as React from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useAccounts } from '../../hooks/use-accounts';
 import { useBalance } from '../../hooks/use-balance';
 import { DepositDialog } from './deposit-dialog';
 import { NewAccountDialog } from './new-account-dialog';
+import { TransferDialog } from './transfer-dialog';
 import { UserDropdown } from './user-dropdown';
 import { WithdrawDialog } from './withdraw-dialog';
 
@@ -197,6 +198,16 @@ export function DashboardSidebar({
               <Button variant="ghost" className="w-full justify-start gap-2">
                 <ArrowUp className="h-4 w-4 text-red-600" />
                 Sacar
+              </Button>
+            }
+          />
+          <TransferDialog
+            originAccountCode={currentAccountCode || undefined}
+            currentBalance={balance}
+            trigger={
+              <Button variant="ghost" className="w-full justify-start gap-2">
+                <ArrowRightLeft className="h-4 w-4 text-blue-600" />
+                Transferir
               </Button>
             }
           />

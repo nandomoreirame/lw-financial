@@ -11,7 +11,9 @@ interface TransactionResponse {
   type: 'DEPOSIT' | 'WITHDRAW' | 'TRANSFER' | 'INITIAL_BALANCE';
   amount: string;
   originAccountId: string | null;
+  originAccountCode: string | null;
   destinationAccountId: string | null;
+  destinationAccountCode: string | null;
   userId: string | null;
   createdAt: string;
 }
@@ -106,6 +108,18 @@ export async function transactionsHandler(
         createdAt: 'desc',
       },
       take: 20,
+      include: {
+        originAccount: {
+          select: {
+            code: true,
+          },
+        },
+        destinationAccount: {
+          select: {
+            code: true,
+          },
+        },
+      },
     });
 
     if (process.env.NODE_ENV === 'development') {
@@ -128,7 +142,9 @@ export async function transactionsHandler(
       type: tx.type,
       amount: tx.amount.toString(),
       originAccountId: tx.originAccountId,
+      originAccountCode: tx.originAccount?.code ?? null,
       destinationAccountId: tx.destinationAccountId,
+      destinationAccountCode: tx.destinationAccount?.code ?? null,
       userId: tx.userId,
       createdAt: tx.createdAt.toISOString(),
     }));
@@ -186,12 +202,20 @@ export async function transactionsHandler(
             oldestTransactionDate.getTime() - 1000
           );
 
+          const defaultAccount = await prisma.bankAccount.findFirst({
+            where: { userId },
+            orderBy: { createdAt: 'asc' },
+            select: { code: true },
+          });
+
           const initialBalanceTransaction: TransactionResponse = {
             id: `initial-balance-${userId}`,
             type: 'INITIAL_BALANCE',
             amount: initialBalance.toString(),
             originAccountId: null,
+            originAccountCode: null,
             destinationAccountId: accountIds[0] || null,
+            destinationAccountCode: defaultAccount?.code ?? null,
             userId: userId,
             createdAt: initialBalanceDate.toISOString(),
           };
@@ -245,7 +269,9 @@ export async function transactionsHandler(
             type: 'INITIAL_BALANCE',
             amount: initialBalance.toString(),
             originAccountId: null,
+            originAccountCode: null,
             destinationAccountId: targetAccountId,
+            destinationAccountCode: account.code,
             userId: userId,
             createdAt: initialBalanceDate.toISOString(),
           };
@@ -315,9 +341,11 @@ export const transactionsSchema = {
             enum: ['DEPOSIT', 'WITHDRAW', 'TRANSFER', 'INITIAL_BALANCE'],
           },
           amount: { type: 'string' },
-          originAccountId: { type: 'string' },
-          destinationAccountId: { type: 'string' },
-          userId: { type: 'string' },
+          originAccountId: { type: 'string', nullable: true },
+          originAccountCode: { type: 'string', nullable: true },
+          destinationAccountId: { type: 'string', nullable: true },
+          destinationAccountCode: { type: 'string', nullable: true },
+          userId: { type: 'string', nullable: true },
           createdAt: { type: 'string', format: 'date-time' },
         },
         required: ['id', 'type', 'amount', 'createdAt'],
